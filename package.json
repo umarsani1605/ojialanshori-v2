@@ -9,7 +9,10 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "db:generate": "nuxt db generate",
-    "db:migrate": "nuxt db migrate"
+    "db:migrate": "nuxt db migrate",
+    "migrate:content": "tsx scripts/migrate-content.ts",
+    "migrate:users": "tsx scripts/migrate-users.ts",
+    "migrate:media": "tsx scripts/migrate-media.ts"
   },
   "dependencies": {
     "@nuxt/image": "^2.0.0",
@@ -25,7 +28,9 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "dotenv": "^17.4.1",
     "drizzle-kit": "^0.31.10",
+    "tsx": "^4.21.0",
     "typescript": "latest",
     "vue-tsc": "latest",
     "wrangler": "^4.81.1"
