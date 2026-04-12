@@ -1,5 +1,32 @@
 # CLAUDE.md
 
+## Project Context
+
+**Project:** Omah Ngaji Al-Anshori — Website Rewrite (ojialanshori.com)
+**Deskripsi:** Full rewrite website pesantren dari WordPress ke Nuxt 4 fullstack.
+
+### Tech Stack
+
+| Layer | Teknologi |
+| --- | --- |
+| Framework | Nuxt 4 + Nuxt UI |
+| Deployment | Cloudflare Workers via NuxtHub |
+| Database | MySQL + Drizzle ORM |
+| Storage | Cloudflare R2 (via NuxtHub blob) |
+| Cache/KV | Cloudflare KV (via NuxtHub) |
+| Auth | nuxt-auth-utils |
+| Email | Brevo REST API |
+
+### Konvensi Kode
+
+- TypeScript — hindari `any`
+- camelCase di TypeScript, snake_case di DB (via `casing: 'snake_case'` di hub config)
+- Server routes di `server/api/` dan `server/routes/`
+- Drizzle ORM untuk semua query DB — tidak ada raw SQL kecuali terpaksa
+- Schema di `server/db/schema.ts`, jangan tulis migration manual
+
+---
+
 ## Akses Dokumentasi — WAJIB Sebelum Implementasi
 
 Nuxt, Nuxt UI, dan NuxtHub memiliki banyak perubahan yang tidak tercakup oleh training data. **Selalu baca dokumentasi terbaru** sebelum mengimplementasikan apapun yang menyentuh ketiga library ini.
@@ -26,131 +53,129 @@ Training data sudah outdated untuk ketiga library ini. Jika ragu tentang API, na
 
 ---
 
+## Database Instructions
+
+- **Dialect:** MySQL via NuxtHub (`hub.db: { dialect: 'mysql' }`)
+- **Schema:** `server/db/schema.ts` — definisi tabel dengan `mysqlTable` dari `drizzle-orm/mysql-core`
+- **Casing:** `casing: 'snake_case'` aktif — tulis camelCase di TypeScript, otomatis jadi snake_case di DB
+- **Generate migration:** `pnpm db:generate` (jalankan setelah ubah schema)
+- **Apply migration:** `pnpm db:migrate` (butuh `MYSQL_URL` di `.env`)
+- **JANGAN tulis file migration SQL manual** — selalu generate via `pnpm db:generate`
+- Migration files ada di `server/db/migrations/mysql/`
+
+---
+
 ## Linear Workflow
 
-### Before starting any ticket
+### Sebelum mulai ticket
 
-1. Pull the ticket from Linear: use `mcp__linear-server__get_issue` with the issue ID
-2. Read comments on the immediately preceding ticket (e.g. if starting E3-003, read E3-002 comments) using `mcp__linear-server__list_comments` — look for handoff notes left by the previous agent
-3. Read the full description, acceptance criteria, technical notes, and API tests
-4. Set the ticket status to **In Progress** via `mcp__linear-server__save_issue`
+1. Pull ticket dari Linear: gunakan `mcp__linear-omah-ngaji__get_issue` dengan issue ID
+2. Baca komentar ticket sebelumnya (misal mulai OJI-3, baca komentar OJI-2) via `mcp__linear-omah-ngaji__list_comments` — cari handoff notes dari agent sebelumnya
+3. Baca full description, acceptance criteria, dan technical notes
+4. Set status ticket ke **In Progress** via `mcp__linear-omah-ngaji__save_issue`
 
 ### Branch naming
 
-- Always create a new branch before starting any implementation
-- Branch name format: `{ticket-id}/{short-description}`
-  - Example: `ifi-15/tenant-schema`, `ifi-16/tenant-registration-form`
-- If the current ticket **depends on** (is blocked by) a previous ticket that is not yet merged, branch off that ticket's branch instead of `main`
-  - Check the ticket's "Blocked by" field in Linear to determine the parent branch
-- Otherwise always branch from `main`
+- Selalu buat branch baru sebelum mulai implementasi
+- Format: `{gitBranchName dari Linear ticket}`
+  - Contoh: `umarsani361/oji-2-e1-002-drizzle-orm-schema`, `umarsani361/oji-4-e1-004-migration-users`
+- Jika ticket **bergantung pada** ticket sebelumnya yang belum di-merge, branch dari branch ticket itu
+  - Cek field "Blocked by" di Linear untuk menentukan parent branch
+- Jika tidak, selalu branch dari `main`
 
-### Committing
+### Commit
 
-After implementation is verified (build passes, API tests pass):
+Setelah implementasi selesai:
 
-- Use **atomic commits**: group logically related files into one commit — do not commit file-by-file, but also do not dump all changes in a single commit if they span unrelated concerns
-- Follow **Conventional Commits** format (already used in this repo):
-  - `feat(scope): description` — new feature or endpoint
+- Gunakan **atomic commits** — group file yang terkait dalam satu commit
+- Ikuti format **Conventional Commits**:
+  - `feat(scope): description` — fitur baru
   - `fix(scope): description` — bug fix
-  - `refactor(scope): description` — code restructure without behavior change
+  - `refactor(scope): description` — restruktur tanpa perubahan behavior
   - `chore(scope): description` — tooling, deps, config
-  - `docs(scope): description` — documentation only
-  - Scope is optional but preferred (e.g. `feat(tenant): add registration form`)
-- Keep commit messages concise — describe _what_ changed and _why_, not _how_
-- Example groupings for a schema + API + UI ticket:
-  - Commit 1: `feat(schema): add Tenant and TenantStatusLog models with migration`
-  - Commit 2: `feat(tenant): add tenant registration tRPC procedure`
-  - Commit 3: `feat(ui): add public tenant registration form`
+  - `docs(scope): description` — dokumentasi saja
+- Scope opsional tapi dianjurkan (misal `feat(auth): add login endpoint`)
+- Pesan commit: describe _apa_ yang berubah dan _kenapa_, bukan _bagaimana_
 
-### While working
+### Saat mengerjakan
 
-- Add implementation notes as comments via `mcp__linear-server__save_comment`
-- If a blocker is discovered, add a comment with the blocker details and leave status as In Progress
+- Tambahkan implementation notes sebagai komentar via `mcp__linear-omah-ngaji__save_comment`
+- Jika ada blocker, tambah komentar dengan detail blocker dan biarkan status In Progress
 
-### API testing requirement
+### Setelah selesai
 
-- For every ticket that introduces tRPC procedures, run ALL curl test cases specified in the ticket's "API Tests" section
-- Test the running dev server (`pnpm dev`) — do not skip tests
-- Post test results (pass/fail per case) as a comment on the ticket before marking Done
-
-### After completing a ticket
-
-1. Run all API tests listed in the ticket and post results as a comment
-2. Post a completion comment using this structure:
+1. Post completion comment dengan struktur ini:
 
    **What was built**
-   - {Bullet list of features/endpoints/UI pages implemented}
+   - {Bullet list fitur/endpoint/halaman yang diimplementasi}
 
    **Key files changed**
-   - `{file path}` — {what changed}
-
-   **API test results**
-   - ✅ {test case}: passed — {actual response summary}
-   - ❌ {test case}: failed — {error}
+   - `{file path}` — {apa yang berubah}
 
    **Handoff notes**
-   - {Context the next ticket needs: schema fields added, helpers introduced, patterns to follow}
-   - {Any deviations from the original spec and why}
+   - {Context yang dibutuhkan ticket berikutnya}
+   - {Deviasi dari spec original dan alasannya}
 
-   > Formatting rule: wrap all code references in backticks — enum values, field names, model names, function names, status constants, file paths, and CLI commands.
+   > Wrap semua referensi kode dalam backtick: enum values, field names, function names, file paths, CLI commands.
 
-3. Set status to **In Review** (needs human review) or **Done** (self-contained + tests pass)
-4. Create atomic commits following Conventional Commits (see "Committing" section)
-5. Push the branch and open a GitHub PR to `main` (see "Creating a PR" section)
-6. Post the PR URL as a follow-up comment on the Linear ticket
+2. Set status ke **In Review** (butuh review manusia) atau **Done** (self-contained + tests pass)
+3. Buat atomic commits sesuai Conventional Commits
+4. Push branch dan buka GitHub PR ke `main` (lihat section "GitHub Workflow")
+5. Post PR URL sebagai komentar follow-up di ticket Linear
 
-### Finding your next ticket
+### Mencari ticket berikutnya
 
-- Work in epic dependency order: E1 → E2 → E3/E4/E7 (parallel) → E5 → E6
-- Within an epic, work tickets in numeric order unless a specific one is unblocked earlier
-- Use `mcp__linear-server__list_issues` filtered by project + status=Todo to find next work
-- Pull the full ticket with `mcp__linear-server__get_issue` before starting — never work from memory alone
+- Kerjakan sesuai epic dependency order: **E1 → E2 → E3/E4/E5/E6 (paralel) → E7 → E8**
+- Dalam satu epic, kerjakan ticket secara numerik kecuali ada yang sudah unblocked lebih awal
+- Gunakan `mcp__linear-omah-ngaji__list_issues` filter project + status=Todo untuk cari ticket berikutnya
+- Pull full ticket dengan `mcp__linear-omah-ngaji__get_issue` sebelum mulai — jangan dari ingatan
 
 ### Status meanings
 
-| Status      | Meaning                                              |
-| ----------- | ---------------------------------------------------- |
-| Backlog     | Not yet scheduled                                    |
-| Todo        | Scheduled for current session                        |
-| In Progress | Actively being worked on                             |
-| In Review   | Built, awaiting review / testing                     |
-| Done        | Verified complete — all AC checked, API tests passed |
-| Canceled    | Descoped or not needed                               |
+| Status      | Arti                                                  |
+| ----------- | ----------------------------------------------------- |
+| Backlog     | Belum dijadwalkan                                     |
+| Todo        | Dijadwalkan untuk dikerjakan                          |
+| In Progress | Sedang dikerjakan                                     |
+| In Review   | Selesai dibangun, menunggu review / testing           |
+| Done        | Terverifikasi selesai — semua AC dicek, tests passed  |
+| Canceled    | Descoped atau tidak diperlukan                        |
+
+---
 
 ## GitHub Workflow
 
-### Creating a PR
+### Membuat PR
 
-After all commits are pushed, open a GitHub PR targeting `main`:
+Setelah semua commit di-push, buka GitHub PR targeting `main`:
 
-**Title format:** `[{TICKET-ID}] {ticket title}`
+**Format judul:** `[{TICKET-ID}] {ticket title}`
 
-- Example: `[IFI-15] Database Schema — Core Tables (Tenants, Users, Sessions)`
+- Contoh: `[OJI-2] E1-002 — Drizzle ORM schema semua tabel MySQL`
 
-**PR description format:**
+**Format deskripsi PR:**
 
 ```
 ## Overview
-{1–2 sentences describing what this PR does and why}
+{1–2 kalimat yang menjelaskan apa yang dilakukan PR ini dan kenapa}
 
-- {Bullet expanding on a key detail, decision, or scope point}
-- {Another notable aspect — e.g. what was removed, replaced, or why an approach was chosen}
+- {Bullet detail penting, keputusan, atau scope}
 
 ## Changes
-- `{file or area}` — {what changed}
+- `{file atau area}` — {apa yang berubah}
 - ...
 
 ## Testing
-- {Step-by-step instructions to verify the changes work}
-- {Include any seed data, env vars, or setup needed}
+- {Langkah-langkah untuk verifikasi perubahan bekerja}
+- {Sertakan env vars atau setup yang dibutuhkan}
 
 ## Notes
-{Optional paragraph for deviations from spec, caveats, or anything the reviewer should know.
-Omit this section if there is nothing notable.}
+{Opsional: deviasi dari spec, caveat, atau hal yang perlu diketahui reviewer.
+Hilangkan section ini jika tidak ada yang perlu dicatat.}
 
 ## Linear
-{Linear ticket URL}
+{URL ticket Linear}
 ```
 
-- After the PR is created, post its URL as a **separate comment** on the Linear ticket (after the implementation summary comment)
-- Use `mcp__linear-server__save_comment` with the PR URL and a one-line summary
+- Setelah PR dibuat, post URL-nya sebagai **komentar terpisah** di ticket Linear
+- Gunakan `mcp__linear-omah-ngaji__save_comment` dengan PR URL dan satu baris ringkasan
