@@ -19,7 +19,6 @@ import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { S3Client, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
-import { Readable } from 'node:stream'
 import { eq } from 'drizzle-orm'
 import * as schema from '../server/db/schema.js'
 
@@ -87,15 +86,15 @@ async function uploadToR2(s3: S3Client, bucket: string, key: string, url: string
     throw new Error(`HTTP ${response.status}`)
   }
 
-  const contentLength = response.headers.get('content-length')
-  const body = Readable.fromWeb(response.body as Parameters<typeof Readable.fromWeb>[0])
+  // Buffer dulu agar ContentLength diketahui — R2 tidak support chunked encoding
+  const buffer = Buffer.from(await response.arrayBuffer())
 
   await s3.send(new PutObjectCommand({
     Bucket: bucket,
     Key: key,
-    Body: body,
+    Body: buffer,
     ContentType: getMimeType(url),
-    ...(contentLength ? { ContentLength: Number(contentLength) } : {}),
+    ContentLength: buffer.byteLength,
   }))
 }
 
