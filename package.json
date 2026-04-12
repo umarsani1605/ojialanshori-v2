@@ -1,0 +1,34 @@
+{
+  "name": "ojialanshori-v2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "db:generate": "nuxt db generate",
+    "db:migrate": "nuxt db migrate"
+  },
+  "dependencies": {
+    "@nuxt/image": "^2.0.0",
+    "@nuxt/ui": "^4.6.1",
+    "@nuxthub/core": "^0.10.7",
+    "@nuxtjs/seo": "^5.1.3",
+    "drizzle-orm": "^0.45.2",
+    "mysql2": "^3.22.0",
+    "nuxt": "^4.4.2",
+    "nuxt-disqus": "^1.2.0",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "latest",
+    "vue-tsc": "latest",
+    "wrangler": "^4.81.1"
+  },
+  "packageManager": "pnpm@10.28.0"
+}
