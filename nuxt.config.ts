@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   hub: {
     db: {
       dialect: 'mysql',
+      casing: 'snake_case',
       // Matikan auto-migrate saat build & dev — jalankan manual via pnpm db:migrate
       applyMigrationsDuringBuild: false,
       applyMigrationsDuringDev: false,
