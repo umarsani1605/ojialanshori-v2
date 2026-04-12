@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ojialanshori-v2",
+  "compatibility_date": "2026-04-12",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": ".output/public",
+
+  // Cloudflare R2 — media storage
+  "r2_buckets": [
+    {
+      "binding": "BLOB",
+      "bucket_name": "omah-ngaji-media",
+      "preview_bucket_name": "omah-ngaji-media-preview"
+    }
+  ],
+
+  // Cloudflare KV — key-value store
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "<kv-namespace-id>",
+      "preview_id": "<kv-preview-namespace-id>"
+    },
+    {
+      "binding": "CACHE",
+      "id": "<cache-namespace-id>",
+      "preview_id": "<cache-preview-namespace-id>"
+    }
+  ],
+
+  // MySQL database via MYSQL_URL environment variable (bukan D1)
+  // Set MYSQL_URL di Cloudflare Workers environment variables
+  "vars": {
+    "NUXT_PUBLIC_SITE_URL": "https://ojialanshori.com"
+  }
+}
