@@ -28,3 +28,6 @@ logs
 
 .mcp.json
 .claude/settings.local.json
+
+# Migration output
+scripts/migrate-content-map.json
