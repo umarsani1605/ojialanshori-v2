@@ -107,7 +107,7 @@ async function main() {
 
   console.log('🔌 Connecting to database...')
   const connection = await mysql.createConnection(process.env.MYSQL_URL)
-  const db = drizzle(connection, { schema, casing: 'snake_case' })
+  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
 
   const mapping = {
     categories: {} as Record<number, number>,

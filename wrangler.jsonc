@@ -9,28 +9,28 @@
   "r2_buckets": [
     {
       "binding": "BLOB",
-      "bucket_name": "omah-ngaji-media",
-      "preview_bucket_name": "omah-ngaji-media-preview"
-    }
+      "bucket_name": "ojialanshori",
+      "preview_bucket_name": "ojialanshori-preview",
+    },
   ],
 
   // Cloudflare KV — key-value store
   "kv_namespaces": [
     {
-      "binding": "KV",
-      "id": "<kv-namespace-id>",
-      "preview_id": "<kv-preview-namespace-id>"
+      "binding": "OMAH_NGAJI_KV",
+      "id": "156fd4abc0f644d1bb7ee52a03bb5bcc",
+      "preview_id": "156fd4abc0f644d1bb7ee52a03bb5bcc",
     },
     {
-      "binding": "CACHE",
-      "id": "<cache-namespace-id>",
-      "preview_id": "<cache-preview-namespace-id>"
-    }
+      "binding": "OMAH_NGAJI_CACHE",
+      "id": "17aff56a91244275a2db10022f96d848",
+      "preview_id": "17aff56a91244275a2db10022f96d848",
+    },
   ],
 
   // MySQL database via MYSQL_URL environment variable (bukan D1)
   // Set MYSQL_URL di Cloudflare Workers environment variables
   "vars": {
-    "NUXT_PUBLIC_SITE_URL": "https://ojialanshori.com"
-  }
+    "NUXT_PUBLIC_SITE_URL": "https://ojialanshori.com",
+  },
 }

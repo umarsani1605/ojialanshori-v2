@@ -83,7 +83,7 @@ async function main() {
     mysql.createConnection(process.env.WP_MYSQL_URL),
     mysql.createConnection(process.env.MYSQL_URL),
   ])
-  const db = drizzle(newConn, { schema, casing: 'snake_case' })
+  const db = drizzle(newConn, { schema, casing: 'snake_case', mode: 'default' })
 
   const mapping: Record<number, number> = {} // wp_user_id → new_user_id
 
