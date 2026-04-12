@@ -3,8 +3,7 @@ import mysql from 'mysql2/promise'
 import { sql } from 'drizzle-orm'
 
 export default defineEventHandler(async () => {
-  const config = useRuntimeConfig()
-  const mysqlUrl = process.env.MYSQL_URL || config.mysqlUrl
+  const mysqlUrl = process.env.MYSQL_URL
 
   if (!mysqlUrl) {
     throw createError({ statusCode: 500, statusMessage: 'MYSQL_URL is not configured' })
