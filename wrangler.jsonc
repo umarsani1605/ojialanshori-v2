@@ -14,15 +14,15 @@
     },
   ],
 
-  // Cloudflare KV — key-value store
+  // Cloudflare KV — NuxtHub expects binding names "KV" and "CACHE"
   "kv_namespaces": [
     {
-      "binding": "OMAH_NGAJI_KV",
+      "binding": "KV",
       "id": "156fd4abc0f644d1bb7ee52a03bb5bcc",
       "preview_id": "156fd4abc0f644d1bb7ee52a03bb5bcc",
     },
     {
-      "binding": "OMAH_NGAJI_CACHE",
+      "binding": "CACHE",
       "id": "17aff56a91244275a2db10022f96d848",
       "preview_id": "17aff56a91244275a2db10022f96d848",
     },
