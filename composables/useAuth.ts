@@ -1,3 +1,15 @@
+/**
+ * Exposes reactive authentication state, role-based flags, and a logout action for the current user session.
+ *
+ * @returns An object with:
+ * - `user`: reactive current user object
+ * - `loggedIn`: reactive boolean indicating authentication state
+ * - `fetch`: session-aware fetch helper
+ * - `isSuperadmin`, `isPengurus`, `isReviewer`, `isSantri`: computed booleans for exact role checks
+ * - `isAdmin`: computed boolean true when role is `superadmin` or `pengurus`
+ * - `canPublish`, `canReview`: computed booleans true when role is `superadmin`, `pengurus`, or `reviewer`
+ * - `logout()`: async function that posts to `/api/auth/logout`, clears the session, and navigates to `/masuk`
+ */
 export function useAuth() {
   const { user, loggedIn, clear, fetch } = useUserSession()
 
