@@ -6,6 +6,10 @@ import * as schema from '~/server/db/schema'
 export default defineEventHandler(async (event) => {
   const { user } = await getUserSession(event)
 
+  if (!user) {
+    throw createError({ statusCode: 401, message: 'Unauthorized' })
+  }
+
   const mysqlUrl = process.env.MYSQL_URL
   if (!mysqlUrl) {
     throw createError({ statusCode: 500, message: 'Database tidak terkonfigurasi.' })

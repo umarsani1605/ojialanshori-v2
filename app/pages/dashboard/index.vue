@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { RoleColor } from '~/utils/roleDisplay'
+
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth'],
@@ -6,21 +8,22 @@ definePageMeta({
 
 const auth = useAuth()
 
-const { data: stats, status } = await useFetch('/api/dashboard/stats', {
-  key: 'dashboard-stats',
+const { data: stats, status, refresh } = await useFetch('/api/dashboard/stats', {
+  key: `dashboard-stats-${auth.user.value?.id}`,
 })
 
-const greeting = computed(() => {
+const greeting = ref('')
+onMounted(() => {
   const hour = new Date().getHours()
-  if (hour < 11) return 'Selamat Pagi'
-  if (hour < 15) return 'Selamat Siang'
-  if (hour < 18) return 'Selamat Sore'
-  return 'Selamat Malam'
+  if (hour < 11) greeting.value = 'Selamat Pagi'
+  else if (hour < 15) greeting.value = 'Selamat Siang'
+  else if (hour < 18) greeting.value = 'Selamat Sore'
+  else greeting.value = 'Selamat Malam'
 })
 
-const isAdmin = computed(() =>
-  auth.user.value?.role === 'superadmin' || auth.user.value?.role === 'pengurus',
-)
+const userRole = computed(() => auth.user.value?.role ?? '')
+const roleLabel = computed(() => roleLabelMap[userRole.value] ?? userRole.value)
+const roleColor = computed<RoleColor>(() => roleColorMap[userRole.value] ?? 'primary')
 
 const postStatusLabel: Record<string, string> = {
   published: 'Terpublikasi',
@@ -52,17 +55,11 @@ const postStatusColor: Record<string, 'success' | 'warning' | 'error' | 'neutral
               {{ auth.user.value?.name }}
             </span>
             <UBadge
-              :color="auth.user.value?.role === 'superadmin' ? 'error'
-                : auth.user.value?.role === 'pengurus' ? 'success'
-                  : auth.user.value?.role === 'reviewer' ? 'warning'
-                    : 'primary'"
+              :color="roleColor"
               variant="subtle"
               size="xs"
             >
-              {{ auth.user.value?.role === 'superadmin' ? 'Superadmin'
-                : auth.user.value?.role === 'pengurus' ? 'Pengurus'
-                  : auth.user.value?.role === 'reviewer' ? 'Reviewer'
-                    : 'Santri' }}
+              {{ roleLabel }}
             </UBadge>
           </div>
         </template>
@@ -84,6 +81,23 @@ const postStatusColor: Record<string, 'success' | 'warning' | 'error' | 'neutral
         <template v-if="status === 'pending'">
           <div class="flex items-center justify-center py-12">
             <UIcon name="i-lucide-loader-circle" class="animate-spin text-neutral-400 text-2xl" />
+          </div>
+        </template>
+
+        <template v-else-if="status === 'error'">
+          <div class="flex flex-col items-center gap-3 py-12 text-center">
+            <p class="text-sm text-neutral-500">
+              Gagal memuat statistik.
+            </p>
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-refresh-cw"
+              @click="refresh()"
+            >
+              Coba lagi
+            </UButton>
           </div>
         </template>
 

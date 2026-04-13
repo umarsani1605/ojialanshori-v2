@@ -1,24 +1,10 @@
 <script setup lang="ts">
+import type { RoleColor } from '~/utils/roleDisplay'
+
 const auth = useAuth()
 const { mainLinks, footerLinks } = useNavigation()
 
 const sidebarCollapsed = ref(false)
-
-const roleLabelMap: Record<string, string> = {
-  superadmin: 'Superadmin',
-  pengurus: 'Pengurus',
-  reviewer: 'Reviewer',
-  santri: 'Santri',
-}
-
-type RoleColor = 'error' | 'success' | 'warning' | 'primary'
-
-const roleColorMap: Record<string, RoleColor> = {
-  superadmin: 'error',
-  pengurus: 'success',
-  reviewer: 'warning',
-  santri: 'primary',
-}
 
 const userRole = computed(() => auth.user.value?.role ?? '')
 const roleLabel = computed(() => roleLabelMap[userRole.value] ?? userRole.value)
