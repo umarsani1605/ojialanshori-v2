@@ -86,7 +86,7 @@ async function onSubmit() {
           class="space-y-4"
           @submit="onSubmit"
         >
-          <UFormField name="identifier" label="Email">
+          <UFormField name="identifier" label="Username atau Email">
             <UInput
               v-model="state.identifier"
               placeholder="admin@ojialanshori.com"

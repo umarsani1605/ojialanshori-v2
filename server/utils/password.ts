@@ -1,6 +1,4 @@
 import bcrypt from 'bcryptjs'
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PasswordHash } = require('node-phpass') as { PasswordHash: new (iterations?: number, portable?: boolean) => { CheckPassword(password: string, hash: string): boolean } }
 
 export async function verifyPassword(
   plain: string,
@@ -8,6 +6,8 @@ export async function verifyPassword(
   type: 'phpass' | 'bcrypt',
 ): Promise<boolean> {
   if (type === 'phpass') {
+    // Lazy import: only loaded when verifying phpass (legacy WordPress) passwords
+    const { PasswordHash } = await import('node-phpass') as { PasswordHash: new (iterations?: number, portable?: boolean) => { CheckPassword(password: string, hash: string): boolean } }
     const ph = new PasswordHash(8, true)
     return ph.CheckPassword(plain, hash) as boolean
   }

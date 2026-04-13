@@ -84,13 +84,27 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, message: 'Username atau password salah.' })
     }
 
-    // Progressive migration: phpass → bcrypt
+    // Progressive migration: phpass → bcrypt (fire-and-forget, tidak menambah latency)
     if (user.passwordType === 'phpass') {
-      const newHash = await hashPassword(password)
-      await db
-        .update(schema.users)
-        .set({ passwordHash: newHash, passwordType: 'bcrypt' })
-        .where(eq(schema.users.id, user.id))
+      const userId = user.id
+      const migrateTask = (async () => {
+        const migConn = await mysql.createConnection(mysqlUrl)
+        const migDb = drizzle(migConn, { schema, casing: 'snake_case', mode: 'default' })
+        try {
+          const newHash = await hashPassword(password)
+          await migDb
+            .update(schema.users)
+            .set({ passwordHash: newHash, passwordType: 'bcrypt' })
+            .where(eq(schema.users.id, userId))
+        }
+        finally {
+          await migConn.end()
+        }
+      })()
+
+      // Cloudflare Workers: gunakan waitUntil agar task selesai setelah response
+      const cfCtx = (event.context as { cloudflare?: { context?: { waitUntil: (p: Promise<unknown>) => void } } }).cloudflare?.context
+      cfCtx ? cfCtx.waitUntil(migrateTask) : migrateTask.catch(() => {})
     }
 
     // Hapus rate limit setelah login berhasil
