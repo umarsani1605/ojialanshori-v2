@@ -133,10 +133,10 @@ async function onSubmit() {
           </UButton>
         </UForm>
 
-        <!-- Register link -->
+        <!-- Register link (disabled until registration flow exists) -->
         <p class="text-sm text-center text-neutral-500 mt-6">
           Belum punya akun?
-          <span class="text-primary-600 cursor-pointer">Daftar akun santri</span>
+          <span>Daftar akun santri</span>
         </p>
       </div>
     </div>

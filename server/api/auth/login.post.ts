@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
-import { eq, or } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import * as schema from '~/server/db/schema'
 
 const RATE_LIMIT_MAX = 5
@@ -62,11 +62,12 @@ export default defineEventHandler(async (event) => {
   const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
 
   try {
+    // Determine column to query: email contains '@', otherwise treat as username
+    const isEmail = identifier.includes('@')
     const user = await db.query.users.findFirst({
-      where: or(
-        eq(schema.users.username, identifier),
-        eq(schema.users.email, identifier),
-      ),
+      where: isEmail
+        ? eq(schema.users.email, identifier)
+        : eq(schema.users.username, identifier),
     })
 
     if (!user) {
@@ -74,14 +75,15 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, message: 'Username atau password salah.' })
     }
 
-    if (!user.isActive) {
-      throw createError({ statusCode: 403, message: 'Akun tidak aktif.' })
-    }
-
+    // Verify password before checking isActive so rate limiting applies to all attempts
     const isValid = await verifyPassword(password, user.passwordHash, user.passwordType)
     if (!isValid) {
       await recordFailedAttempt()
       throw createError({ statusCode: 401, message: 'Username atau password salah.' })
+    }
+
+    if (!user.isActive) {
+      throw createError({ statusCode: 403, message: 'Akun tidak aktif.' })
     }
 
     // Progressive migration: phpass → bcrypt (fire-and-forget, tidak menambah latency)
