@@ -10,7 +10,7 @@ vi.mock('node-phpass', () => ({
   },
 }))
 
-import { hashPassword, verifyPassword } from '~/server/utils/password'
+import { hashPassword, verifyPassword } from '@@/server/utils/password'
 
 describe('verifyPassword', () => {
   it('berhasil verifikasi phpass hash dari WordPress', async () => {
