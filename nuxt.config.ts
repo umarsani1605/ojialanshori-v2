@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
     '@nuxt/image',
     'nuxt-disqus',
+    'nuxt-auth-utils',
   ],
 
   hub: {

@@ -12,16 +12,20 @@
     "db:migrate": "nuxt db migrate",
     "migrate:content": "tsx scripts/migrate-content.ts",
     "migrate:users": "tsx scripts/migrate-users.ts",
-    "migrate:media": "tsx scripts/migrate-media.ts"
+    "migrate:media": "tsx scripts/migrate-media.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.6.1",
     "@nuxthub/core": "^0.10.7",
     "@nuxtjs/seo": "^5.1.3",
+    "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "mysql2": "^3.22.0",
+    "node-phpass": "^1.0.5",
     "nuxt": "^4.4.2",
+    "nuxt-auth-utils": "^0.5.29",
     "nuxt-disqus": "^1.2.0",
     "vue": "latest",
     "vue-router": "latest"
@@ -29,12 +33,21 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1029.0",
     "@nuxt/devtools": "latest",
+    "@nuxt/test-utils": "^4.0.2",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node-phpass": "^1.0.3",
+    "@vue/test-utils": "^2.4.6",
     "dotenv": "^17.4.1",
     "drizzle-kit": "^0.31.10",
+    "happy-dom": "^20.8.9",
     "tsx": "^4.21.0",
     "typescript": "latest",
+    "vitest": "^4.1.4",
     "vue-tsc": "latest",
     "wrangler": "^4.81.1"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["bcrypt", "esbuild", "sharp", "workerd", "@parcel/watcher"]
+  }
 }
