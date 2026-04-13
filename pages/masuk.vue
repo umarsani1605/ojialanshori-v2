@@ -118,7 +118,7 @@ async function onSubmit() {
               class="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
             >
             <label for="remember" class="text-sm text-neutral-600 cursor-pointer">
-              Keep me signed in
+              Ingat saya
             </label>
           </div>
 

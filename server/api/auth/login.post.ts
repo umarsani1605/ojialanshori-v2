@@ -18,7 +18,10 @@ export default defineEventHandler(async (event) => {
   }
 
   // Rate limiting via Cloudflare KV
-  const ip = getRequestIP(event, { xForwardedFor: true }) ?? 'unknown'
+  const ip = getRequestIP(event, { xForwardedFor: true })
+  if (!ip) {
+    throw createError({ statusCode: 400, message: 'Tidak dapat mengidentifikasi alamat IP.' })
+  }
   const rateLimitKey = `ratelimit:login:${ip}`
 
   const attempts = await kv.getItem<{ count: number; firstAt: number }>(rateLimitKey)
@@ -40,10 +43,11 @@ export default defineEventHandler(async (event) => {
       await kv.setItem(rateLimitKey, { count: 1, firstAt: now }, { ttl: RATE_LIMIT_WINDOW_SEC })
     }
     else {
+      const remainingTtl = Math.ceil(RATE_LIMIT_WINDOW_SEC - (Date.now() - current.firstAt) / 1000)
       await kv.setItem(
         rateLimitKey,
         { count: current.count + 1, firstAt: current.firstAt },
-        { ttl: RATE_LIMIT_WINDOW_SEC },
+        { ttl: remainingTtl > 0 ? remainingTtl : 1 },
       )
     }
   }
