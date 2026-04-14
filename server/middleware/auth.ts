@@ -1,7 +1,13 @@
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
+  const isDashboardApi = path === '/api/dashboard' || path.startsWith('/api/dashboard/')
 
-  if (path === '/api/dashboard' || path.startsWith('/api/dashboard/')) {
-    await requireUserSession(event)
+  if (isDashboardApi) {
+    const { user } = await requireUserSession(event)
+    event.context.user = user
+  }
+  else {
+    const session = await getUserSession(event)
+    if (session?.user) event.context.user = session.user
   }
 })
