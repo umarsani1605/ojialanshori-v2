@@ -229,10 +229,6 @@ async function runConfirm() {
   }
 }
 
-function initials(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 }
@@ -241,7 +237,7 @@ function isSelf(user: User) {
   return auth.user.value?.id === user.id
 }
 
-const UAvatar = resolveComponent('UAvatar')
+const AppAvatar = resolveComponent('AppAvatar')
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UTooltip = resolveComponent('UTooltip')
@@ -253,10 +249,9 @@ const columns: TableColumn<User>[] = [
     cell: ({ row }) => {
       const u = row.original
       return h('div', { class: 'flex items-center gap-3' }, [
-        h(UAvatar, {
-          src: u.avatarPath ?? undefined,
-          alt: u.name,
-          text: initials(u.name),
+        h(AppAvatar, {
+          name: u.name,
+          src: u.avatarPath,
           size: 'sm',
         }),
         h('div', { class: 'min-w-0' }, [

@@ -57,9 +57,9 @@ const navItems = computed(() => [mainLinks.value, footerLinks.value])
           class="flex items-center gap-2 px-3 py-3 border-t border-default"
           :class="sidebarCollapsed ? 'justify-center' : ''"
         >
-          <UAvatar
-            :src="auth.user.value?.avatarPath ?? undefined"
-            :alt="auth.user.value?.name ?? ''"
+          <AppAvatar
+            :name="auth.user.value?.name"
+            :src="auth.user.value?.avatarPath"
             size="sm"
             class="shrink-0"
           />
