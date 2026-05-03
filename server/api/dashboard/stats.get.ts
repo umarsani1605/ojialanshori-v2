@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, message: 'Database tidak terkonfigurasi.' })
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
+  const pool = mysql.createPool(mysqlUrl)
+  const db = drizzle(pool, { schema, casing: 'snake_case', mode: 'default' })
 
   try {
     const isAdmin = user.role === 'superadmin' || user.role === 'pengurus'
@@ -76,6 +76,6 @@ export default defineEventHandler(async (event) => {
     }
   }
   finally {
-    await connection.end()
+    await pool.end()
   }
 })
