@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { count, desc, eq } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
+import * as schema from '../../db/schema'
 
 export default defineEventHandler(async (event) => {
   const { user } = await getUserSession(event)
@@ -22,7 +22,6 @@ export default defineEventHandler(async (event) => {
     const isAdmin = user.role === 'superadmin' || user.role === 'pengurus'
 
     if (isAdmin) {
-      // Stats global untuk pengurus & superadmin
       const [publishedResult, pendingResult, userCountResult, galleryResult, recentPending] = await Promise.all([
         db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'published')),
         db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'pending_review')),

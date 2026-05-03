@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { eq } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
+import * as schema from '../../db/schema'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_SEC = 15 * 60 // 15 menit

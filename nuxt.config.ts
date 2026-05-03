@@ -1,6 +1,14 @@
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-04-12',
   devtools: { enabled: true },
+
+  css: ['~/assets/css/main.css'],
+
+  ui: {
+    colorMode: false,
+  },
 
   modules: [
     '@nuxthub/core',
@@ -49,8 +57,8 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    optimizeDeps: {
-      include: [],
-    },
+    plugins: [
+      tailwindcss(),
+    ],
   },
 })
