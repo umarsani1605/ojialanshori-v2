@@ -1,8 +1,8 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { eq, or } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
-import type { Role } from '~/server/db/schema'
+import * as schema from '~~/server/db/schema'
+import type { Role } from '~~/server/db/schema'
 
 const VALID_ROLES: Role[] = ['superadmin', 'pengurus', 'reviewer', 'santri']
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

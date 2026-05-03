@@ -4,7 +4,6 @@ import type { TableColumn } from '@nuxt/ui'
 import type { RoleColor } from '~/utils/roleDisplay'
 
 definePageMeta({
-  layout: 'dashboard',
   middleware: ['auth', 'role'],
   requiredRole: 'superadmin',
 })
@@ -229,10 +228,6 @@ async function runConfirm() {
   }
 }
 
-function initials(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 }
@@ -241,7 +236,7 @@ function isSelf(user: User) {
   return auth.user.value?.id === user.id
 }
 
-const UAvatar = resolveComponent('UAvatar')
+const AppAvatar = resolveComponent('AppAvatar')
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UTooltip = resolveComponent('UTooltip')
@@ -253,10 +248,9 @@ const columns: TableColumn<User>[] = [
     cell: ({ row }) => {
       const u = row.original
       return h('div', { class: 'flex items-center gap-3' }, [
-        h(UAvatar, {
-          src: u.avatarPath ?? undefined,
-          alt: u.name,
-          text: initials(u.name),
+        h(AppAvatar, {
+          name: u.name,
+          src: u.avatarPath,
           size: 'sm',
         }),
         h('div', { class: 'min-w-0' }, [
@@ -340,29 +334,19 @@ const columns: TableColumn<User>[] = [
 </script>
 
 <template>
-  <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar>
-        <template #left>
-          <h1 class="text-base font-semibold text-neutral-800">
-            Manajemen User
-          </h1>
-        </template>
-        <template #right>
-          <UButton
-            icon="i-lucide-user-plus"
-            color="primary"
-            size="sm"
-            @click="openCreate"
-          >
-            Tambah User
-          </UButton>
-        </template>
-      </UDashboardNavbar>
+  <AppContent title="Manajemen User">
+    <template #action>
+      <UButton
+        icon="i-lucide-user-plus"
+        color="primary"
+        size="sm"
+        @click="openCreate"
+      >
+        Tambah User
+      </UButton>
     </template>
 
-    <template #body>
-      <div class="p-6 space-y-4">
+    <div class="p-6 space-y-4">
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">
           <UInput
@@ -418,8 +402,7 @@ const columns: TableColumn<User>[] = [
           />
         </div>
       </div>
-    </template>
-  </UDashboardPanel>
+  </AppContent>
 
   <!-- Form Modal -->
   <UModal v-model:open="formOpen" :title="formMode === 'create' ? 'Tambah User' : 'Edit User'">

@@ -2,33 +2,15 @@ import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { and, eq, ne, or } from 'drizzle-orm'
 import * as schema from '~~/server/db/schema'
-import type { Role } from '~~/server/db/schema'
 
-const VALID_ROLES: Role[] = ['superadmin', 'pengurus', 'reviewer', 'santri']
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default defineEventHandler(async (event) => {
-  const currentUser = requireSuperadmin(event)
+  const currentUser = requireAuth(event)
 
-  const id = Number(getRouterParam(event, 'id'))
-  if (!Number.isFinite(id) || id <= 0) {
-    throw createError({ statusCode: 400, message: 'ID user tidak valid.' })
-  }
-
-  if (id === currentUser.id) {
-    throw createError({ statusCode: 403, message: 'Superadmin tidak bisa mengedit dirinya sendiri di sini. Gunakan halaman Profil.' })
-  }
-
-  const body = await readBody<{
-    name?: string
-    username?: string
-    email?: string
-    role?: Role
-    isActive?: boolean
-  }>(event)
+  const body = await readBody<{ name?: string, username?: string, email?: string }>(event)
 
   const updates: Partial<typeof schema.users.$inferInsert> = {}
-
   if (body.name !== undefined) {
     const name = body.name.trim()
     if (!name) throw createError({ statusCode: 400, message: 'Nama tidak boleh kosong.' })
@@ -44,15 +26,6 @@ export default defineEventHandler(async (event) => {
     if (!EMAIL_REGEX.test(email)) throw createError({ statusCode: 400, message: 'Format email tidak valid.' })
     updates.email = email
   }
-  if (body.role !== undefined) {
-    if (!VALID_ROLES.includes(body.role)) {
-      throw createError({ statusCode: 400, message: 'Role tidak valid.' })
-    }
-    updates.role = body.role
-  }
-  if (body.isActive !== undefined) {
-    updates.isActive = Boolean(body.isActive)
-  }
 
   if (Object.keys(updates).length === 0) {
     throw createError({ statusCode: 400, message: 'Tidak ada perubahan untuk disimpan.' })
@@ -65,9 +38,6 @@ export default defineEventHandler(async (event) => {
   const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
 
   try {
-    const target = await db.query.users.findFirst({ where: eq(schema.users.id, id) })
-    if (!target) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
-
     if (updates.email || updates.username) {
       const duplicates = [
         updates.email ? eq(schema.users.email, updates.email) : undefined,
@@ -77,7 +47,7 @@ export default defineEventHandler(async (event) => {
       const orCondition = duplicates.length > 1 ? or(...duplicates) : duplicates[0]
       const duplicate = orCondition
         ? await db.query.users.findFirst({
-          where: and(ne(schema.users.id, id), orCondition),
+          where: and(ne(schema.users.id, currentUser.id), orCondition),
         })
         : null
 
@@ -89,12 +59,23 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    await db.update(schema.users).set(updates).where(eq(schema.users.id, id))
+    await db.update(schema.users).set(updates).where(eq(schema.users.id, currentUser.id))
 
     const updated = await db.query.users.findFirst({
-      where: eq(schema.users.id, id),
+      where: eq(schema.users.id, currentUser.id),
       columns: { passwordHash: false, passwordType: false },
     })
+
+    if (updated) {
+      await setUserSession(event, {
+        user: {
+          id: updated.id,
+          name: updated.name,
+          role: updated.role,
+          avatarPath: updated.avatarPath ?? null,
+        },
+      })
+    }
 
     return { user: updated }
   }
