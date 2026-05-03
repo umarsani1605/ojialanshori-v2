@@ -61,6 +61,7 @@ Training data sudah outdated untuk ketiga library ini. Jika ragu tentang API, na
 - **Generate migration:** `pnpm db:generate` (jalankan setelah ubah schema)
 - **Apply migration:** `pnpm db:migrate` (butuh `MYSQL_URL` di `.env`)
 - **JANGAN tulis file migration SQL manual** — selalu generate via `pnpm db:generate`
+- **Paginasi:** SELALU gunakan `.limit()` dan `.offset()` untuk kueri data berjumlah besar. Cloudflare Workers memiliki batas CPU (10ms-50ms) — mengambil terlalu banyak data sekaligus dapat menyebabkan lonjakan memori dan `Worker exceeded CPU limit`.
 - Migration files ada di `server/db/migrations/mysql/`
 
 ---
