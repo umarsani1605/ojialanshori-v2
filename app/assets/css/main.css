@@ -1,2 +1,63 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@theme static {
+  --font-sans: 'Geist', sans-serif;
+
+  /* Utilities Colors */
+  --color-background-page: #f8fafc;
+  --color-sidebar-foreground: #52525b;
+  --color-border: #e4e4e7;
+}
+
+@layer base {
+  body {
+    @apply bg-background-page;
+  }
+}
+
+:root {
+  --ui-border: #eef2f6;
+}
+
+.table-primary {
+  @apply min-w-full;
+}
+
+.table-primary th {
+  @apply px-4 py-4 text-left font-semibold bg-slate-50/50 border-b text-[14px] border-default;
+}
+
+.table-primary td {
+  @apply px-4 py-4 border-b border-default text-[14px] align-top;
+}
+
+.table-primary tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+/* Zebra */
+.table-primary tbody tr:nth-child(even) {
+  @apply bg-white;
+}
+
+.table-primary tbody tr:nth-child(odd) {
+  @apply bg-white;
+}
+
+.table-primary tbody tr:hover {
+  @apply bg-gray-50/50;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}

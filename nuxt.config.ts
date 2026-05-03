@@ -6,10 +6,6 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  ui: {
-    colorMode: false,
-  },
-
   modules: [
     '@nuxthub/core',
     '@nuxt/ui',
@@ -18,6 +14,11 @@ export default defineNuxtConfig({
     'nuxt-disqus',
     'nuxt-auth-utils',
   ],
+
+  colorMode: {
+    preference: 'light',
+    fallback: 'light'
+  },
 
   hub: {
     db: {
