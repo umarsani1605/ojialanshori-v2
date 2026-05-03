@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     if (!target) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
 
     const newPassword = generatePassword(12)
-    const passwordHash = await hashPassword(newPassword)
+    const passwordHash = await hashUserPassword(newPassword)
 
     await db.update(schema.users)
       .set({ passwordHash, passwordType: 'bcrypt' })

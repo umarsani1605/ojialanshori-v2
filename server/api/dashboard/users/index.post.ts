@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
     }
 
-    const passwordHash = await hashPassword(password)
+    const passwordHash = await hashUserPassword(password)
 
     const result = await db.insert(schema.users).values({
       name,
