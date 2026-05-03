@@ -4,7 +4,6 @@ import type { TableColumn } from '@nuxt/ui'
 import type { RoleColor } from '~/utils/roleDisplay'
 
 definePageMeta({
-  layout: 'dashboard',
   middleware: ['auth', 'role'],
   requiredRole: 'superadmin',
 })
@@ -335,29 +334,19 @@ const columns: TableColumn<User>[] = [
 </script>
 
 <template>
-  <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar>
-        <template #left>
-          <h1 class="text-base font-semibold text-neutral-800">
-            Manajemen User
-          </h1>
-        </template>
-        <template #right>
-          <UButton
-            icon="i-lucide-user-plus"
-            color="primary"
-            size="sm"
-            @click="openCreate"
-          >
-            Tambah User
-          </UButton>
-        </template>
-      </UDashboardNavbar>
+  <AppContent title="Manajemen User">
+    <template #action>
+      <UButton
+        icon="i-lucide-user-plus"
+        color="primary"
+        size="sm"
+        @click="openCreate"
+      >
+        Tambah User
+      </UButton>
     </template>
 
-    <template #body>
-      <div class="p-6 space-y-4">
+    <div class="p-6 space-y-4">
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">
           <UInput
@@ -413,8 +402,7 @@ const columns: TableColumn<User>[] = [
           />
         </div>
       </div>
-    </template>
-  </UDashboardPanel>
+  </AppContent>
 
   <!-- Form Modal -->
   <UModal v-model:open="formOpen" :title="formMode === 'create' ? 'Tambah User' : 'Edit User'">

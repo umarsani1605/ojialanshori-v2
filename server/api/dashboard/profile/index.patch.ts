@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { and, eq, ne, or } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
+import * as schema from '~~/server/db/schema'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 

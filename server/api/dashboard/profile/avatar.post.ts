@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { eq } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
+import * as schema from '~~/server/db/schema'
 
 const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp']

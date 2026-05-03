@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { eq } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
+import * as schema from '~~/server/db/schema'
 
 export default defineEventHandler(async (event) => {
   const currentUser = requireAuth(event)
@@ -37,12 +37,12 @@ export default defineEventHandler(async (event) => {
     const user = await db.query.users.findFirst({ where: eq(schema.users.id, currentUser.id) })
     if (!user) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
 
-    const valid = await verifyPassword(oldPassword, user.passwordHash, user.passwordType)
+    const valid = await verifyUserPassword(oldPassword, user.passwordHash, user.passwordType)
     if (!valid) {
       throw createError({ statusCode: 400, message: 'Password lama tidak sesuai.' })
     }
 
-    const newHash = await hashPassword(newPassword)
+    const newHash = await hashUserPassword(newPassword)
     await db.update(schema.users)
       .set({ passwordHash: newHash, passwordType: 'bcrypt' })
       .where(eq(schema.users.id, currentUser.id))

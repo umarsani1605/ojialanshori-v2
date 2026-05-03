@@ -1,6 +1,5 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'dashboard',
   middleware: ['auth'],
 })
 
@@ -158,19 +157,8 @@ async function deleteAvatar() {
 </script>
 
 <template>
-  <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar>
-        <template #left>
-          <h1 class="text-base font-semibold text-neutral-800">
-            Profil Saya
-          </h1>
-        </template>
-      </UDashboardNavbar>
-    </template>
-
-    <template #body>
-      <div class="p-6 max-w-2xl space-y-6">
+  <AppContent title="Profil Saya">
+    <div class="p-6 max-w-2xl space-y-6">
         <!-- Section 1: Avatar -->
         <UCard>
           <template #header>
@@ -306,7 +294,6 @@ async function deleteAvatar() {
             </div>
           </form>
         </UCard>
-      </div>
-    </template>
-  </UDashboardPanel>
+    </div>
+  </AppContent>
 </template>
