@@ -1,21 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
-// node-phpass depends on native bcrypt binary which isn't available in test env.
-// We mock via ESM dynamic import (password.ts now uses lazy import() instead of require()).
-vi.mock('node-phpass', () => ({
-  PasswordHash: class {
-    CheckPassword(password: string, hash: string) {
-      return hash === `phpass:${password}`
-    }
-  },
-}))
+// Testing the custom verifyPhpass and bcrypt hash utilities
 
-import { hashPassword, verifyPassword } from '@@/server/utils/password'
+import { hashUserPassword as hashPassword, verifyUserPassword as verifyPassword } from '@@/server/utils/password'
 
 describe('verifyPassword', () => {
   it('berhasil verifikasi phpass hash dari WordPress', async () => {
-    // Simulated phpass hash — mock format is `phpass:<password>`
-    const phpassHash = 'phpass:testpassword'
+    // Real WordPress phpass hash for 'testpassword'
+    const phpassHash = '$P$612345678JQBttCmD3BAlfh.49kKyD/'
     expect(await verifyPassword('testpassword', phpassHash, 'phpass')).toBe(true)
   })
 
