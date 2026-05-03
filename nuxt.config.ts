@@ -1,6 +1,10 @@
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-04-12',
   devtools: { enabled: true },
+
+  css: ['~/assets/css/main.css'],
 
   modules: [
     '@nuxthub/core',
@@ -10,6 +14,11 @@ export default defineNuxtConfig({
     'nuxt-disqus',
     'nuxt-auth-utils',
   ],
+
+  colorMode: {
+    preference: 'light',
+    fallback: 'light'
+  },
 
   hub: {
     db: {
@@ -49,8 +58,8 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    optimizeDeps: {
-      include: [],
-    },
+    plugins: [
+      tailwindcss(),
+    ],
   },
 })

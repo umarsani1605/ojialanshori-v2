@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { count, desc, eq } from 'drizzle-orm'
-import * as schema from '~/server/db/schema'
+import * as schema from '../../db/schema'
 
 export default defineEventHandler(async (event) => {
   const { user } = await getUserSession(event)
@@ -15,14 +15,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, message: 'Database tidak terkonfigurasi.' })
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
+  const pool = mysql.createPool(mysqlUrl)
+  const db = drizzle(pool, { schema, casing: 'snake_case', mode: 'default' })
 
   try {
     const isAdmin = user.role === 'superadmin' || user.role === 'pengurus'
 
     if (isAdmin) {
-      // Stats global untuk pengurus & superadmin
       const [publishedResult, pendingResult, userCountResult, galleryResult, recentPending] = await Promise.all([
         db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'published')),
         db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'pending_review')),
@@ -77,6 +76,6 @@ export default defineEventHandler(async (event) => {
     }
   }
   finally {
-    await connection.end()
+    await pool.end()
   }
 })
