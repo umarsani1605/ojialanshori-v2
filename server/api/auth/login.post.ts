@@ -76,7 +76,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Verify password before checking isActive so rate limiting applies to all attempts
-    const isValid = await verifyPassword(password, user.passwordHash, user.passwordType)
+    const isValid = await verifyUserPassword(password, user.passwordHash, user.passwordType)
     if (!isValid) {
       await recordFailedAttempt()
       throw createError({ statusCode: 401, message: 'Username atau password salah.' })
@@ -93,7 +93,7 @@ export default defineEventHandler(async (event) => {
         const migConn = await mysql.createConnection(mysqlUrl)
         const migDb = drizzle(migConn, { schema, casing: 'snake_case', mode: 'default' })
         try {
-          const newHash = await hashPassword(password)
+          const newHash = await hashUserPassword(password)
           await migDb
             .update(schema.users)
             .set({ passwordHash: newHash, passwordType: 'bcrypt' })

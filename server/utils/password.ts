@@ -50,7 +50,7 @@ function verifyPhpass(plain: string, storedHash: string): boolean {
  * @param type - Hash algorithm to use: `'phpass'` or `'bcrypt'`
  * @returns `true` if the plaintext matches the hash, `false` otherwise
  */
-export async function verifyPassword(
+export async function verifyUserPassword(
   plain: string,
   hash: string,
   type: 'phpass' | 'bcrypt',
@@ -67,6 +67,6 @@ export async function verifyPassword(
  * @param plain - The plaintext password to hash
  * @returns The bcrypt-formatted hash of `plain`
  */
-export async function hashPassword(plain: string): Promise<string> {
+export async function hashUserPassword(plain: string): Promise<string> {
   return bcrypt.hash(plain, 12)
 }
