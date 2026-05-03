@@ -2,7 +2,6 @@
 import type { RoleColor } from '~/utils/roleDisplay'
 
 definePageMeta({
-  layout: 'dashboard',
   middleware: ['auth'],
 })
 
@@ -41,33 +40,8 @@ const postStatusColor: Record<string, 'success' | 'warning' | 'error' | 'neutral
 </script>
 
 <template>
-  <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar>
-        <template #left>
-          <h1 class="text-base font-semibold text-neutral-800">
-            Beranda
-          </h1>
-        </template>
-        <template #right>
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-neutral-600 hidden sm:inline">
-              {{ auth.user.value?.name }}
-            </span>
-            <UBadge
-              :color="roleColor"
-              variant="subtle"
-              size="xs"
-            >
-              {{ roleLabel }}
-            </UBadge>
-          </div>
-        </template>
-      </UDashboardNavbar>
-    </template>
-
-    <template #body>
-      <div class="p-6 space-y-6">
+  <AppContent title="Beranda" :loading="status === 'pending'">
+    <div class="space-y-6">
         <!-- Greeting -->
         <div>
           <h2 class="text-xl font-semibold text-neutral-800">
@@ -332,6 +306,5 @@ const postStatusColor: Record<string, 'success' | 'warning' | 'error' | 'neutral
           </UCard>
         </template>
       </div>
-    </template>
-  </UDashboardPanel>
+  </AppContent>
 </template>
