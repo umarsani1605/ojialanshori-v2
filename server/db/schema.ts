@@ -93,6 +93,33 @@ export const settings = mysqlTable('settings', {
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
 })
 
+export const testimonials = mysqlTable('testimonials', {
+  id: int().primaryKey().autoincrement(),
+  name: varchar({ length: 255 }).notNull(),
+  title: varchar({ length: 255 }).notNull(),
+  content: text().notNull(),
+  avatarPath: varchar({ length: 500 }),
+  order: int().notNull().default(0),
+  isActive: boolean().notNull().default(true),
+  createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const faqs = mysqlTable('faqs', {
+  id: int().primaryKey().autoincrement(),
+  question: varchar({ length: 500 }).notNull(),
+  answer: text().notNull(),
+  order: int().notNull().default(0),
+  isActive: boolean().notNull().default(true),
+  createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+})
+
+export const contacts = mysqlTable('contacts', {
+  key: varchar({ length: 100 }).primaryKey(),
+  value: text().notNull(),
+  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+})
+
 // ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({

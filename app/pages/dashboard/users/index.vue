@@ -4,6 +4,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { RoleColor } from '~/utils/roleDisplay'
 
 definePageMeta({
+  layout: 'dashboard',
   middleware: ['auth', 'role'],
   requiredRole: 'superadmin',
 })
