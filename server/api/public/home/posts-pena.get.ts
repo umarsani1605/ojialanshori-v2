@@ -5,7 +5,12 @@ import * as schema from '~~/server/db/schema'
 
 export default defineCachedEventHandler(async () => {
   const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) return []
+  if (!mysqlUrl) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'MYSQL_URL is not configured',
+    })
+  }
 
   const connection = await mysql.createConnection(mysqlUrl)
   const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })

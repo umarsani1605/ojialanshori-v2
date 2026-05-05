@@ -30,22 +30,22 @@ function dismiss() {
 <template>
   <div
     v-if="visible && banner"
-    class="bg-emerald-700 text-white text-sm"
+    class="bg-brand-300 text-white text-sm font-ui"
   >
-    <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
-      <p class="flex-1 text-center">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-3 relative">
+      <p class="text-center italic">
+        {{ banner.text }}
         <NuxtLink
           v-if="banner.link"
           :to="banner.link"
-          class="hover:underline"
+          class="font-semibold underline underline-offset-2 hover:text-brand-50 ml-1"
         >
-          {{ banner.text }}
+          Selengkapnya
         </NuxtLink>
-        <span v-else>{{ banner.text }}</span>
       </p>
       <button
         type="button"
-        class="shrink-0 p-1 rounded hover:bg-white/10 transition cursor-pointer"
+        class="absolute right-3 p-1 rounded-full opacity-80 hover:opacity-100 hover:bg-white/15 transition cursor-pointer"
         aria-label="Tutup banner"
         @click="dismiss"
       >

@@ -1,7 +1,7 @@
 export default defineAppConfig({
   ui: {
     colors: {
-      primary: 'emerald',
+      primary: 'brand',
       neutral: 'neutral'
     },
     alert: {
@@ -283,6 +283,15 @@ export default defineAppConfig({
         root: ['p-8 sm:p-10 lg:p-16'],
         header: ['gap-4'],
         description: ['text-dimmed!']
+      }
+    },
+    carousel: {
+      slots: {
+        dot: [
+          'cursor-pointer size-2 bg-neutral-300 dark:bg-neutral-700 rounded-full',
+          'transition-all',
+          'data-[state=active]:bg-primary-500 dark:data-[state=active]:bg-primary-400'
+        ]
       }
     }
   }

@@ -1,266 +1,342 @@
 <script setup lang="ts">
 type Post = {
-  id: number
-  title: string
-  slug: string
-  excerpt: string | null
-  featuredImage: string | null
-  publishedAt: string | Date | null
-  createdAt: string | Date
-  categorySlug?: string
-  authorName?: string
-}
-
-type Testimonial = {
-  id: number
-  name: string
-  title: string
-  content: string
-  avatarPath: string | null
-  order: number
-}
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featuredImage: string | null;
+  publishedAt: string | Date | null;
+  createdAt: string | Date;
+  categorySlug?: string;
+  authorName?: string;
+};
 
 type GalleryItem = {
-  id: number
-  title: string
-  imagePath: string
-  album: string | null
-  order: number
-}
+  id: number;
+  title: string;
+  imagePath: string;
+  album: string | null;
+  order: number;
+};
 
 const features = [
+  { image: "/images/icons/icon-1.png", title: "Kuliah sambil Ngaji" },
+  { image: "/images/icons/icon-3.png", title: "Ngaji Al-Qur'an dan Kitab" },
+  { image: "/images/icons/icon-4.png", title: "Rumah Baru, Keluarga Baru" },
+  { image: "/images/icons/icon-2.png", title: "Kegiatan Seru Lainnya" },
+];
+
+const testimonials = [
   {
-    icon: 'i-lucide-graduation-cap',
-    title: 'Kuliah sambil Ngaji',
-    description: 'Tetap fokus belajar di kampus sambil memperdalam ilmu agama.',
+    name: "Asmaul Khusna, S.Pd.",
+    role: "Penerima Beasiswa LPDP Magister Program Monash University",
+    avatar: "/images/testimonials/khusna.jpg",
+    quote:
+      "Omah Ngaji adalah rumah kedua bagi Khusna. Tempat dimana Khusna bertumbuh, belajar mengaji dan nilai-nilai kehidupan. Omah ngaji itu ‘adem’, erat dengan rasa kekeluargaannya. Terutama, bapak dan ibu yang senantiasa membimbing dengan penuh kasih, serta teman-teman yang saling mendukung, membuat Omah Ngaji menjadi support system terbesar bagi Khusna.",
   },
   {
-    icon: 'i-lucide-book-open',
-    title: "Ngaji Al-Qur'an dan Kitab",
-    description: "Mengaji Al-Qur'an dan kitab kuning bersama asatidz pilihan.",
+    name: "Putri Lestari, S.Pd.",
+    role: "Penerima Beasiswa LPDP MSc Social Anthropology, The University of Edinburgh",
+    avatar: "/images/testimonials/putri.jpg",
+    quote:
+      "Di sela-sela kesibukan dalam aktivitas kemahasiswaan, Omah Ngaji merupakan oase bagi saya selama di Solo. Saya tidak sekadar mengaji namun juga diberi ruang mengasah nalar berpikir melalui diskusi dan pelatihan untuk meningkatkan skill. Tidak berhenti pada ilmu praktis, saya juga belajar tentang kebermanfaatan di sini. Banyak kenangan dan kebersamaan bersama guru dan sahabat yang tidak hanya terpatri dalam memori, namun juga memberikan hikmah dalam kehidupan saya.",
   },
   {
-    icon: 'i-lucide-home',
-    title: 'Rumah Baru, Keluarga Baru',
-    description: 'Suasana hangat layaknya rumah kedua bersama santri lainnya.',
+    name: "Eka Wulan Safriani, S.Pd.",
+    role: "Penerima Beasiswa LPDP Magister Program UPI",
+    avatar: "/images/testimonials/eka.jpg",
+    quote:
+      "Bagi saya omah ngaji bukan hanya sekedar tempat melepas istirahat dari padatnya aktivitas kampus, tapi lebih dari itu. Omah ngaji menjadi sebuah rumah untuk menimba ilmu agama, rumah untuk membuka wawasan, rumah untuk tumbuh bersama, bahkan selama saya di Omah Ngaji, saya menemukan figure-figure yang membuat saya terdorong dan termotivasi untuk terus berprestasi di akademik dan aktif terlibat kegiatan sosial di masyarakat. Bahkan ada satu nilai dari omah ngaji yang terus saya pegang sampai sekarang, yakni ilmu dan adab.",
   },
-  {
-    icon: 'i-lucide-sparkles',
-    title: 'Kegiatan Seru Lainnya',
-    description: 'Aneka kegiatan keagamaan, sosial, dan pengembangan diri.',
-  },
-]
+];
 
-const [{ data: settings }, { data: testimonials }, { data: berita }, { data: pena }, { data: gallery }] = await Promise.all([
-  useFetch<Record<string, string>>('/api/public/settings', { key: 'public-settings', default: () => ({}) }),
-  useFetch<Testimonial[]>('/api/public/home/testimonials', { key: 'home-testimonials', default: () => [] }),
-  useFetch<Post[]>('/api/public/home/posts-berita', { key: 'home-posts-berita', default: () => [] }),
-  useFetch<Post[]>('/api/public/home/posts-pena', { key: 'home-posts-pena', default: () => [] }),
-  useFetch<GalleryItem[]>('/api/public/home/gallery', { key: 'home-gallery', default: () => [] }),
-])
+const [
+  { data: settings },
+  { data: berita, error: beritaError },
+  { data: pena, error: penaError },
+  { data: gallery },
+] = await Promise.all([
+  useFetch<Record<string, string>>("/api/public/settings", {
+    key: "public-settings",
+    default: () => ({}),
+  }),
+  useFetch<Post[]>("/api/public/home/posts-berita", {
+    key: "home-posts-berita",
+    default: () => [],
+  }),
+  useFetch<Post[]>("/api/public/home/posts-pena", {
+    key: "home-posts-pena",
+    default: () => [],
+  }),
+  useFetch<GalleryItem[]>("/api/public/home/gallery", {
+    key: "home-gallery",
+    default: () => [],
+  }),
+]);
 
-const siteName = computed(() => settings.value?.site_name ?? 'Omah Ngaji Al-Anshori')
-const siteTagline = computed(() => settings.value?.site_tagline ?? 'Pondok Pesantren')
-const heroDescription = computed(() => settings.value?.hero_description
-  ?? 'Tempat belajar Al-Qur\'an, kitab, dan akhlak — sambil tetap kuliah dan berkarya.')
-
-const testimonialIndex = ref(0)
-const currentTestimonial = computed(() => testimonials.value?.[testimonialIndex.value] ?? null)
-
-function nextTestimonial() {
-  if (!testimonials.value || testimonials.value.length === 0) return
-  testimonialIndex.value = (testimonialIndex.value + 1) % testimonials.value.length
+if (beritaError.value) {
+  throw createError({
+    statusCode: 500,
+    statusMessage: "Failed to load homepage berita posts",
+    cause: beritaError.value,
+  });
 }
-function prevTestimonial() {
-  if (!testimonials.value || testimonials.value.length === 0) return
-  testimonialIndex.value = (testimonialIndex.value - 1 + testimonials.value.length) % testimonials.value.length
+
+if (penaError.value) {
+  throw createError({
+    statusCode: 500,
+    statusMessage: "Failed to load homepage pena santri posts",
+    cause: penaError.value,
+  });
 }
 
-const featureSection = ref<HTMLElement | null>(null)
+const siteName = computed(
+  () => settings.value?.site_name ?? "Omah Ngaji Al-Anshori",
+);
+const siteTagline = computed(
+  () => settings.value?.site_tagline ?? "Asrama Mahasiswa",
+);
+const heroDescription = computed(
+  () =>
+    settings.value?.hero_description ??
+    "Omah Ngaji Al-Anshori adalah asrama mahasiswa yang bertujuan untuk mengembangkan karakter dan spiritualitas mahasiswa.",
+);
+
 function scrollToFeatures() {
-  featureSection.value?.scrollIntoView({ behavior: 'smooth' })
+  const el = document.getElementById("kenalan");
+  el?.scrollIntoView({ behavior: "smooth" });
 }
 
-const instagramUrl = computed(() => settings.value?.instagram_url ?? 'https://instagram.com/ojialanshori')
-const youtubeUrl = computed(() => settings.value?.youtube_url ?? 'https://youtube.com/@ojialanshori')
-const youtubeEmbed = computed(() => settings.value?.youtube_embed ?? '')
+const instagramUrl = computed(
+  () =>
+    settings.value?.instagram_url ??
+    settings.value?.contact_instagram_url ??
+    "https://www.instagram.com/omahngaji_",
+);
+const youtubeUrl = computed(
+  () =>
+    settings.value?.youtube_url ??
+    settings.value?.contact_youtube_url ??
+    "https://youtube.com/@ojialanshori",
+);
+const youtubeEmbedUrl = computed(
+  () =>
+    settings.value?.youtube_embed_url ??
+    "https://www.youtube.com/embed/8_yx6vHuLSg",
+);
+
+const visibleGallery = computed(() => gallery.value?.slice(0, 8) ?? []);
+const galleryLightbox = useGalleryLightbox(visibleGallery);
 
 useSeoMeta({
   title: () => `${siteName.value} — ${siteTagline.value}`,
   description: () => heroDescription.value,
   ogTitle: () => `${siteName.value} — ${siteTagline.value}`,
   ogDescription: () => heroDescription.value,
-  ogImage: () => settings.value?.og_image ?? '/logo.png',
-})
+  ogImage: () => settings.value?.og_image ?? "/images/logo/logo1.png",
+});
 </script>
 
 <template>
-  <div>
-    <!-- 1. Hero -->
-    <section class="bg-gradient-to-b from-emerald-600 to-emerald-700 text-white relative overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-10">
-        <p class="text-sm md:text-base text-emerald-100 uppercase tracking-widest">
-          {{ siteTagline }}
-        </p>
-        <h1 class="mt-3 text-3xl md:text-5xl font-bold leading-tight">
+  <div class="font-sans">
+    <!-- 1. Hero — green gradient + Arabic letter ornaments -->
+    <section class="hero-gradient relative overflow-hidden text-white">
+      <!-- Decorative ornaments — white Arabic letters & shapes on green bg -->
+      <NuxtImg
+        src="/images/hero/hero-left-top.png"
+        alt=""
+        aria-hidden="true"
+        class="absolute top-6 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
+      />
+      <NuxtImg
+        src="/images/hero/hero-left-bottom.png"
+        alt=""
+        aria-hidden="true"
+        class="absolute bottom-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
+      />
+      <NuxtImg
+        src="/images/hero/hero-right-top.png"
+        alt=""
+        aria-hidden="true"
+        class="absolute top-12 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
+      />
+      <NuxtImg
+        src="/images/hero/hero-right-bottom.png"
+        alt=""
+        aria-hidden="true"
+        class="absolute bottom-0 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
+      />
+
+      <UPageHero
+        orientation="horizontal"
+        reverse
+        class="relative z-10 py-10"
+        :ui="{
+          container: 'py-14 sm:py-16 lg:py-18 gap-12 lg:gap-16 items-center',
+          wrapper: 'items-start',
+          headline: 'text-xl font-semibold text-white/90',
+          title:
+            'font-ui text-xl md:text-2xl lg:text-4xl font-extrabold text-white tracking-wide',
+          description:
+            'text-base md:text-lg text-white/85 max-w-xl leading-relaxed',
+          links: 'mt-2',
+        }"
+      >
+        <template #headline>
+          <span class="flex items-center gap-3">
+            {{ siteTagline }}
+          </span>
+        </template>
+        <template #title>
           {{ siteName }}
-        </h1>
-        <p class="mt-6 text-base md:text-lg text-emerald-50 max-w-2xl mx-auto">
+        </template>
+        <template #description>
           {{ heroDescription }}
-        </p>
-        <UButton
-          class="mt-8"
-          color="neutral"
-          variant="solid"
-          size="lg"
-          icon="i-lucide-arrow-down"
-          @click="scrollToFeatures"
-        >
-          Kenali lebih dekat
-        </UButton>
-      </div>
-      <!-- Decorative blobs -->
-      <div class="absolute -top-12 -left-12 size-48 bg-emerald-400/30 rounded-full blur-3xl" />
-      <div class="absolute bottom-0 -right-12 size-64 bg-emerald-300/20 rounded-full blur-3xl" />
+        </template>
+        <template #links>
+          <UButton
+            variant="ghost"
+            icon="i-lucide-arrow-down"
+            class="px-3 py-2 rounded-xl text-white border border-white hover:text-primary hover:bg-white"
+            @click="scrollToFeatures"
+          >
+            Kenali lebih dekat
+          </UButton>
+        </template>
+
+        <!-- Default slot = the visual on the opposite side of text (logo) -->
+        <div class="flex justify-center">
+          <NuxtImg
+            src="/images/logo/logo3.png"
+            alt="Omah Ngaji Al-Anshori"
+            class="max-w-sm object-contain"
+          />
+        </div>
+      </UPageHero>
     </section>
 
     <!-- 2. Fitur -->
-    <section ref="featureSection" class="max-w-7xl mx-auto px-4 py-16">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div
-          v-for="feature in features"
-          :key="feature.title"
-          class="text-center"
-        >
-          <div class="mx-auto size-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <UIcon :name="feature.icon" class="size-8" />
+    <section id="kenalan" class="py-10 md:py-16">
+      <UContainer>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+          <div
+            v-for="feature in features"
+            :key="feature.title"
+            class="group flex flex-col items-center text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
+          >
+            <div
+              class="size-24 md:size-28 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
+            >
+              <NuxtImg
+                :src="feature.image"
+                :alt="feature.title"
+                class="size-16 md:size-20 object-contain"
+              />
+            </div>
+            <h4 class="text-base md:text-lg font-semibold">
+              {{ feature.title }}
+            </h4>
           </div>
-          <h3 class="mt-4 font-semibold text-neutral-800 text-sm md:text-base">
-            {{ feature.title }}
-          </h3>
-          <p class="mt-1 text-xs md:text-sm text-neutral-500">
-            {{ feature.description }}
-          </p>
         </div>
-      </div>
+      </UContainer>
     </section>
 
-    <!-- 3. Testimoni Alumni -->
-    <section
-      v-if="testimonials && testimonials.length > 0"
-      class="bg-neutral-50 py-16"
-    >
-      <div class="max-w-3xl mx-auto px-4 text-center">
-        <h2 class="text-sm uppercase tracking-widest text-emerald-700 font-semibold">
+    <!-- 3. Kata Alumni -->
+    <section class="bg-[#f9fafb] py-10 md:py-16">
+      <UContainer>
+        <h2 class="font-bold text-xl md:text-2xl tracking-wide mb-10 md:mb-14">
           Kata Alumni
         </h2>
-        <h3 class="mt-2 text-2xl md:text-3xl font-bold text-neutral-800">
-          Suara dari Mereka
-        </h3>
-
-        <div
-          v-if="currentTestimonial"
-          class="mt-8 bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-default"
+        <UCarousel
+          v-slot="{ item }"
+          :items="testimonials"
+          :autoplay="{ delay: 6000 }"
+          loop
+          arrows
+          dots
+          prev-icon="i-lucide-chevron-left"
+          next-icon="i-lucide-chevron-right"
+          :prev="{ variant: 'ghost', color: 'neutral' }"
+          :next="{ variant: 'ghost', color: 'neutral' }"
         >
-          <UIcon name="i-lucide-quote" class="size-8 text-emerald-200 mx-auto" />
-          <p class="mt-4 text-neutral-700 leading-relaxed text-sm md:text-base">
-            {{ currentTestimonial.content }}
-          </p>
-          <div class="mt-6 flex flex-col items-center gap-2">
-            <AppAvatar
-              :name="currentTestimonial.name"
-              :src="currentTestimonial.avatarPath"
-              size="xl"
-            />
-            <p class="font-semibold text-neutral-800">
-              {{ currentTestimonial.name }}
+          <div class="max-w-3xl mx-auto px-4 text-center">
+            <p class="text-base md:text-lg leading-relaxed mb-8">
+              &ldquo;{{ item.quote }}&rdquo;
             </p>
-            <p class="text-sm text-neutral-500">
-              {{ currentTestimonial.title }}
+            <NuxtImg
+              :src="item.avatar"
+              :alt="item.name"
+              class="size-16 rounded-full object-cover mx-auto mb-3"
+              loading="lazy"
+            />
+            <p class="font-bold">
+              {{ item.name }}
+            </p>
+            <p class="text-sm text-dimmed mt-1">
+              {{ item.role }}
             </p>
           </div>
-        </div>
-
-        <div v-if="testimonials.length > 1" class="mt-6 flex items-center justify-center gap-3">
-          <UButton
-            icon="i-lucide-chevron-left"
-            color="neutral"
-            variant="outline"
-            size="sm"
-            aria-label="Sebelumnya"
-            @click="prevTestimonial"
-          />
-          <span class="text-sm text-neutral-500">
-            {{ testimonialIndex + 1 }} / {{ testimonials.length }}
-          </span>
-          <UButton
-            icon="i-lucide-chevron-right"
-            color="neutral"
-            variant="outline"
-            size="sm"
-            aria-label="Selanjutnya"
-            @click="nextTestimonial"
-          />
-        </div>
-      </div>
+        </UCarousel>
+      </UContainer>
     </section>
 
     <!-- 4. Berita Terbaru -->
-    <section class="max-w-7xl mx-auto px-4 py-16">
-      <div class="flex items-end justify-between mb-8">
-        <div>
-          <h2 class="text-sm uppercase tracking-widest text-emerald-700 font-semibold">
-            Berita
-          </h2>
-          <h3 class="mt-1 text-2xl md:text-3xl font-bold text-neutral-800">
-            Berita Terbaru
-          </h3>
-        </div>
-        <NuxtLink
-          to="/berita"
-          class="text-sm text-emerald-700 font-medium hover:underline shrink-0"
+    <section class="py-10 md:py-16">
+      <UContainer>
+        <div
+          class="flex items-end justify-between border-b-2 border-default pb-4 mb-12"
         >
-          Lainnya →
-        </NuxtLink>
-      </div>
-
-      <div v-if="berita && berita.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <PublicPostCard
-          v-for="post in berita"
-          :key="post.id"
-          :post="post"
-          base-path="/berita"
-        />
-      </div>
-      <PublicEmptyState
-        v-else
-        title="Belum ada berita"
-        description="Berita terbaru dari pondok akan tampil di sini."
-        icon="i-lucide-newspaper"
-      />
-    </section>
-
-    <!-- 5. Pena Santri -->
-    <section class="bg-neutral-50 py-16">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-end justify-between mb-8">
-          <div>
-            <h2 class="text-sm uppercase tracking-widest text-emerald-700 font-semibold">
-              Pena Santri
-            </h2>
-            <h3 class="mt-1 text-2xl md:text-3xl font-bold text-neutral-800">
-              Karya Santri
-            </h3>
-          </div>
+          <h2 class="font-bold text-xl md:text-2xl tracking-wide">Berita</h2>
           <NuxtLink
-            to="/pena-santri"
-            class="text-sm text-emerald-700 font-medium hover:underline shrink-0"
+            to="/berita"
+            class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
           >
-            Lainnya →
+            Lainnya
+            <UIcon name="i-lucide-arrow-right" class="size-4" />
           </NuxtLink>
         </div>
 
-        <div v-if="pena && pena.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+          v-if="berita && berita.length > 0"
+          class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+        >
+          <PublicPostCard
+            v-for="post in berita"
+            :key="post.id"
+            :post="post"
+            base-path="/berita"
+          />
+        </div>
+        <PublicEmptyState
+          v-else
+          title="Belum ada berita"
+          icon="i-lucide-newspaper"
+        />
+      </UContainer>
+    </section>
+
+    <!-- 5. Pena Santri -->
+    <section class="py-10 md:py-16">
+      <UContainer>
+        <div
+          class="flex items-end justify-between border-b border-default pb-4 mb-12"
+        >
+          <h2 class="font-bold text-xl md:text-2xl tracking-wide">
+            Pena Santri
+          </h2>
+          <NuxtLink
+            to="/pena-santri"
+            class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
+          >
+            Lainnya
+            <UIcon name="i-lucide-arrow-right" class="size-4" />
+          </NuxtLink>
+        </div>
+
+        <div
+          v-if="pena && pena.length > 0"
+          class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+        >
           <PublicPostCard
             v-for="post in pena"
             :key="post.id"
@@ -271,86 +347,226 @@ useSeoMeta({
         <PublicEmptyState
           v-else
           title="Belum ada karya"
-          description="Karya santri akan ditampilkan di sini."
           icon="i-lucide-pen-line"
         />
-      </div>
+      </UContainer>
     </section>
 
     <!-- 6. Galeri -->
-    <section class="max-w-7xl mx-auto px-4 py-16">
-      <div class="flex items-end justify-between mb-8">
-        <div>
-          <h2 class="text-sm uppercase tracking-widest text-emerald-700 font-semibold">
-            Galeri
-          </h2>
-          <h3 class="mt-1 text-2xl md:text-3xl font-bold text-neutral-800">
-            Momen Pondok
-          </h3>
-        </div>
-        <NuxtLink
-          to="/galeri"
-          class="text-sm text-emerald-700 font-medium hover:underline shrink-0"
-        >
-          Lihat semua →
-        </NuxtLink>
-      </div>
+    <section class="py-10 md:py-16">
+      <UContainer>
+        <PublicSectionHeading title="Galeri">
+          <template #action>
+            <NuxtLink
+              to="/galeri"
+              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
+            >
+              Lainnya
+              <UIcon name="i-lucide-arrow-right" class="size-4" />
+            </NuxtLink>
+          </template>
+        </PublicSectionHeading>
 
-      <div v-if="gallery && gallery.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div
-          v-for="item in gallery"
-          :key="item.id"
-          class="aspect-square rounded-lg overflow-hidden bg-neutral-100"
+          v-if="visibleGallery.length > 0"
+          class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
         >
-          <NuxtImg
-            :src="item.imagePath"
-            :alt="item.title"
-            loading="lazy"
-            class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
+          <button
+            v-for="(item, index) in visibleGallery"
+            :key="item.id"
+            type="button"
+            class="aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 group relative text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            :aria-label="`Lihat foto ${item.title}`"
+            @click="galleryLightbox.open(index)"
+          >
+            <NuxtImg
+              :src="item.imagePath"
+              :alt="item.title"
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div
+              class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-4 py-3 text-sm font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+            >
+              {{ item.title }}
+            </div>
+          </button>
         </div>
-      </div>
-      <PublicEmptyState
-        v-else
-        title="Belum ada foto"
-        description="Galeri foto kegiatan akan tampil di sini."
-        icon="i-lucide-image"
-      />
+        <PublicEmptyState
+          v-else
+          title="Belum ada foto"
+          description="Galeri foto kegiatan akan tampil di sini."
+          icon="i-lucide-image"
+        />
+      </UContainer>
     </section>
 
-    <!-- 7. Sosmed -->
-    <section class="bg-emerald-50 py-16">
-      <div class="max-w-3xl mx-auto px-4 text-center">
-        <h2 class="text-sm uppercase tracking-widest text-emerald-700 font-semibold">
-          Sosial Media
-        </h2>
-        <h3 class="mt-1 text-2xl md:text-3xl font-bold text-neutral-800">
-          Ikuti Kami
-        </h3>
-        <p class="mt-3 text-neutral-600">
-          Update kegiatan harian melalui sosial media kami.
-        </p>
+    <UModal
+      v-model:open="galleryLightbox.isOpen.value"
+      fullscreen
+      :transition="true"
+      :ui="{
+        content: 'bg-slate-950/10 shadow-none ring-0',
+      }"
+    >
+      <template #content>
+        <div class="flex min-h-screen flex-col text-white">
+          <div
+            class="flex items-center justify-between gap-4 px-4 py-4 md:px-6"
+          >
+            <div>
+              <p class="text-sm text-white/70">
+                {{ galleryLightbox.activeIndex.value + 1 }} /
+                {{ visibleGallery.length }}
+              </p>
+              <h3 class="mt-1 text-lg font-semibold">
+                {{ galleryLightbox.activeItem.value?.title }}
+              </h3>
+            </div>
 
-        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a :href="instagramUrl" target="_blank" rel="noopener">
-            <UButton size="lg" color="primary" variant="solid" icon="i-lucide-instagram">
-              Instagram
-            </UButton>
-          </a>
-          <a :href="youtubeUrl" target="_blank" rel="noopener">
-            <UButton size="lg" color="error" variant="solid" icon="i-lucide-youtube">
-              YouTube
-            </UButton>
-          </a>
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-x"
+              class="text-white hover:bg-white/10"
+              aria-label="Tutup lightbox"
+              @click="galleryLightbox.close"
+            />
+          </div>
+
+          <div
+            class="flex flex-1 items-center justify-center gap-3 px-4 pb-6 md:gap-6 md:px-6"
+          >
+            <UButton
+              v-if="galleryLightbox.hasMultipleItems.value"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-chevron-left"
+              class="hidden md:inline-flex text-white hover:bg-white/10"
+              aria-label="Foto sebelumnya"
+              @click="galleryLightbox.prev"
+            />
+
+            <div
+              class="flex w-full max-w-6xl flex-col items-center justify-center gap-4"
+            >
+              <div class="overflow-hidden rounded-2xl bg-white/5">
+                <NuxtImg
+                  v-if="galleryLightbox.activeItem.value"
+                  :src="galleryLightbox.activeItem.value.imagePath"
+                  :alt="galleryLightbox.activeItem.value.title"
+                  class="max-h-[72vh] w-auto max-w-full object-contain"
+                  loading="eager"
+                />
+              </div>
+
+              <p
+                v-if="galleryLightbox.activeItem.value?.album"
+                class="text-sm text-white/70"
+              >
+                {{ galleryLightbox.activeItem.value.album }}
+              </p>
+
+              <div
+                v-if="galleryLightbox.hasMultipleItems.value"
+                class="flex items-center gap-3 md:hidden"
+              >
+                <UButton
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-chevron-left"
+                  class="text-white hover:bg-white/10"
+                  aria-label="Foto sebelumnya"
+                  @click="galleryLightbox.prev"
+                />
+                <UButton
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-chevron-right"
+                  class="text-white hover:bg-white/10"
+                  aria-label="Foto berikutnya"
+                  @click="galleryLightbox.next"
+                />
+              </div>
+            </div>
+
+            <UButton
+              v-if="galleryLightbox.hasMultipleItems.value"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-chevron-right"
+              class="hidden md:inline-flex text-white hover:bg-white/10"
+              aria-label="Foto berikutnya"
+              @click="galleryLightbox.next"
+            />
+          </div>
         </div>
+      </template>
+    </UModal>
 
-        <div
-          v-if="youtubeEmbed"
-          class="mt-10 rounded-xl overflow-hidden border border-default"
+    <!-- 7. Instagram -->
+    <section class="py-10 md:py-16">
+      <UContainer>
+        <PublicSectionHeading title="Instagram" />
+        <a
+          :href="instagramUrl"
+          target="_blank"
+          rel="noopener"
+          class="group flex flex-col sm:flex-row items-center justify-between gap-6 rounded-2xl border border-default bg-white p-6 md:p-8 transition-colors hover:border-brand-300"
         >
-          <div class="aspect-video" v-html="youtubeEmbed" />
+          <div class="flex items-center gap-5">
+            <div
+              class="size-14 rounded-2xl border border-default flex items-center justify-center shrink-0 text-slate-700"
+            >
+              <UIcon name="i-lucide-instagram" class="size-8" />
+            </div>
+            <div class="text-center sm:text-left">
+              <h4 class="font-bold text-lg md:text-xl mb-0.5">@omahngaji_</h4>
+              <p class="font-ui text-sm text-muted">
+                Akun Resmi Omah Ngaji Al-Anshori Surakarta
+              </p>
+            </div>
+          </div>
+          <span
+            class="font-ui font-semibold bg-brand-500 text-white group-hover:bg-brand-600 px-5 py-2 rounded-lg transition-colors"
+          >
+            Ikuti Kami
+          </span>
+        </a>
+      </UContainer>
+    </section>
+
+    <!-- 8. Youtube -->
+    <section class="py-10 md:py-16">
+      <UContainer>
+        <PublicSectionHeading title="Youtube" />
+
+        <div class="aspect-video rounded-2xl overflow-hidden bg-neutral-100">
+          <iframe
+            :src="youtubeEmbedUrl"
+            title="YouTube video Omah Ngaji Al-Anshori"
+            class="w-full h-full"
+            frameborder="0"
+            allow="
+              accelerometer;
+              autoplay;
+              clipboard-write;
+              encrypted-media;
+              gyroscope;
+              picture-in-picture;
+              web-share;
+            "
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          />
         </div>
-      </div>
+      </UContainer>
     </section>
   </div>
 </template>
+
+<style scoped>
+.hero-gradient {
+  background: linear-gradient(180deg, #88de87 0%, #29c4a9 100%);
+}
+</style>

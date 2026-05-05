@@ -80,8 +80,20 @@ async function fetchAll<T>(endpoint: string, params: Record<string, string> = {}
     url.searchParams.set('page', String(page))
     url.searchParams.set('per_page', '100')
 
-    const res = await fetch(url.toString())
-    if (!res.ok) throw new Error(`WP API ${res.status}: ${url}`)
+    const res = await fetch(url.toString(), {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://ojialanshori.com/',
+        'Origin': 'https://ojialanshori.com/',
+      },
+    })
+    if (!res.ok) {
+      const errorBody = await res.text()
+      console.log(`\n🔴 Debug Error Body (first 300 chars):\n${errorBody.substring(0, 300)}...`)
+      throw new Error(`WP API ${res.status}: ${url}`)
+    }
 
     if (page === 1) {
       totalPages = parseInt(res.headers.get('X-WP-TotalPages') ?? '1', 10)

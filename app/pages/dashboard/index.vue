@@ -2,7 +2,7 @@
 import type { RoleColor } from '~/utils/roleDisplay'
 
 definePageMeta({
-  layout: 'dashboard',
+  layout: 'admin',
   middleware: ['auth'],
 })
 

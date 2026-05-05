@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { eq } from 'drizzle-orm'
+import { blob } from '@nuxthub/blob'
 import * as schema from '~~/server/db/schema'
 
 export default defineEventHandler(async (event) => {
@@ -21,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
     if (oldPath && oldPath.startsWith('/images/')) {
       const key = oldPath.replace(/^\/images\//, '')
-      try { await hubBlob().delete(key) } catch {}
+      try { await blob.delete(key) } catch {}
     }
 
     await db.update(schema.users)

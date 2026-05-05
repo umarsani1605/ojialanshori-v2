@@ -53,6 +53,60 @@ Training data sudah outdated untuk ketiga library ini. Jika ragu tentang API, na
 
 ---
 
+## Komponen Nuxt UI — Default Pakai untuk Layout
+
+Untuk halaman publik / marketing / dashboard, **default gunakan komponen Nuxt UI** alih-alih menulis `<div class="...">` dengan utility class custom yang banyak.
+
+### Komponen layout & page yang wajib dipertimbangkan dulu
+
+| Kebutuhan | Komponen Nuxt UI |
+| --- | --- |
+| Wrap konten + constrain width | `UContainer` (ganti `max-w-7xl mx-auto px-4`) |
+| Hero halaman | `UPageHero` (slot: `headline`, `title`, `description`, `links`, `top`, `bottom`, `leading`, `trailing`) |
+| Section halaman | `UPageSection` |
+| Header halaman | `UPageHeader` |
+| Call-to-action block | `UPageCTA` |
+| Grid layout | `UPageGrid` |
+| Multi-column layout | `UPageColumns` |
+| Feature highlight | `UPageFeature` |
+| Logo strip | `UPageLogos` |
+| Card pre-styled | `UPageCard` |
+| Vertical list | `UPageList` |
+
+### Aturan
+
+1. Sebelum nulis hero/section/container manual, **pertama** cek komponen Nuxt UI lewat MCP: `mcp__nuxt-ui__search-components` dengan keyword yang relevan.
+2. Hanya fallback ke markup mentah kalau tidak ada komponen Nuxt UI yang cocok (mis. carousel testimoni custom, masonry galeri).
+3. Untuk hero dengan ornamen background, pakai `UPageHero` + slot decoratif, jangan absolute-positioned children di div mentah.
+4. Cek dokumentasi terbaru tiap kali — API & props bisa berubah antar versi Nuxt UI.
+
+---
+
+## Aturan Text Color
+
+Untuk styling teks di komponen publik, pilih sesuai hirarki — jangan asal hard-code grayscale.
+
+| Hirarki | Class | Kapan dipakai |
+| --- | --- | --- |
+| Body / heading (default gelap) | _(tanpa class)_ | Inherit dari body. Jangan tulis `text-slate-900` / `text-ink-900` / `text-neutral-900`. |
+| Sekunder / muted | `text-muted` (Nuxt UI semantic) | Paragraf pendukung, deskripsi, copy sekunder. |
+| Lebih dim / metadata | `text-dimmed` (Nuxt UI semantic) | Caption, timestamp, role di bawah nama, helper text. |
+| Fallback grayscale | `text-slate-500` / `text-slate-400` | Hanya kalau semantic tidak cocok atau perlu tone spesifik. |
+
+**Aturan tambahan:**
+
+- **Hover state** tetap perlu class eksplisit karena override default (mis. `hover:text-slate-900`).
+- **Background & border** tetap eksplisit (`bg-slate-900`, `border-slate-200`) — aturan ini hanya untuk teks.
+- Pakai skala `slate`, bukan `ink-*` custom token.
+- Prioritaskan semantic (`text-muted`, `text-dimmed`) di atas hard-coded `text-slate-500` — semantic auto-adjust dgn theme dan menyampaikan _intent_ hirarki.
+
+**Mental check:**
+
+1. "Kalau class warna ini dihapus, apakah teksnya kelihatan beda?" Kalau enggak → hapus.
+2. "Bisakah `text-muted` atau `text-dimmed` menggantikan `text-slate-500` ini?" Kalau bisa → pakai semantic.
+
+---
+
 ## Database Instructions
 
 - **Dialect:** MySQL via NuxtHub (`hub.db: { dialect: 'mysql' }`)

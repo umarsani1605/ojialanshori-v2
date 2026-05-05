@@ -10,7 +10,7 @@
     {
       "binding": "BLOB",
       "bucket_name": "ojialanshori",
-      "preview_bucket_name": "ojialanshori-preview",
+      "preview_bucket_name": "ojialanshori",
     },
   ],
 

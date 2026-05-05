@@ -38,8 +38,12 @@ export default defineNuxtConfig({
     enabled: false,
   },
 
-  // @nuxt/image: provider dikonfigurasi di E8 (SEO & Performance)
-  image: {},
+  image: {
+    provider: process.env.NODE_ENV === 'production' ? 'cloudflare' : 'none',
+    cloudflare: {
+      baseURL: '/',
+    },
+  },
 
   disqus: {
     shortname: process.env.DISQUS_SHORTNAME || '',

@@ -4,101 +4,113 @@ const props = defineProps<{
 }>()
 
 const navLinks = [
-  { label: 'Beranda', to: '/' },
   { label: 'Profil', to: '/profil' },
   { label: 'Kegiatan', to: '/kegiatan' },
   { label: 'Berita', to: '/berita' },
-  { label: 'Pena Santri', to: '/pena-santri' },
+  { label: 'Blog', to: '/pena-santri' },
   { label: 'Kontak', to: '/kontak' },
-  { label: 'FAQ', to: '/faq' },
 ]
 
 const year = new Date().getFullYear()
 
-const instagramUrl = computed(() => props.settings?.instagram_url ?? 'https://instagram.com/ojialanshori')
-const youtubeUrl = computed(() => props.settings?.youtube_url ?? 'https://youtube.com/@ojialanshori')
-const address = computed(() => props.settings?.address ?? '')
-const mapsEmbed = computed(() => props.settings?.maps_embed ?? '')
+const facebookUrl = computed(() => props.settings?.facebook_url ?? props.settings?.contact_facebook_url ?? 'https://facebook.com/ojialanshori')
+const instagramUrl = computed(() => props.settings?.instagram_url ?? props.settings?.contact_instagram_url ?? 'https://www.instagram.com/omahngaji_')
+const youtubeUrl = computed(() => props.settings?.youtube_url ?? props.settings?.contact_youtube_url ?? 'https://youtube.com/@ojientertainment4897')
+const tiktokUrl = computed(() => props.settings?.tiktok_url ?? props.settings?.contact_tiktok_url ?? 'https://tiktok.com/@omahngaji_')
+
+const mapsEmbedUrl = computed(
+  () =>
+    props.settings?.contact_maps_embed
+    ?? props.settings?.maps_embed
+    ?? 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d4439.636936115365!2d110.85348123043434!3d-7.545847830514026!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a16e1cb921e67%3A0xf2ca3eeac2c4569e!2sPesantren%20Mahasiswa%20Omah%20Ngaji%20Al%20Anshori!5e0!3m2!1sid!2sid!4v1730611092747!5m2!1sid!2sid',
+)
+
+const socials = computed(() => [
+  { label: 'Facebook', href: facebookUrl.value, icon: 'i-simple-icons-facebook' },
+  { label: 'Instagram', href: instagramUrl.value, icon: 'i-simple-icons-instagram' },
+  { label: 'YouTube', href: youtubeUrl.value, icon: 'i-simple-icons-youtube' },
+  { label: 'TikTok', href: tiktokUrl.value, icon: 'i-simple-icons-tiktok' },
+])
 </script>
 
 <template>
-  <footer class="bg-emerald-700 text-white mt-16">
-    <div class="max-w-7xl mx-auto px-4 py-10">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Brand -->
-        <div>
-          <div class="flex items-center gap-3">
-            <img
-              src="/logo.png"
+  <footer class="text-white">
+    <div class="footer-gradient">
+      <UContainer>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 py-12 md:py-16 items-start">
+          <!-- Logo -->
+          <NuxtLink to="/" class="inline-flex">
+            <NuxtImg
+              src="/images/logo/logo3.png"
               alt="Omah Ngaji Al-Anshori"
-              class="h-10 w-10 object-contain bg-white rounded-full p-1"
-            >
-            <p class="font-bold leading-tight">
-              Omah Ngaji<br>Al-Anshori
-            </p>
-          </div>
-          <p
-            v-if="address"
-            class="mt-4 text-sm text-emerald-100"
-          >
-            {{ address }}
-          </p>
-        </div>
+              class="h-24 w-auto object-contain"
+            />
+          </NuxtLink>
 
-        <!-- Nav -->
-        <div>
-          <h4 class="text-sm font-semibold uppercase tracking-wide text-emerald-100">
-            Halaman
-          </h4>
-          <ul class="mt-3 space-y-2">
-            <li v-for="link in navLinks" :key="link.to">
-              <NuxtLink
-                :to="link.to"
-                class="text-sm text-emerald-50 hover:text-white"
+          <!-- Nav -->
+          <div>
+            <h5 class="font-display font-bold text-white text-lg mb-5">
+              Omah Ngaji Al-Anshori
+            </h5>
+            <ul class="space-y-3">
+              <li v-for="link in navLinks" :key="link.to">
+                <NuxtLink
+                  :to="link.to"
+                  class="text-white/90 hover:text-white transition-colors"
+                >
+                  {{ link.label }}
+                </NuxtLink>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Sosmed -->
+          <div>
+            <h5 class="font-display font-bold text-white text-lg mb-5">
+              Ikuti kami
+            </h5>
+            <div class="flex gap-3">
+              <a
+                v-for="social in socials"
+                :key="social.label"
+                :href="social.href"
+                target="_blank"
+                rel="noopener"
+                :aria-label="social.label"
+                class="size-10 rounded-full border border-white/80 text-white flex items-center justify-center hover:bg-white hover:text-brand-600 transition-colors"
               >
-                {{ link.label }}
-              </NuxtLink>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Social + maps -->
-        <div>
-          <h4 class="text-sm font-semibold uppercase tracking-wide text-emerald-100">
-            Sosial Media
-          </h4>
-          <div class="mt-3 flex gap-3">
-            <a
-              :href="instagramUrl"
-              target="_blank"
-              rel="noopener"
-              class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
-              aria-label="Instagram"
-            >
-              <UIcon name="i-lucide-instagram" class="size-5" />
-            </a>
-            <a
-              :href="youtubeUrl"
-              target="_blank"
-              rel="noopener"
-              class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
-              aria-label="YouTube"
-            >
-              <UIcon name="i-lucide-youtube" class="size-5" />
-            </a>
+                <UIcon :name="social.icon" class="size-5" />
+              </a>
+            </div>
           </div>
-          <div
-            v-if="mapsEmbed"
-            class="mt-4 rounded-lg overflow-hidden"
-          >
-            <div class="aspect-video" v-html="mapsEmbed" />
+
+          <!-- Maps -->
+          <div class="rounded-lg overflow-hidden bg-white/10 aspect-[16/9] lg:aspect-auto lg:h-[225px]">
+            <iframe
+              :src="mapsEmbedUrl"
+              title="Lokasi Omah Ngaji Al-Anshori"
+              class="w-full h-full border-0"
+              loading="lazy"
+              allowfullscreen
+              referrerpolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
-      </div>
+      </UContainer>
+    </div>
 
-      <div class="mt-10 pt-6 border-t border-emerald-600 text-center text-xs text-emerald-100">
-        © {{ year }} Omah Ngaji Al-Anshori. All rights reserved.
-      </div>
+    <div class="bg-slate-900 py-5">
+      <UContainer>
+        <p class="text-center text-sm font-ui text-white/80">
+          Omah Ngaji Al-Anshori © {{ year }}
+        </p>
+      </UContainer>
     </div>
   </footer>
 </template>
+
+<style scoped>
+.footer-gradient {
+  background: linear-gradient(180deg, #88de87 0%, #29c4a9 100%);
+}
+</style>

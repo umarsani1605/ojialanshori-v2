@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 import { eq } from 'drizzle-orm'
+import { blob } from '@nuxthub/blob'
 import * as schema from '~~/server/db/schema'
 
 const MAX_SIZE = 2 * 1024 * 1024 // 2MB
@@ -32,7 +33,6 @@ export default defineEventHandler(async (event) => {
   const storageKey = `avatars/${currentUser.id}/${Date.now()}.${ext}`
   const publicPath = `/images/${storageKey}`
 
-  const blob = hubBlob()
   await blob.put(storageKey, file.data, { contentType: mime })
 
   const mysqlUrl = process.env.MYSQL_URL

@@ -24,30 +24,29 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 bg-white border-b border-default shadow-sm">
-    <nav class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-      <NuxtLink to="/" class="flex items-center gap-2 shrink-0">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-default">
+    <nav class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-6">
+      <NuxtLink to="/" class="flex items-center gap-3 shrink-0">
         <img
-          src="/logo.png"
+          src="/images/logo/logo1.png"
           alt="Omah Ngaji Al-Anshori"
-          class="h-8 w-8 object-contain"
+          class="h-12 w-auto object-contain"
         >
-        <span class="hidden sm:inline text-sm font-bold text-emerald-700 leading-tight">
-          Omah Ngaji<br>Al-Anshori
-        </span>
       </NuxtLink>
 
       <!-- Desktop nav -->
-      <ul class="hidden lg:flex items-center gap-1">
+      <ul class="hidden lg:flex items-center gap-8">
         <li v-for="link in navLinks" :key="link.to">
           <NuxtLink
             :to="link.to"
-            class="px-3 py-2 text-sm rounded-md transition-colors"
-            :class="isActive(link.to)
-              ? 'text-emerald-700 font-semibold'
-              : 'text-neutral-600 hover:text-emerald-700 hover:bg-emerald-50'"
+            class="relative font-ui text-sm font-medium transition-colors py-2 group"
+            :class="isActive(link.to) ? 'text-brand-600' : 'hover:text-brand-600'"
           >
             {{ link.label }}
+            <span
+              class="absolute left-0 -bottom-0.5 h-[2px] bg-brand-500 transition-all duration-300"
+              :class="isActive(link.to) ? 'w-full' : 'w-0 group-hover:w-full'"
+            />
           </NuxtLink>
         </li>
       </ul>
@@ -56,10 +55,11 @@ function isActive(to: string) {
         <template v-if="auth.loggedIn.value">
           <NuxtLink to="/dashboard">
             <UButton
-              size="sm"
+              size="md"
               color="primary"
               variant="solid"
               icon="i-lucide-layout-dashboard"
+              class="rounded-full font-ui font-semibold px-6"
             >
               <span class="hidden sm:inline">Dashboard</span>
             </UButton>
@@ -71,7 +71,13 @@ function isActive(to: string) {
           />
         </template>
         <NuxtLink v-else to="/masuk">
-          <UButton size="sm" color="primary" variant="solid" icon="i-lucide-log-in">
+          <UButton
+            size="md"
+            color="primary"
+            variant="solid"
+            icon="i-lucide-user"
+            class="rounded-full font-ui font-semibold px-6"
+          >
             <span class="hidden sm:inline">Masuk</span>
           </UButton>
         </NuxtLink>
@@ -82,7 +88,7 @@ function isActive(to: string) {
           aria-label="Buka menu"
           @click="mobileOpen = !mobileOpen"
         >
-          <UIcon :name="mobileOpen ? 'i-lucide-x' : 'i-lucide-menu'" class="size-5" />
+          <UIcon :name="mobileOpen ? 'i-lucide-x' : 'i-lucide-menu'" class="size-6" />
         </button>
       </div>
     </nav>
@@ -104,10 +110,10 @@ function isActive(to: string) {
           <li v-for="link in navLinks" :key="link.to">
             <NuxtLink
               :to="link.to"
-              class="block px-3 py-3 text-sm rounded-md"
+              class="block px-3 py-3 font-ui text-sm rounded-md"
               :class="isActive(link.to)
-                ? 'text-emerald-700 font-semibold bg-emerald-50'
-                : 'text-neutral-700 hover:bg-neutral-50'"
+                ? 'text-brand-600 font-semibold bg-brand-50'
+                : 'hover:bg-neutral-50'"
             >
               {{ link.label }}
             </NuxtLink>
