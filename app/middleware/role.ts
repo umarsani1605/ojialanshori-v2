@@ -2,6 +2,7 @@ type Role = 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
 
 const ROLE_HIERARCHY: Record<string, Role[]> = {
   all: ['superadmin', 'pengurus', 'reviewer', 'santri'],
+  santri: ['santri'],
   reviewer: ['superadmin', 'pengurus', 'reviewer'],
   admin: ['superadmin', 'pengurus'],
   superadmin: ['superadmin'],
