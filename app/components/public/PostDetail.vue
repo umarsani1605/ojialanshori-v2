@@ -106,9 +106,8 @@ const shareButtons = computed(() => [
               :href="btn.href"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium transition-colors hover:bg-neutral-50"
+              class="inline-flex items-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium transition-colors hover:bg-neutral-50"
             >
-              <UIcon :name="btn.icon" class="size-4" :style="{ color: btn.color }" />
               {{ btn.label }}
             </a>
           </div>
