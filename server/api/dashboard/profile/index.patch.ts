@@ -8,9 +8,19 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export default defineEventHandler(async (event) => {
   const currentUser = requireAuth(event)
 
-  const body = await readBody<{ name?: string, username?: string, email?: string }>(event)
+  const body = await readBody<{
+    name?: string
+    username?: string
+    email?: string
+    phone?: string | null
+    university?: string | null
+    faculty?: string | null
+    major?: string | null
+    yearEnrolled?: number | null
+  }>(event)
 
   const updates: Partial<typeof schema.users.$inferInsert> = {}
+
   if (body.name !== undefined) {
     const name = body.name.trim()
     if (!name) throw createError({ statusCode: 400, message: 'Nama tidak boleh kosong.' })
@@ -25,6 +35,17 @@ export default defineEventHandler(async (event) => {
     const email = body.email.trim().toLowerCase()
     if (!EMAIL_REGEX.test(email)) throw createError({ statusCode: 400, message: 'Format email tidak valid.' })
     updates.email = email
+  }
+  if ('phone' in body) updates.phone = body.phone ?? null
+  if ('university' in body) updates.university = body.university ?? null
+  if ('faculty' in body) updates.faculty = body.faculty ?? null
+  if ('major' in body) updates.major = body.major ?? null
+  if ('yearEnrolled' in body) {
+    const yr = body.yearEnrolled
+    if (yr !== null && yr !== undefined && (yr < 1901 || yr > 2155)) {
+      throw createError({ statusCode: 400, message: 'Tahun angkatan tidak valid.' })
+    }
+    updates.yearEnrolled = yr ?? null
   }
 
   if (Object.keys(updates).length === 0) {
