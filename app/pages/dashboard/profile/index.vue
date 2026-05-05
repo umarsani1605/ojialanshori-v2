@@ -9,7 +9,7 @@ type User = {
   username: string
   email: string
   role: 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
-  avatarPath: string | null
+  avatar: string | null
   isActive: boolean
   createdAt: string
 }
@@ -172,7 +172,7 @@ async function deleteAvatar() {
           <div class="flex items-center gap-4">
             <AppAvatar
               :name="user?.name"
-              :src="user?.avatarPath"
+              :src="user?.avatar"
               size="3xl"
             />
             <div class="flex flex-col gap-2">
@@ -184,10 +184,10 @@ async function deleteAvatar() {
                   :loading="avatarUploading"
                   @click="pickFile"
                 >
-                  {{ user?.avatarPath ? 'Ganti Foto' : 'Upload Foto' }}
+                  {{ user?.avatar ? 'Ganti Foto' : 'Upload Foto' }}
                 </UButton>
                 <UButton
-                  v-if="user?.avatarPath"
+                  v-if="user?.avatar"
                   icon="i-lucide-trash-2"
                   size="sm"
                   color="error"

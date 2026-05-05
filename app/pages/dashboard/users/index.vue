@@ -17,7 +17,7 @@ type User = {
   username: string
   email: string
   role: Role
-  avatarPath: string | null
+  avatar: string | null
   isActive: boolean
   createdAt: string
 }
@@ -251,7 +251,7 @@ const columns: TableColumn<User>[] = [
       return h('div', { class: 'flex items-center gap-3' }, [
         h(AppAvatar, {
           name: u.name,
-          src: u.avatarPath,
+          src: u.avatar,
           size: 'sm',
         }),
         h('div', { class: 'min-w-0' }, [

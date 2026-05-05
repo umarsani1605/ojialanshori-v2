@@ -85,7 +85,7 @@ function isActive(to: string, exact = false) {
             >
               <AppAvatar
                 :name="auth.user.value?.name"
-                :src="auth.user.value?.avatarPath"
+                :src="auth.user.value?.avatar"
                 size="xs"
               />
               <span class="text-sm font-medium">{{ firstName }}</span>
@@ -156,7 +156,7 @@ function isActive(to: string, exact = false) {
               <div class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3">
                 <AppAvatar
                   :name="auth.user.value?.name"
-                  :src="auth.user.value?.avatarPath"
+                  :src="auth.user.value?.avatar"
                   size="sm"
                 />
                 <div class="min-w-0 flex-1">

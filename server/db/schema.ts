@@ -7,6 +7,7 @@ import {
   boolean,
   timestamp,
   date,
+  year,
   mysqlEnum,
   primaryKey,
   type AnyMySqlColumn,
@@ -31,7 +32,12 @@ export const users = mysqlTable('users', {
   passwordHash: varchar({ length: 255 }).notNull(),
   passwordType: mysqlEnum(['phpass', 'bcrypt']).notNull().default('phpass'),
   role: mysqlEnum(['superadmin', 'pengurus', 'reviewer', 'santri']).notNull().default('santri'),
-  avatarPath: varchar({ length: 500 }),
+  avatar: varchar({ length: 500 }),
+  phone: varchar({ length: 20 }),
+  university: varchar({ length: 255 }),
+  faculty: varchar({ length: 255 }),
+  major: varchar({ length: 255 }),
+  yearEnrolled: year('year_enrolled'),
   isActive: boolean().notNull().default(true),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
@@ -94,25 +100,12 @@ export const settings = mysqlTable('settings', {
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
 })
 
-export const tags = mysqlTable('tags', {
-  id: int().primaryKey().autoincrement(),
-  name: varchar({ length: 100 }).notNull(),
-  slug: varchar({ length: 100 }).notNull().unique(),
-})
-
-export const postTags = mysqlTable('post_tags', {
-  postId: int().notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  tagId: int().notNull().references(() => tags.id, { onDelete: 'cascade' }),
-}, table => ({
-  pk: primaryKey({ columns: [table.postId, table.tagId] }),
-}))
-
 export const testimonials = mysqlTable('testimonials', {
   id: int().primaryKey().autoincrement(),
   name: varchar({ length: 255 }).notNull(),
   title: varchar({ length: 255 }).notNull(),
   content: text().notNull(),
-  avatarPath: varchar({ length: 500 }),
+  avatar: varchar({ length: 500 }),
   order: int().notNull().default(0),
   isActive: boolean().notNull().default(true),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -133,6 +126,19 @@ export const contacts = mysqlTable('contacts', {
   value: text().notNull(),
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
 })
+
+export const tags = mysqlTable('tags', {
+  id: int().primaryKey().autoincrement(),
+  name: varchar({ length: 100 }).notNull(),
+  slug: varchar({ length: 100 }).notNull().unique(),
+})
+
+export const postTags = mysqlTable('post_tags', {
+  postId: int().notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  tagId: int().notNull().references(() => tags.id, { onDelete: 'cascade' }),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.postId, table.tagId] }),
+}))
 
 // ─── Relations ───────────────────────────────────────────────────────────────
 

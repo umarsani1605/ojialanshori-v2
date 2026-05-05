@@ -121,7 +121,7 @@ export default defineEventHandler(async (event) => {
           id: user.id,
           name: user.name,
           role: user.role,
-          avatarPath: user.avatarPath ?? null,
+          avatar: user.avatar ?? null,
         },
       },
       { maxAge },
@@ -132,7 +132,7 @@ export default defineEventHandler(async (event) => {
         id: user.id,
         name: user.name,
         role: user.role,
-        avatarPath: user.avatarPath ?? null,
+        avatar: user.avatar ?? null,
       },
     }
   }

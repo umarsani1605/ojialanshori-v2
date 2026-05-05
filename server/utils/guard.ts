@@ -2,7 +2,7 @@ import { createError, type H3Event } from 'h3'
 
 export type Role = 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
 
-type SessionUser = { id: number, name: string, role: Role, avatarPath?: string | null }
+type SessionUser = { id: number, name: string, role: Role, avatar?: string | null }
 
 export function requireRole(event: H3Event, roles: Role[]): SessionUser {
   const user = event.context.user as SessionUser | undefined

@@ -3,7 +3,7 @@ declare module '#auth-utils' {
     id: number
     name: string
     role: 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
-    avatarPath: string | null
+    avatar: string | null
   }
 }
 

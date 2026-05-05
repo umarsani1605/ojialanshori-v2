@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
           id: updated.id,
           name: updated.name,
           role: updated.role,
-          avatarPath: updated.avatarPath ?? null,
+          avatar: updated.avatar ?? null,
         },
       })
     }
