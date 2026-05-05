@@ -2,11 +2,12 @@
 import type { RoleColor } from '~/utils/roleDisplay'
 
 definePageMeta({
-  layout: 'admin',
   middleware: ['auth'],
 })
 
 const auth = useAuth()
+
+setPageLayout(auth.isSantri.value ? 'dashboard-santri' : 'admin')
 
 const { data: stats, status, refresh } = await useFetch('/api/dashboard/stats', {
   key: `dashboard-stats-${auth.user.value?.id}`,
