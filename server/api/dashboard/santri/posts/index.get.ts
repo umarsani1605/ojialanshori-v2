@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
           categoryType: schema.categories.type,
         })
         .from(schema.posts)
-        .innerJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+        .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
         .where(listWhere)
         .orderBy(desc(schema.posts.createdAt)),
       db

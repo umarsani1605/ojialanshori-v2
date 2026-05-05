@@ -18,8 +18,8 @@ type PostRow = {
   rejectionNote: string | null
   createdAt: string
   publishedAt: string | null
-  categoryName: string
-  categoryType: 'berita' | 'pena_santri'
+  categoryName: string | null
+  categoryType: 'berita' | 'pena_santri' | null
 }
 
 type ListResponse = {
@@ -178,7 +178,7 @@ const columns: TableColumn<PostRow>[] = [
   {
     accessorKey: 'categoryName',
     header: 'Kategori',
-    cell: ({ row }) => h('span', { class: 'text-sm text-neutral-700' }, row.original.categoryName),
+    cell: ({ row }) => h('span', { class: 'text-sm text-neutral-700' }, row.original.categoryName ?? 'Belum dipilih'),
   },
   {
     accessorKey: 'status',

@@ -8,6 +8,7 @@ import {
   timestamp,
   date,
   mysqlEnum,
+  primaryKey,
   type AnyMySqlColumn,
 } from 'drizzle-orm/mysql-core'
 import { relations, sql } from 'drizzle-orm'
@@ -51,7 +52,7 @@ export const posts = mysqlTable('posts', {
   content: longtext().notNull(),
   excerpt: text(),
   featuredImage: varchar({ length: 500 }),
-  categoryId: int().notNull().references(() => categories.id),
+  categoryId: int().references(() => categories.id),
   authorId: int().notNull().references(() => users.id),
   status: mysqlEnum(['draft', 'pending_review', 'published', 'rejected']).notNull().default('draft'),
   rejectionNote: text(),
@@ -92,6 +93,19 @@ export const settings = mysqlTable('settings', {
   value: text().notNull(),
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
 })
+
+export const tags = mysqlTable('tags', {
+  id: int().primaryKey().autoincrement(),
+  name: varchar({ length: 100 }).notNull(),
+  slug: varchar({ length: 100 }).notNull().unique(),
+})
+
+export const postTags = mysqlTable('post_tags', {
+  postId: int().notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  tagId: int().notNull().references(() => tags.id, { onDelete: 'cascade' }),
+}, table => ({
+  pk: primaryKey({ columns: [table.postId, table.tagId] }),
+}))
 
 export const testimonials = mysqlTable('testimonials', {
   id: int().primaryKey().autoincrement(),
@@ -136,7 +150,7 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   posts: many(posts),
 }))
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const postsRelations = relations(posts, ({ one, many }) => ({
   category: one(categories, {
     fields: [posts.categoryId],
     references: [categories.id],
@@ -144,5 +158,21 @@ export const postsRelations = relations(posts, ({ one }) => ({
   author: one(users, {
     fields: [posts.authorId],
     references: [users.id],
+  }),
+  postTags: many(postTags),
+}))
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  postTags: many(postTags),
+}))
+
+export const postTagsRelations = relations(postTags, ({ one }) => ({
+  post: one(posts, {
+    fields: [postTags.postId],
+    references: [posts.id],
+  }),
+  tag: one(tags, {
+    fields: [postTags.tagId],
+    references: [tags.id],
   }),
 }))

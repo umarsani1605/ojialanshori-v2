@@ -60,7 +60,7 @@ type SantriMyPost = {
   status: 'draft' | 'pending_review' | 'published' | 'rejected'
   publishedAt: string | Date | null
   createdAt: string | Date
-  categoryName: string
+  categoryName: string | null
 }
 
 type SantriFeedPost = {
@@ -324,7 +324,7 @@ function formatDate(date: string | Date | null | undefined) {
                       {{ post.title }}
                     </p>
                     <p class="mt-1 text-xs text-dimmed">
-                      {{ post.categoryName }} · {{ formatDate(post.publishedAt ?? post.createdAt) }}
+                      {{ post.categoryName ?? 'Belum pilih kategori' }} · {{ formatDate(post.publishedAt ?? post.createdAt) }}
                     </p>
                   </div>
                   <UBadge
