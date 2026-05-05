@@ -13,6 +13,7 @@
     "migrate:content": "tsx scripts/migrate-content.ts",
     "migrate:users": "tsx scripts/migrate-users.ts",
     "migrate:media": "tsx scripts/migrate-media.ts",
+    "migrate:gallery": "tsx scripts/migrate-gallery.ts",
     "test": "vitest"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "nuxt": "^4.4.2",
     "nuxt-auth-utils": "^0.5.29",
     "nuxt-disqus": "^1.2.0",
+    "pino": "^10.3.1",
     "tailwindcss": "^4.2.4",
     "vue": "latest",
     "vue-router": "latest"

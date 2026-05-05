@@ -1,0 +1,60 @@
+<script setup lang="ts">
+type Post = {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featuredImage: string | null;
+  publishedAt: string | Date | null;
+  createdAt: string | Date;
+  categorySlug?: string;
+  authorName?: string;
+};
+
+const props = defineProps<{
+  post: Post;
+  basePath?: string;
+}>();
+
+const href = computed(
+  () => `${props.basePath ?? "/berita"}/${props.post.slug}`,
+);
+
+const dateFormatted = computed(() => {
+  const date = props.post.publishedAt ?? props.post.createdAt;
+  return new Date(date).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+});
+</script>
+
+<template>
+  <NuxtLink :to="href" class="group flex flex-col">
+    <div class="aspect-[16/10] bg-neutral-100 rounded-2xl overflow-hidden">
+      <NuxtImg
+        v-if="post.featuredImage"
+        :src="post.featuredImage"
+        :alt="post.title"
+        loading="lazy"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div
+        v-else
+        class="w-full h-full flex items-center justify-center text-neutral-400"
+      >
+        <UIcon name="i-lucide-image" class="size-10" />
+      </div>
+    </div>
+    <h3
+      class="text-xl font-bold leading-snug line-clamp-2 mt-6 transition-colors group-hover:text-primary"
+    >
+      {{ post.title }}
+    </h3>
+    <p class="text-base text-slate-500 mt-4">
+      {{ dateFormatted }}
+    </p>
+  </NuxtLink>
+</template>

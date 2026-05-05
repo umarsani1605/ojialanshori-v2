@@ -1,10 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap');
 
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
 @theme static {
-  --font-sans: 'Geist', sans-serif;
+  --font-sans: 'Rubik', sans-serif;
+  --font-display: 'Poppins', sans-serif;
+  --font-ui: 'Rubik', sans-serif;
+
+  /* Brand palette — sourced from ojialanshori.com */
+  --color-brand-50: #f0fdf2;
+  --color-brand-100: #dcfce0;
+  --color-brand-200: #bbf7c1;
+  --color-brand-300: #88de87;
+  --color-brand-400: #6ad868;
+  --color-brand-500: #50ce64;
+  --color-brand-600: #3ab84e;
+  --color-brand-700: #2f9941;
+  --color-brand-800: #297938;
+  --color-brand-900: #246330;
+  --color-brand-950: #0f3819;
+  --color-brand-teal: #29c4a9;
+
+  --color-ink-900: #221f20;
+  --color-ink-700: #393937;
+  --color-ink-500: #6b696e;
 
   /* Utilities Colors */
   --color-background-page: #f8fafc;
@@ -15,11 +35,25 @@
 @layer base {
   body {
     @apply bg-background-page;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 }
 
 :root {
   --ui-border: #eef2f6;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-ui {
+  font-family: var(--font-ui);
 }
 
 .table-primary {

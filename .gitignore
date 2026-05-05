@@ -32,3 +32,8 @@ logs
 # Migration output
 scripts/migrate-content-map.json
 scripts/migrate-users-map.json
+.aidesigner/*
+!.aidesigner/.gitkeep
+
+docs
+.claude/worktrees
