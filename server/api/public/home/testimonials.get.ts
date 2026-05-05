@@ -16,7 +16,7 @@ export default defineCachedEventHandler(async () => {
       name: schema.testimonials.name,
       title: schema.testimonials.title,
       content: schema.testimonials.content,
-      avatarPath: schema.testimonials.avatarPath,
+      avatarPath: schema.testimonials.avatar,
       order: schema.testimonials.order,
     })
       .from(schema.testimonials)

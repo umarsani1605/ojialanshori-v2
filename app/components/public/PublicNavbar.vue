@@ -66,7 +66,7 @@ function isActive(to: string) {
           </NuxtLink>
           <AppAvatar
             :name="auth.user.value?.name"
-            :src="auth.user.value?.avatarPath"
+            :src="auth.user.value?.avatar"
             size="sm"
           />
         </template>

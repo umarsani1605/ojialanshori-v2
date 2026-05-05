@@ -1,6 +1,5 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'admin',
   middleware: ['auth'],
 })
 
@@ -17,6 +16,8 @@ type User = {
 
 const auth = useAuth()
 const toast = useToast()
+
+setPageLayout(auth.isSantri.value ? 'dashboard-santri' : 'admin')
 
 const { data, refresh } = await useFetch<{ user: User }>('/api/dashboard/profile', {
   key: 'profile-self',

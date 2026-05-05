@@ -58,7 +58,7 @@ export const posts = mysqlTable('posts', {
   content: longtext().notNull(),
   excerpt: text(),
   featuredImage: varchar({ length: 500 }),
-  categoryId: int().notNull().references(() => categories.id),
+  categoryId: int().references(() => categories.id),
   authorId: int().notNull().references(() => users.id),
   status: mysqlEnum(['draft', 'pending_review', 'published', 'rejected']).notNull().default('draft'),
   rejectionNote: text(),
