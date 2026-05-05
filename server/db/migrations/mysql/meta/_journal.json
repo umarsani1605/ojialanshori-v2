@@ -22,6 +22,13 @@
       "when": 1777856901702,
       "tag": "0002_melodic_vindicator",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1777972633895,
+      "tag": "0003_spotty_human_torch",
+      "breakpoints": true
     }
   ]
 }

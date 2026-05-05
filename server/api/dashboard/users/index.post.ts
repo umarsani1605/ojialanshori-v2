@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
       passwordHash,
       passwordType: 'bcrypt',
       role,
-      avatarPath: null,
+      avatar: null,
       isActive: true,
     })
 

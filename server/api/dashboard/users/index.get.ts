@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         username: schema.users.username,
         email: schema.users.email,
         role: schema.users.role,
-        avatarPath: schema.users.avatarPath,
+        avatar: schema.users.avatar,
         isActive: schema.users.isActive,
         createdAt: schema.users.createdAt,
       })

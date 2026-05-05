@@ -16,9 +16,9 @@ export default defineEventHandler(async (event) => {
   try {
     const existing = await db.query.users.findFirst({
       where: eq(schema.users.id, currentUser.id),
-      columns: { avatarPath: true },
+      columns: { avatar: true },
     })
-    const oldPath = existing?.avatarPath
+    const oldPath = existing?.avatar
 
     if (oldPath && oldPath.startsWith('/images/')) {
       const key = oldPath.replace(/^\/images\//, '')
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     }
 
     await db.update(schema.users)
-      .set({ avatarPath: null })
+      .set({ avatar: null })
       .where(eq(schema.users.id, currentUser.id))
 
     await setUserSession(event, {
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
         id: currentUser.id,
         name: currentUser.name,
         role: currentUser.role,
-        avatarPath: null,
+        avatar: null,
       },
     })
 
