@@ -45,16 +45,16 @@ export default defineEventHandler(async (event) => {
     // Remove old avatar from R2 if it exists
     const existing = await db.query.users.findFirst({
       where: eq(schema.users.id, currentUser.id),
-      columns: { avatarPath: true },
+      columns: { avatar: true },
     })
-    const oldPath = existing?.avatarPath
+    const oldPath = existing?.avatar
     if (oldPath && oldPath.startsWith('/images/')) {
       const oldKey = oldPath.replace(/^\/images\//, '')
       try { await blob.delete(oldKey) } catch {}
     }
 
     await db.update(schema.users)
-      .set({ avatarPath: publicPath })
+      .set({ avatar: publicPath })
       .where(eq(schema.users.id, currentUser.id))
 
     await setUserSession(event, {
@@ -62,11 +62,11 @@ export default defineEventHandler(async (event) => {
         id: currentUser.id,
         name: currentUser.name,
         role: currentUser.role,
-        avatarPath: publicPath,
+        avatar: publicPath,
       },
     })
 
-    return { avatarPath: publicPath }
+    return { avatar: publicPath }
   }
   finally {
     await connection.end()
