@@ -303,10 +303,7 @@ const columns: TableColumn<PostRow>[] = [
         <UButton
           variant="outline"
           :disabled="deleting"
-          @click="
-            deleteModalOpen = false
-            deleteTarget = null
-          "
+          @click="deleteModalOpen = false; deleteTarget = null"
         >
           Batal
         </UButton>
