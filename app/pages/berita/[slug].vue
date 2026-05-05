@@ -1,8 +1,25 @@
 <script setup lang="ts">
+type PostDetailResponse = {
+  post: {
+    id: number
+    title: string
+    slug: string
+    content: string
+    excerpt: string | null
+    featuredImage: string | null
+    publishedAt: string | null
+    createdAt: string
+    categorySlug: string
+    categoryName: string
+    categoryType: 'berita' | 'pena_santri'
+    authorName: string
+  }
+}
+
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data, error } = await useFetch(`/api/public/posts/${slug}`, {
+const { data, error } = await useFetch<PostDetailResponse>(`/api/public/posts/${slug}`, {
   key: `public-post-${slug}`,
 })
 
@@ -24,7 +41,7 @@ useSeoMeta({
 useHead({
   script: [{
     type: 'application/ld+json',
-    children: JSON.stringify({
+    innerHTML: JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Article',
       headline: post.value.title,
