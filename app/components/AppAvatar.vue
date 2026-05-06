@@ -1,13 +1,16 @@
 <script setup lang="ts">
 type Size = '3xs' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
+type FallbackColor = 'auto' | 'primary'
 
 const props = withDefaults(defineProps<{
   name: string | null | undefined
   src?: string | null
   size?: Size
   class?: string
+  fallbackColor?: FallbackColor
 }>(), {
   size: 'sm',
+  fallbackColor: 'auto',
 })
 
 const initials = computed(() => getInitials(props.name))
@@ -36,10 +39,11 @@ const sizeClassMap: Record<Size, string> = {
   />
   <span
     v-else
-    class="inline-flex items-center justify-center rounded-full font-semibold text-white select-none"
+    class="inline-flex items-center justify-center rounded-full font-semibold select-none"
     :class="[
       sizeClassMap[size],
       props.class,
+      props.fallbackColor === 'primary' ? 'bg-primary text-inverted' : 'text-white',
       {
         'size-4': size === '3xs',
         'size-5': size === '2xs',
@@ -52,7 +56,7 @@ const sizeClassMap: Record<Size, string> = {
         'size-14': size === '3xl',
       },
     ]"
-    :style="{ backgroundColor: bg }"
+    :style="props.fallbackColor === 'auto' ? { backgroundColor: bg } : undefined"
     :aria-label="name ?? ''"
   >
     {{ initials }}

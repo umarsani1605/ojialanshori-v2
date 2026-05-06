@@ -113,19 +113,19 @@ const showApprovedAlert = computed(
 
 const statItems = computed(() => [
   {
-    label: "Total Post",
+    label: "Total Artikel",
     value: santriStats.value?.total ?? 0,
     icon: "ph:note-pencil-duotone",
     color: "blue" as const,
   },
   {
-    label: "Terpublikasi",
+    label: "Terbit",
     value: santriStats.value?.published ?? 0,
     icon: "ph:check-circle-duotone",
     color: "green" as const,
   },
   {
-    label: "Menunggu Review",
+    label: "Dalam Ulasan",
     value: santriStats.value?.pendingReview ?? 0,
     icon: "ph:clock-duotone",
     color: "amber" as const,
@@ -218,8 +218,8 @@ function getPostStatusTone(status: SantriMyPost["status"]) {
 function getPostStatusLabel(status: SantriMyPost["status"]) {
   return {
     draft: "Draft",
-    pending_review: "Pending Review",
-    published: "Published",
+    pending_review: "Dalam Ulasan",
+    published: "Terbit",
     rejected: "Rejected",
   }[status];
 }
@@ -239,7 +239,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
         </div>
         <div class="mt-4">
           <UButton to="/dashboard/posts/create" icon="i-lucide-pen-line">
-            Tulis Post
+            Tulis Artikel
           </UButton>
         </div>
       </UCard>
@@ -275,8 +275,8 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
           v-if="showApprovedAlert"
           color="success"
           variant="subtle"
-          :title="`Post '${latestApprovedPost?.title}' sudah disetujui`"
-          description="Post tersebut sudah masuk ke listing publik."
+          :title="`Artikel '${latestApprovedPost?.title}' sudah disetujui`"
+          description="Artikel tersebut sudah masuk ke listing publik."
         >
           <template #actions>
             <UButton color="success" variant="link" @click="openApprovedPost()">
@@ -289,8 +289,8 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
           v-else-if="(santriStats?.rejected ?? 0) > 0"
           color="warning"
           variant="subtle"
-          :title="`${santriStats?.rejected} post perlu diperbaiki`"
-          description="Buka daftar post untuk melihat catatan reviewer."
+          :title="`${santriStats?.rejected} artikel perlu diperbaiki`"
+          description="Buka daftar artikel untuk melihat catatan reviewer."
         >
           <template #actions>
             <UButton
@@ -321,7 +321,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
             <template #header>
               <div class="flex items-center justify-between gap-3">
                 <div>
-                  <h2 class="font-semibold">Post Saya</h2>
+                  <h2 class="font-semibold">Artikel Saya</h2>
                 </div>
                 <NuxtLink
                   to="/dashboard/posts"
@@ -336,7 +336,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
               v-if="recentMyPosts.length === 0"
               class="w-full h-full flex items-center justify-center text-dimmed"
             >
-              Belum ada post yang ditulis.
+              Belum ada artikel yang ditulis.
             </div>
 
             <div v-else class="space-y-4">
@@ -378,7 +378,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
               v-if="recentFeedPosts.length === 0"
               class="w-full h-full flex items-center justify-center text-dimmed"
             >
-              Belum ada post.
+              Belum ada artikel.
             </div>
 
             <div v-else class="space-y-4">
@@ -445,19 +445,19 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
         <template v-else-if="reviewerStats">
           <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <DashboardStatCard
-              label="Total Post"
+              label="Total Artikel"
               :value="reviewerStats.totalPosts"
               icon="ph:note-pencil"
               color="blue"
             />
             <DashboardStatCard
-              label="Terpublikasi"
+              label="Terbit"
               :value="reviewerStats.publishedPosts"
               icon="ph:check-circle"
               color="green"
             />
             <DashboardStatCard
-              label="Menunggu Review"
+              label="Dalam Ulasan"
               :value="reviewerStats.pendingPosts"
               icon="ph:clock"
               color="amber"

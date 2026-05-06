@@ -89,7 +89,7 @@ onMounted(() => {
                 <p class="text-2xl font-bold text-slate-800">
                   {{ adminStats.publishedPosts }}
                 </p>
-                <p class="text-xs text-slate-500">Post Terpublikasi</p>
+                <p class="text-xs text-slate-500">Artikel Terbit</p>
               </div>
             </div>
           </UCard>
@@ -102,7 +102,7 @@ onMounted(() => {
                 <p class="text-2xl font-bold text-slate-800">
                   {{ adminStats.pendingReviewPosts }}
                 </p>
-                <p class="text-xs text-slate-500">Menunggu Review</p>
+                <p class="text-xs text-slate-500">Dalam Ulasan</p>
               </div>
             </div>
           </UCard>
@@ -138,7 +138,7 @@ onMounted(() => {
           <template #header>
             <div class="flex items-center justify-between gap-3">
               <h3 class="text-sm font-semibold text-slate-700">
-                Post Menunggu Review
+                Artikel Dalam Ulasan
               </h3>
               <UBadge :color="roleColor" variant="subtle" size="xs">
                 {{ roleLabel }}
@@ -150,7 +150,7 @@ onMounted(() => {
             v-if="adminStats.recentPendingPosts.length === 0"
             class="py-6 text-center text-sm text-slate-400"
           >
-            Tidak ada post yang menunggu review.
+            Tidak ada artikel yang menunggu review.
           </div>
           <ul v-else class="divide-y divide-default">
             <li
@@ -172,7 +172,7 @@ onMounted(() => {
                 size="xs"
                 class="shrink-0"
               >
-                Menunggu Review
+                Dalam Ulasan
               </UBadge>
             </li>
           </ul>

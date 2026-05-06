@@ -153,6 +153,11 @@ export default defineAppConfig({
         },
       ],
     },
+    editor: {
+      slots: {
+        base: "px-2!",
+      },
+    },
     formField: {
       slots: {
         labelWrapper: ["block"],
@@ -219,6 +224,28 @@ export default defineAppConfig({
           color: "neutral",
           variant: ["outline", "subtle"],
           class: "focus-visible:ring-1 ring-slate-200",
+        },
+      ],
+      defaultVariants: {
+        size: "lg",
+      },
+    },
+    inputTags: {
+      slots: {
+        base: [
+          "transition duration-300 ease-in-out rounded-lg disabled:bg-muted disabled:text-gray-700 read-only:text-gray-600",
+        ],
+      },
+      compoundVariants: [
+        {
+          color: "primary",
+          variant: ["outline", "subtle"],
+          class: "has-focus-visible:ring-1 ring-slate-200",
+        },
+        {
+          color: "neutral",
+          variant: ["outline", "subtle"],
+          class: "has-focus-visible:ring-1 ring-slate-200",
         },
       ],
       defaultVariants: {

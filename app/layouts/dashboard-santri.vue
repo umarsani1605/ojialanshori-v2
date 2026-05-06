@@ -11,7 +11,7 @@ const writePath = "/dashboard/posts/create";
 const navLinks = computed(() => {
   const items = [
     { label: "Dashboard", to: "/dashboard" },
-    { label: "Post Saya", to: "/dashboard/posts" },
+    { label: "Artikel Saya", to: "/dashboard/posts" },
   ];
   if (auth.isReviewer.value) {
     items.push({ label: "Antrian Review", to: "/dashboard/review" });
@@ -88,7 +88,7 @@ function isActive(to: string) {
           >
             <UButton variant="ghost">
               <UIcon name="i-lucide-pen-line" size="16" class="mr-1" />
-              Tulis Post
+              Tulis Artikel
             </UButton>
           </NuxtLink>
           <UDropdownMenu :items="dropdownItems" :ui="{ content: 'min-w-52' }">
@@ -157,7 +157,7 @@ function isActive(to: string) {
                   icon="i-lucide-pen-line"
                   class="w-full justify-center"
                 >
-                  Tulis Post
+                  Tulis Artikel
                 </UButton>
               </NuxtLink>
               <NuxtLink
@@ -209,7 +209,7 @@ function isActive(to: string) {
       </template>
     </USlideover>
 
-    <main class="py-6 md:py-8">
+    <main class="py-6">
       <slot />
     </main>
   </div>

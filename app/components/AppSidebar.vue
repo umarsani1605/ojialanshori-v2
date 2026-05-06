@@ -84,8 +84,8 @@ const auth = useAuth()
 const navLinks = computed(() => {
   const items = [
     { label: 'Beranda', icon: 'i-lucide-home', to: '/admin' },
-    { label: 'Review Post', icon: 'i-lucide-inbox', to: '/admin/review' },
-    { label: 'Semua Post', icon: 'i-lucide-files', to: '/admin/posts' },
+    { label: 'Review Artikel', icon: 'i-lucide-inbox', to: '/admin/review' },
+    { label: 'Semua Artikel', icon: 'i-lucide-files', to: '/admin/posts' },
     { label: 'Kategori', icon: 'i-lucide-tag', to: '/admin/categories' },
     { label: 'Galeri', icon: 'i-lucide-image', to: '/admin/gallery' },
     { label: 'Banner', icon: 'i-lucide-megaphone', to: '/admin/banner' },

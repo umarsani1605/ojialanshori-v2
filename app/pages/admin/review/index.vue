@@ -9,7 +9,7 @@ definePageMeta({
 <template>
   <DashboardClusterPlaceholderPage
     cluster="admin"
-    title="Review Post"
+    title="Review Artikel"
     description="Area review untuk superadmin dan pengurus sudah dipindah ke cluster admin dengan canonical URL baru."
   />
 </template>

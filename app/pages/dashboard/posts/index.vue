@@ -74,12 +74,12 @@ const deleting = ref(false);
 const tabs = computed(() => [
   { label: "Semua", value: "", slot: "all" },
   {
-    label: "Published",
+    label: "Terbit",
     value: "published",
     slot: "published",
   },
   {
-    label: "Pending Review",
+    label: "Dalam Ulasan",
     value: "pending_review",
     slot: "pending_review",
   },
@@ -102,8 +102,8 @@ function getStatusColor(status: PostRow["status"]) {
 
 function getStatusLabel(status: PostRow["status"]) {
   return {
-    published: "Published",
-    pending_review: "Pending Review",
+    published: "Terbit",
+    pending_review: "Dalam Ulasan",
     rejected: "Rejected",
     draft: "Draft",
   }[status];
@@ -127,7 +127,7 @@ async function confirmDelete() {
       method: "DELETE",
     });
     toast.add({
-      title: "Post dihapus",
+      title: "Artikel dihapus",
       color: "success",
       icon: "i-lucide-check",
     });
@@ -136,7 +136,7 @@ async function confirmDelete() {
     await refresh();
   } catch (error) {
     toast.add({
-      title: "Gagal menghapus post",
+      title: "Gagal menghapus artikel",
       description:
         (error as { data?: { message?: string }; message?: string }).data
           ?.message ??
@@ -231,10 +231,10 @@ const columns: TableColumn<PostRow>[] = [
 
 <template>
   <UContainer>
-    <UCard class="flex flex-col min-h-[800px]" :ui="{ body: 'pt-4! flex-1' }">
+    <UCard class="flex flex-col min-h-[800px]" :ui="{ body: 'pt-4! flex-1 flex flex-col' }">
       <template #header>
         <div class="flex items-center justify-between gap-3">
-          <h1 class="text-xl font-semibold">Post Saya</h1>
+          <h1 class="text-xl font-semibold">Artikel Saya</h1>
           <UButton to="/dashboard/posts/create" icon="i-lucide-plus" size="sm">
             Tulis Artikel
           </UButton>
@@ -243,40 +243,41 @@ const columns: TableColumn<PostRow>[] = [
 
       <UTabs v-model="activeStatus" :items="tabs" variant="link" class="w-full">
         <template v-for="tab in tabs" :key="tab.slot" #[tab.slot]>
-          <div class="flex flex-col">
-            <div
-              v-if="status === 'pending'"
-              class="flex items-center justify-center py-16"
-            >
-              <UIcon
-                name="i-lucide-loader-circle"
-                class="text-2xl text-dimmed animate-spin"
-              />
-            </div>
-            <div
-              v-else-if="postsForTab(tab.value).length === 0"
-              class="py-16 text-center text-sm text-dimmed"
-            >
-              Tidak ada post.
-            </div>
-            <UTable
-              v-else
-              :data="postsForTab(tab.value)"
-              :columns="columns"
-              :ui="{ base: 'min-w-full table-fixed overflow-clip' }"
-            />
-            <DashboardTablePagination
-              :page="page"
-              :total="totalForTab(tab.value)"
-              @update:page="page = $event"
+          <div
+            v-if="status === 'pending'"
+            class="flex items-center justify-center py-16"
+          >
+            <UIcon
+              name="i-lucide-loader-circle"
+              class="text-2xl text-dimmed animate-spin"
             />
           </div>
+          <div
+            v-else-if="postsForTab(tab.value).length === 0"
+            class="py-16 text-center text-sm text-dimmed"
+          >
+            Tidak ada artikel.
+          </div>
+          <UTable
+            v-else
+            :data="postsForTab(tab.value)"
+            :columns="columns"
+            :ui="{ base: 'min-w-full table-fixed overflow-clip' }"
+          />
         </template>
       </UTabs>
+
+      <DashboardTablePagination
+        v-if="totalForTab(activeStatus) > 0"
+        class="mt-auto"
+        :page="page"
+        :total="totalForTab(activeStatus)"
+        @update:page="page = $event"
+      />
     </UCard>
   </UContainer>
 
-  <UModal v-model:open="deleteModalOpen" title="Hapus Post?">
+  <UModal v-model:open="deleteModalOpen" title="Hapus Artikel?">
     <template #body>
       <p class="text-sm text-slate-600">Tindakan ini tidak bisa dibatalkan.</p>
     </template>

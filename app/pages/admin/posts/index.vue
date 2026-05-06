@@ -9,7 +9,7 @@ definePageMeta({
 <template>
   <DashboardClusterPlaceholderPage
     cluster="admin"
-    title="Semua Post"
+    title="Semua Artikel"
     description="Listing editorial lintas penulis akan hidup di route admin ini. Namespace API lama tetap bisa dipakai pada fase refactor ini."
   />
 </template>

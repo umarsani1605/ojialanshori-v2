@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { TabsItem } from "@nuxt/ui";
-import { roleColorMap, roleLabelMap } from "~/utils/roleDisplay";
 
 type User = {
   id: number;
@@ -29,26 +28,15 @@ const { data, refresh } = await useFetch<{ user: User }>(
 );
 
 const user = computed(() => data.value?.user);
-const joinYear = computed(() =>
-  user.value?.createdAt ? new Date(user.value.createdAt).getFullYear() : "—",
-);
-const userRole = computed(
-  () => user.value?.role ?? auth.user.value?.role ?? "",
-);
-const roleLabel = computed(
-  () => roleLabelMap[userRole.value] ?? userRole.value,
-);
-const roleColor = computed(() => roleColorMap[userRole.value] ?? "primary");
 
 const tabItems: TabsItem[] = [
   { label: "Informasi Pribadi", slot: "informasi" },
   { label: "Keamanan", slot: "keamanan" },
 ];
 
-// ── Informasi Pribadi ────────────────────────────────────────────────────────
-
 const profileForm = reactive({
   name: "",
+  email: "",
   phone: "",
   university: "",
   faculty: "",
@@ -64,18 +52,20 @@ watch(
   (val) => {
     if (!val) return;
     profileForm.name = val.name;
+    profileForm.email = val.email;
     profileForm.phone = val.phone ?? "";
     profileForm.university = val.university ?? "";
     profileForm.faculty = val.faculty ?? "";
     profileForm.major = val.major ?? "";
     profileForm.yearEnrolled = val.yearEnrolled ?? undefined;
   },
-  { immediate: true, once: true },
+  { immediate: true },
 );
 
 function resetProfileForm() {
   if (user.value) {
     profileForm.name = user.value.name;
+    profileForm.email = user.value.email;
     profileForm.phone = user.value.phone ?? "";
     profileForm.university = user.value.university ?? "";
     profileForm.faculty = user.value.faculty ?? "";
@@ -93,6 +83,7 @@ async function saveProfile() {
       method: "PATCH",
       body: {
         name: profileForm.name,
+        email: profileForm.email,
         phone: profileForm.phone || null,
         university: profileForm.university || null,
         faculty: profileForm.faculty || null,
@@ -117,13 +108,13 @@ async function saveProfile() {
   }
 }
 
-const currentYear = new Date().getFullYear();
-const yearOptions = Array.from({ length: 20 }, (_, i) => ({
-  label: String(currentYear - i),
-  value: currentYear - i,
-}));
-
-// ── Keamanan ─────────────────────────────────────────────────────────────────
+const yearOptions = Array.from({ length: 12 }, (_, index) => {
+  const year = 2015 + index;
+  return {
+    label: String(year),
+    value: year,
+  };
+});
 
 const passwordForm = reactive({
   oldPassword: "",
@@ -163,8 +154,6 @@ async function savePassword() {
     passwordSaving.value = false;
   }
 }
-
-// ── Avatar ───────────────────────────────────────────────────────────────────
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const avatarUploading = ref(false);
@@ -250,52 +239,51 @@ async function deleteAvatar() {
 </script>
 
 <template>
-  <UContainer class="max-w-2xl px-6 py-8">
-    <div class="space-y-6">
-      <!-- Card Profil -->
-      <div
-        class="flex items-center gap-5 rounded-xl border border-slate-200 bg-white p-6"
-      >
-        <div class="relative shrink-0">
-          <AppAvatar :name="user?.name" :src="user?.avatar" size="3xl" />
-          <button
-            type="button"
-            class="absolute -bottom-1 -right-1 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm transition-colors hover:bg-slate-50"
-            :disabled="avatarUploading || avatarDeleting"
-            @click="pickFile"
-          >
-            <UIcon
-              :name="
-                avatarUploading ? 'i-lucide-loader-circle' : 'i-lucide-camera'
-              "
-              class="size-3.5 text-muted"
-              :class="{ 'animate-spin': avatarUploading }"
-            />
-          </button>
-        </div>
+  <UContainer>
+    <UCard :ui="{ body: 'pt-4!' }">
+      <template #header>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex min-w-0 items-center gap-4">
+            <div class="relative shrink-0">
+              <AppAvatar
+                :name="user?.name"
+                :src="user?.avatar"
+                size="3xl"
+                fallback-color="primary"
+              />
+              <UButton
+                type="button"
+                icon="i-lucide-camera"
+                color="neutral"
+                variant="outline"
+                size="xs"
+                square
+                class="absolute -right-1 -bottom-1 rounded-full"
+                :loading="avatarUploading"
+                :disabled="avatarDeleting"
+                aria-label="Ubah avatar"
+                @click="pickFile"
+              />
+            </div>
 
-        <div class="min-w-0 flex-1">
-          <p class="truncate text-lg font-semibold">{{ user?.name }}</p>
-          <div class="mt-1 flex items-center gap-2">
-            <UBadge :color="roleColor" variant="subtle" size="sm">{{
-              roleLabel
-            }}</UBadge>
-            <span class="text-xs text-dimmed">Bergabung {{ joinYear }}</span>
+            <div class="min-w-0">
+              <p class="truncate text-lg font-semibold">{{ user?.name }}</p>
+              <p class="truncate text-sm text-muted">{{ user?.email }}</p>
+            </div>
           </div>
-          <p class="mt-1 truncate text-sm text-muted">{{ user?.email }}</p>
-        </div>
 
-        <UButton
-          v-if="user?.avatar"
-          icon="i-lucide-trash-2"
-          color="error"
-          variant="ghost"
-          size="xs"
-          :loading="avatarDeleting"
-          aria-label="Hapus avatar"
-          @click="deleteAvatar"
-        />
-      </div>
+          <UButton
+            v-if="user?.avatar"
+            icon="i-lucide-trash-2"
+            color="error"
+            variant="ghost"
+            size="xs"
+            :loading="avatarDeleting"
+            aria-label="Hapus avatar"
+            @click="deleteAvatar"
+          />
+        </div>
+      </template>
 
       <input
         ref="fileInput"
@@ -305,161 +293,155 @@ async function deleteAvatar() {
         @change="onFileChange"
       />
 
-      <!-- Tabs -->
-      <UTabs :items="tabItems" class="w-full">
+      <UTabs :items="tabItems" variant="link" class="w-full">
         <template #informasi>
-          <div class="mt-4 rounded-xl border border-slate-200 bg-white p-6">
-            <form class="space-y-5" @submit.prevent="saveProfile">
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <UFormField
-                  label="Nama Lengkap"
-                  name="name"
-                  required
-                  class="sm:col-span-2"
-                >
-                  <UInput
-                    v-model="profileForm.name"
-                    :disabled="profileSaving"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField label="No. HP / WhatsApp" name="phone">
-                  <UInput
-                    v-model="profileForm.phone"
-                    :disabled="profileSaving"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField label="Angkatan" name="yearEnrolled">
-                  <USelect
-                    v-model="profileForm.yearEnrolled"
-                    :items="yearOptions"
-                    placeholder="Pilih angkatan"
-                    :disabled="profileSaving"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField label="Universitas / Kampus" name="university">
-                  <UInput
-                    v-model="profileForm.university"
-                    :disabled="profileSaving"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField label="Fakultas" name="faculty">
-                  <UInput
-                    v-model="profileForm.faculty"
-                    :disabled="profileSaving"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField label="Jurusan" name="major" class="sm:col-span-2">
-                  <UInput
-                    v-model="profileForm.major"
-                    :disabled="profileSaving"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField
-                  label="Email"
-                  name="email"
-                  hint="Email tidak bisa diubah"
-                  class="sm:col-span-2"
-                >
-                  <UInput :model-value="user?.email" disabled class="w-full" />
-                </UFormField>
-              </div>
-
-              <p
-                v-if="profileError"
-                class="rounded bg-red-50 px-3 py-2 text-sm text-red-600"
-              >
-                {{ profileError }}
-              </p>
-
-              <div class="flex justify-end gap-2">
-                <UButton
-                  type="button"
-                  color="neutral"
-                  variant="outline"
+          <form class="mt-4 max-w-2xl space-y-5" @submit.prevent="saveProfile">
+            <div class="space-y-4">
+              <UFormField label="Nama Lengkap" name="name" required>
+                <UInput
+                  v-model="profileForm.name"
                   :disabled="profileSaving"
-                  @click="resetProfileForm"
-                >
-                  Batal
-                </UButton>
-                <UButton type="submit" color="primary" :loading="profileSaving">
-                  Simpan Perubahan
-                </UButton>
-              </div>
-            </form>
-          </div>
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="Email" name="email" required>
+                <UInput
+                  v-model="profileForm.email"
+                  type="email"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="No. HP / WhatsApp" name="phone">
+                <UInput
+                  v-model="profileForm.phone"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="Angkatan Masuk OJI" name="yearEnrolled">
+                <USelect
+                  v-model="profileForm.yearEnrolled"
+                  :items="yearOptions"
+                  placeholder="Pilih angkatan"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField
+                label="Angkatan Kuliah"
+                name="collegeYear"
+                hint="Belum tersedia di data profil saat ini."
+              >
+                <UInput model-value="Belum tersedia" disabled class="w-full" />
+              </UFormField>
+
+              <UFormField label="Universitas / Kampus" name="university">
+                <UInput
+                  v-model="profileForm.university"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="Fakultas" name="faculty">
+                <UInput
+                  v-model="profileForm.faculty"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="Jurusan" name="major">
+                <UInput
+                  v-model="profileForm.major"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+            </div>
+
+            <p
+              v-if="profileError"
+              class="rounded-md bg-error/10 px-3 py-2 text-sm text-error"
+            >
+              {{ profileError }}
+            </p>
+
+            <div class="flex justify-end gap-2">
+              <UButton
+                type="button"
+                color="neutral"
+                variant="outline"
+                :disabled="profileSaving"
+                @click="resetProfileForm"
+              >
+                Batal
+              </UButton>
+              <UButton type="submit" color="primary" :loading="profileSaving">
+                Simpan Perubahan
+              </UButton>
+            </div>
+          </form>
         </template>
 
         <template #keamanan>
-          <div class="mt-4 rounded-xl border border-slate-200 bg-white p-6">
-            <form class="space-y-5" @submit.prevent="savePassword">
-              <UFormField label="Password Lama" name="oldPassword" required>
-                <UInput
-                  v-model="passwordForm.oldPassword"
-                  type="password"
-                  :disabled="passwordSaving"
-                  class="w-full"
-                />
-              </UFormField>
+          <form class="mt-4 max-w-3xl space-y-5" @submit.prevent="savePassword">
+            <UFormField label="Password Lama" name="oldPassword" required>
+              <UInput
+                v-model="passwordForm.oldPassword"
+                type="password"
+                :disabled="passwordSaving"
+                class="w-full"
+              />
+            </UFormField>
 
-              <UFormField
-                label="Password Baru"
-                name="newPassword"
-                required
-                hint="Minimal 8 karakter"
-              >
-                <UInput
-                  v-model="passwordForm.newPassword"
-                  type="password"
-                  :disabled="passwordSaving"
-                  class="w-full"
-                />
-              </UFormField>
+            <UFormField
+              label="Password Baru"
+              name="newPassword"
+              required
+              hint="Minimal 8 karakter"
+            >
+              <UInput
+                v-model="passwordForm.newPassword"
+                type="password"
+                :disabled="passwordSaving"
+                class="w-full"
+              />
+            </UFormField>
 
-              <UFormField
-                label="Konfirmasi Password Baru"
-                name="confirmPassword"
-                required
-              >
-                <UInput
-                  v-model="passwordForm.confirmPassword"
-                  type="password"
-                  :disabled="passwordSaving"
-                  class="w-full"
-                />
-              </UFormField>
+            <UFormField
+              label="Konfirmasi Password Baru"
+              name="confirmPassword"
+              required
+            >
+              <UInput
+                v-model="passwordForm.confirmPassword"
+                type="password"
+                :disabled="passwordSaving"
+                class="w-full"
+              />
+            </UFormField>
 
-              <p
-                v-if="passwordError"
-                class="rounded bg-red-50 px-3 py-2 text-sm text-red-600"
-              >
-                {{ passwordError }}
-              </p>
+            <p
+              v-if="passwordError"
+              class="rounded-md bg-error/10 px-3 py-2 text-sm text-error"
+            >
+              {{ passwordError }}
+            </p>
 
-              <div class="flex justify-end">
-                <UButton
-                  type="submit"
-                  color="primary"
-                  :loading="passwordSaving"
-                >
-                  Ganti Password
-                </UButton>
-              </div>
-            </form>
-          </div>
+            <div class="flex justify-end">
+              <UButton type="submit" color="primary" :loading="passwordSaving">
+                Ganti Password
+              </UButton>
+            </div>
+          </form>
         </template>
       </UTabs>
-    </div>
+    </UCard>
   </UContainer>
 </template>
