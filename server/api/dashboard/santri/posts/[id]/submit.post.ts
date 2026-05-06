@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
       featuredImage: payload.featuredImage,
       categoryId: payload.categoryId,
       status: 'pending_review',
-      rejectionNote: null,
+      reviewNote: null,
     })
     .where(eq(schema.posts.id, existing.id))
 

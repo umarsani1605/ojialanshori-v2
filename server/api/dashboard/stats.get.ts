@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
       where: eq(schema.posts.authorId, user.id),
       orderBy: [desc(schema.posts.createdAt)],
       limit: 5,
-      columns: { id: true, title: true, slug: true, status: true, rejectionNote: true, createdAt: true },
+      columns: { id: true, title: true, slug: true, status: true, reviewNote: true, createdAt: true },
     }),
   ])
 

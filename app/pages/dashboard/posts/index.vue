@@ -15,7 +15,7 @@ type PostRow = {
   title: string;
   slug: string;
   status: "draft" | "pending_review" | "published" | "rejected";
-  rejectionNote: string | null;
+  reviewNote: string | null;
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;

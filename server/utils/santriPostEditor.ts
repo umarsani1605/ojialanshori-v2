@@ -161,7 +161,7 @@ export async function getSantriOwnedPost(db: Database, postId: number, authorId:
       featuredImage: true,
       categoryId: true,
       status: true,
-      rejectionNote: true,
+      reviewNote: true,
     },
   })
 
