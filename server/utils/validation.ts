@@ -238,3 +238,36 @@ export function validateSantriPostListQuery(value: unknown) {
       : undefined,
   }
 }
+
+export function validateRejectBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  const reviewNote = getOptionalString(body.reviewNote)
+
+  if (!reviewNote) {
+    throw createError({ statusCode: 400, message: 'Catatan review wajib diisi saat menolak artikel.' })
+  }
+
+  return { reviewNote }
+}
+
+export function validateReviewQueueQuery(value: unknown) {
+  const query = getRequiredRecord(value, 'Query tidak valid.')
+
+  return {
+    page: getPositiveInteger(query.page, 1),
+    limit: getPositiveInteger(query.limit, 10, { max: 50 }),
+  }
+}
+
+export function validateAdminPostsQuery(value: unknown) {
+  const query = getRequiredRecord(value, 'Query tidak valid.')
+  const status = getOptionalString(query.status)
+
+  return {
+    page: getPositiveInteger(query.page, 1),
+    limit: getPositiveInteger(query.limit, 10, { max: 100 }),
+    status: status && VALID_SANTRI_POST_STATUSES.includes(status as PostStatus)
+      ? status as PostStatus
+      : undefined,
+  }
+}
