@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import type { RoleColor } from '~/utils/roleDisplay'
+import type { RoleColor } from '~/constants/roleDisplay'
 
 const route = useRoute()
 const auth = useAuth()
@@ -90,7 +90,7 @@ const navLinks = computed(() => {
     { label: 'Galeri', icon: 'i-lucide-image', to: '/admin/gallery' },
     { label: 'Banner', icon: 'i-lucide-megaphone', to: '/admin/banner' },
   ]
-  if (auth.isSuperadmin.value) {
+  if (auth.isAdmin.value) {
     items.push(
       { label: 'Halaman Statis', icon: 'i-lucide-layout', to: '/admin/pages' },
       { label: 'Users', icon: 'i-lucide-users', to: '/admin/users' },

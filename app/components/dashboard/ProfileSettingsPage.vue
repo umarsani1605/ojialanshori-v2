@@ -6,7 +6,7 @@ type User = {
   name: string;
   username: string;
   email: string;
-  role: "superadmin" | "pengurus" | "reviewer" | "santri";
+  role: "admin" | "reviewer" | "santri";
   avatar: string | null;
   phone: string | null;
   university: string | null;

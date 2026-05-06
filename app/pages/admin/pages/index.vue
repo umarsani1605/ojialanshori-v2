@@ -2,7 +2,6 @@
 definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
-  requiredRole: 'superadmin',
 })
 </script>
 
@@ -10,6 +9,6 @@ definePageMeta({
   <DashboardClusterPlaceholderPage
     cluster="admin"
     title="Halaman Statis"
-    description="Route ini disiapkan khusus superadmin untuk mengelola halaman statis."
+    description="Route ini disiapkan khusus admin untuk mengelola halaman statis."
   />
 </template>

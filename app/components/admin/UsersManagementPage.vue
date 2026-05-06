@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { RoleColor } from "~/utils/roleDisplay";
+import type { RoleColor } from "~/constants/roleDisplay";
 
-type Role = "superadmin" | "pengurus" | "reviewer" | "santri";
+type Role = "admin" | "reviewer" | "santri";
 
 type User = {
   id: number;
@@ -76,8 +76,7 @@ const pagination = computed(
 
 const roleOptions: { label: string; value: Role | undefined }[] = [
   { label: "Semua role", value: undefined },
-  { label: "Superadmin", value: "superadmin" },
-  { label: "Pengurus", value: "pengurus" },
+  { label: "Administrator", value: "admin" },
   { label: "Reviewer", value: "reviewer" },
   { label: "Santri", value: "santri" },
 ];

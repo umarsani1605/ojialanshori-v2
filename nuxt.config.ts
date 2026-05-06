@@ -85,6 +85,10 @@ export default defineNuxtConfig({
     },
   },
 
+  imports: {
+    dirs: ['constants'],
+  },
+
   nitro: {
     preset: "cloudflare-pages",
   },

@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import type { RoleColor } from '~/utils/roleDisplay'
+import type { RoleColor } from '~/constants/roleDisplay'
 
 const isSidebarOpen = ref(false)
 const route = useRoute()

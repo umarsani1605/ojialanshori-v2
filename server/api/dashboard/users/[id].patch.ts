@@ -1,12 +1,12 @@
 import { and, eq, ne, or } from 'drizzle-orm'
 import * as schema from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
-import { requireSuperadmin } from '#server/utils/guard'
+import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { validateDashboardUserUpdateBody, validateRouteIdParams } from '#server/utils/validation'
 
 export default defineEventHandler(async (event) => {
-  const currentUser = requireSuperadmin(event)
+  const currentUser = requireAdmin(event)
 
   const { id } = await getValidatedRouterParams(event, validateRouteIdParams)
   if (!Number.isFinite(id) || id <= 0) {

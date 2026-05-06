@@ -1,6 +1,6 @@
 import { createError, type H3Event } from 'h3'
 
-export type Role = 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
+export type Role = 'admin' | 'reviewer' | 'santri'
 
 type SessionUser = {
   id: number
@@ -20,13 +20,10 @@ export function requireRole(event: H3Event, roles: Role[]): SessionUser {
 }
 
 export const requireAuth = (e: H3Event) =>
-  requireRole(e, ['superadmin', 'pengurus', 'reviewer', 'santri'])
+  requireRole(e, ['admin', 'reviewer', 'santri'])
 
 export const requireReviewer = (e: H3Event) =>
-  requireRole(e, ['superadmin', 'pengurus', 'reviewer'])
+  requireRole(e, ['admin', 'reviewer'])
 
 export const requireAdmin = (e: H3Event) =>
-  requireRole(e, ['superadmin', 'pengurus'])
-
-export const requireSuperadmin = (e: H3Event) =>
-  requireRole(e, ['superadmin'])
+  requireRole(e, ['admin'])

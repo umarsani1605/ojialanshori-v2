@@ -16,7 +16,7 @@ import { relations, sql } from 'drizzle-orm'
 
 // ─── TypeScript types ────────────────────────────────────────────────────────
 
-export type Role = 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
+export type Role = 'admin' | 'reviewer' | 'santri'
 export type PostStatus = 'draft' | 'pending_review' | 'published' | 'rejected'
 export type PasswordType = 'phpass' | 'bcrypt'
 export type PageStatus = 'draft' | 'published'
@@ -31,7 +31,7 @@ export const users = mysqlTable('users', {
   email: varchar({ length: 255 }).notNull().unique(),
   passwordHash: varchar({ length: 255 }).notNull(),
   passwordType: mysqlEnum(['phpass', 'bcrypt']).notNull().default('phpass'),
-  role: mysqlEnum(['superadmin', 'pengurus', 'reviewer', 'santri']).notNull().default('santri'),
+  role: mysqlEnum(['admin', 'reviewer', 'santri']).notNull().default('santri'),
   avatar: varchar({ length: 500 }),
   phone: varchar({ length: 20 }),
   university: varchar({ length: 255 }),

@@ -3,7 +3,7 @@ import { createError } from 'h3'
 import type { CategoryType, PostStatus, Role } from '#server/db/schema'
 import { parseSantriPostPayload } from '#server/utils/santriPostEditor'
 
-const VALID_ROLES: Role[] = ['superadmin', 'pengurus', 'reviewer', 'santri']
+const VALID_ROLES: Role[] = ['admin', 'reviewer', 'santri']
 const VALID_USER_STATUSES = ['active', 'inactive'] as const
 const VALID_PUBLIC_POST_TYPES = ['berita', 'pena_santri'] as const
 const VALID_SANTRI_POST_STATUSES = ['draft', 'pending_review', 'published', 'rejected'] as const satisfies PostStatus[]

@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb(event)
 
-  const isAdmin = user.role === 'superadmin' || user.role === 'pengurus'
+  const isAdmin = user.role === 'admin'
 
   if (isAdmin) {
     const [publishedResult, pendingResult, userCountResult, galleryResult, recentPending] = await Promise.all([

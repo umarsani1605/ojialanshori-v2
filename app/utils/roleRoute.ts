@@ -1,7 +1,7 @@
-export type AppRole = 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
+export type AppRole = 'admin' | 'reviewer' | 'santri'
 export type AppCluster = 'admin' | 'dashboard'
 
-const ADMIN_ROLES: AppRole[] = ['superadmin', 'pengurus']
+const ADMIN_ROLES: AppRole[] = ['admin']
 const DASHBOARD_ROLES: AppRole[] = ['reviewer', 'santri']
 
 export function isAdminRole(role: string | undefined): role is AppRole {

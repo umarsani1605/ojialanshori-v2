@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { RoleColor } from "~/utils/roleDisplay";
-import { roleColorMap, roleLabelMap } from "~/utils/roleDisplay";
+import type { RoleColor } from "~/constants/roleDisplay";
+import { roleColorMap, roleLabelMap } from "~/constants/roleDisplay";
 
 type AdminDashboardStats = {
   type: "global";
