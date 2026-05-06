@@ -1,15 +1,17 @@
+import type { H3Event } from 'h3'
+
 /**
  * Email stub — E7 will replace with real Brevo REST API integration.
  * For now, logs to console so we can verify the call during development.
  */
-export async function sendEmail(opts: {
+export async function sendEmail(event: H3Event, opts: {
   to: string
   toName?: string
   subject: string
   htmlContent: string
   textContent?: string
 }): Promise<void> {
-  const apiKey = process.env.BREVO_API_KEY
+  const { brevoApiKey: apiKey } = useRuntimeConfig(event)
 
   if (!apiKey) {
     console.log('[email:stub] BREVO_API_KEY not set — would send:', {

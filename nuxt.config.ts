@@ -1,29 +1,40 @@
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
-  compatibilityDate: '2026-04-12',
-  devtools: { enabled: false },
+  compatibilityDate: "2026-04-12",
+  devtools: { enabled: true },
 
-  css: ['~/assets/css/main.css'],
+  css: ["~/assets/css/main.css"],
 
   modules: [
-    '@nuxthub/core',
-    '@nuxt/ui',
-    '@nuxtjs/seo',
-    '@nuxt/image',
-    'nuxt-disqus',
-    'nuxt-auth-utils',
+    "@nuxthub/core",
+    "@nuxt/ui",
+    "@nuxtjs/seo",
+    "@nuxt/image",
+    "nuxt-disqus",
+    "nuxt-auth-utils",
   ],
 
   colorMode: {
-    preference: 'light',
-    fallback: 'light'
+    preference: "light",
+    fallback: "light",
+  },
+
+  app: {
+    head: {
+      script: [
+        {
+          innerHTML: `localStorage.setItem('vueuse-color-scheme','light');localStorage.setItem('nuxt-color-mode','light');document.documentElement.classList.remove('dark');`,
+          tagPriority: "critical",
+        },
+      ],
+    },
   },
 
   hub: {
     db: {
-      dialect: 'mysql',
-      casing: 'snake_case',
+      dialect: "mysql",
+      casing: "snake_case",
       // Matikan auto-migrate saat build & dev — jalankan manual via pnpm db:migrate
       applyMigrationsDuringBuild: false,
       applyMigrationsDuringDev: false,
@@ -39,40 +50,55 @@ export default defineNuxtConfig({
   },
 
   image: {
-    provider: process.env.NODE_ENV === 'production' ? 'cloudflare' : 'none',
+    provider: process.env.NODE_ENV === "production" ? "cloudflare" : "none",
     cloudflare: {
-      baseURL: '/',
+      baseURL: "/",
     },
   },
 
   disqus: {
-    shortname: process.env.DISQUS_SHORTNAME || '',
+    shortname: process.env.NUXT_PUBLIC_DISQUS_SHORTNAME || "",
   },
 
   runtimeConfig: {
-    sessionSecret: '',
-    brevoApiKey: '',
+    sessionSecret:
+      process.env.NUXT_SESSION_SECRET ||
+      process.env.NUXT_SESSION_PASSWORD ||
+      "",
+    brevoApiKey:
+      process.env.NUXT_BREVO_API_KEY || process.env.BREVO_API_KEY || "",
+    mysqlUrl: process.env.NUXT_MYSQL_URL || process.env.MYSQL_URL || "",
+    r2AccessKeyId:
+      process.env.NUXT_R2_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || "",
+    r2SecretAccessKey:
+      process.env.NUXT_R2_SECRET_ACCESS_KEY ||
+      process.env.R2_SECRET_ACCESS_KEY ||
+      "",
+    r2Bucket: process.env.NUXT_R2_BUCKET || process.env.R2_BUCKET || "",
+    r2Endpoint: process.env.NUXT_R2_ENDPOINT || process.env.R2_ENDPOINT || "",
     public: {
-      disqusShortname: process.env.DISQUS_SHORTNAME || '',
+      disqusShortname:
+        process.env.NUXT_PUBLIC_DISQUS_SHORTNAME ||
+        process.env.DISQUS_SHORTNAME ||
+        "",
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "",
     },
   },
 
   nitro: {
-    preset: 'cloudflare-pages',
+    preset: "cloudflare-pages",
   },
 
   vite: {
     optimizeDeps: {
       include: [
-        '@nuxt/ui > prosemirror-state',
-        '@nuxt/ui > prosemirror-transform',
-        '@nuxt/ui > prosemirror-model',
-        '@nuxt/ui > prosemirror-view',
-        '@nuxt/ui > prosemirror-gapcursor',
+        "@nuxt/ui > prosemirror-state",
+        "@nuxt/ui > prosemirror-transform",
+        "@nuxt/ui > prosemirror-model",
+        "@nuxt/ui > prosemirror-view",
+        "@nuxt/ui > prosemirror-gapcursor",
       ],
     },
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
   },
-})
+});

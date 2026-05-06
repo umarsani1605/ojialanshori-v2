@@ -1,7 +1,8 @@
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
 import { and, eq, ne, or } from 'drizzle-orm'
-import * as schema from '~~/server/db/schema'
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireAuth } from '#server/utils/guard'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -52,14 +53,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Tidak ada perubahan untuk disimpan.' })
   }
 
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) throw createError({ statusCode: 500, message: 'Database tidak terkonfigurasi.' })
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
+  }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
-
-  try {
-    if (updates.email || updates.username) {
+  const db = useDb(event)
+  if (updates.email || updates.username) {
       const duplicates = [
         updates.email ? eq(schema.users.email, updates.email) : undefined,
         updates.username ? eq(schema.users.username, updates.username) : undefined,
@@ -78,29 +77,26 @@ export default defineEventHandler(async (event) => {
         }
         throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
       }
-    }
+  }
 
-    await db.update(schema.users).set(updates).where(eq(schema.users.id, currentUser.id))
+  await db.update(schema.users).set(updates).where(eq(schema.users.id, currentUser.id))
 
-    const updated = await db.query.users.findFirst({
-      where: eq(schema.users.id, currentUser.id),
-      columns: { passwordHash: false, passwordType: false },
+  const updated = await db.query.users.findFirst({
+    where: eq(schema.users.id, currentUser.id),
+    columns: { passwordHash: false, passwordType: false },
+  })
+
+  if (updated) {
+    await setUserSession(event, {
+      user: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        role: updated.role,
+        avatar: updated.avatar ?? null,
+      },
     })
-
-    if (updated) {
-      await setUserSession(event, {
-        user: {
-          id: updated.id,
-          name: updated.name,
-          role: updated.role,
-          avatar: updated.avatar ?? null,
-        },
-      })
-    }
-
-    return { user: updated }
   }
-  finally {
-    await connection.end()
-  }
+
+  return { user: updated }
 })

@@ -5,15 +5,16 @@ defineProps<{
 </script>
 
 <template>
-  <div class="mb-12">
-    <div class="flex items-end justify-between gap-4 mb-5">
-      <h2 class="font-bold text-2xl md:text-3xl tracking-wide">
+  <div class="mb-8">
+    <div class="mb-4 flex items-end justify-between gap-4">
+      <h2 class="text-2xl font-bold tracking-tight md:text-3xl">
         {{ title }}
       </h2>
       <slot name="action" />
     </div>
-    <div class="relative h-1 bg-default rounded-full">
-      <span class="absolute left-0 top-0 h-1 w-24 bg-primary rounded-full" />
+
+    <div class="relative h-1 w-full overflow-hidden rounded-full bg-slate-200">
+      <span class="absolute inset-y-0 left-0 w-24 rounded-full bg-primary" />
     </div>
   </div>
 </template>

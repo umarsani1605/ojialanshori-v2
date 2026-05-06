@@ -28,8 +28,9 @@
     },
   ],
 
-  // MySQL database via MYSQL_URL environment variable (bukan D1)
-  // Set MYSQL_URL di Cloudflare Workers environment variables
+  // Runtime config is read from NUXT_* Worker variables.
+  // Example private vars: NUXT_MYSQL_URL, NUXT_SESSION_SECRET, NUXT_BREVO_API_KEY
+  // Example public vars: NUXT_PUBLIC_SITE_URL, NUXT_PUBLIC_DISQUS_SHORTNAME
   "vars": {
     "NUXT_PUBLIC_SITE_URL": "https://ojialanshori.com",
   },

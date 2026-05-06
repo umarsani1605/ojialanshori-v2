@@ -17,8 +17,13 @@ describe('middleware/role — checkAccess', () => {
     expect(checkAccess('reviewer', 'reviewer')).toBe(true)
   })
 
-  it("requiredRole 'reviewer' — pengurus bisa akses", () => {
-    expect(checkAccess('pengurus', 'reviewer')).toBe(true)
+  it("requiredRole 'reviewer' — pengurus tidak bisa akses", () => {
+    expect(checkAccess('pengurus', 'reviewer')).toBe(false)
+  })
+
+  it("requiredRole 'dashboard' — reviewer dan santri bisa akses", () => {
+    expect(checkAccess('reviewer', 'dashboard')).toBe(true)
+    expect(checkAccess('santri', 'dashboard')).toBe(true)
   })
 
   it("requiredRole 'admin' — reviewer tidak bisa akses", () => {

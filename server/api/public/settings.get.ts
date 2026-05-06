@@ -1,21 +1,13 @@
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
-import * as schema from '~~/server/db/schema'
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
 
-export default defineCachedEventHandler(async () => {
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) return {}
+export default defineCachedEventHandler(async (event) => {
+  if (!isMysqlConfigured(event)) return {}
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
+  const db = useDb(event)
 
-  try {
-    const rows = await db.select().from(schema.settings)
-    return Object.fromEntries(rows.map(row => [row.key, row.value])) as Record<string, string>
-  }
-  finally {
-    await connection.end()
-  }
+  const rows = await db.select().from(schema.settings)
+  return Object.fromEntries(rows.map(row => [row.key, row.value])) as Record<string, string>
 }, {
   maxAge: 60,
   name: 'public-settings',

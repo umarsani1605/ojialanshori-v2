@@ -1,56 +1,59 @@
 import { Readable } from 'node:stream'
 import { setHeader, type H3Event } from 'h3'
 
+import { getR2MediaConfig } from '#server/utils/runtime'
+
 type S3Body = {
-  transformToByteArray?: () => Promise<Uint8Array>
-}
+  arrayBuffer?: () => Promise<ArrayBuffer>;
+  transformToByteArray?: () => Promise<Uint8Array>;
+  transformToWebStream?: () => ReadableStream<Uint8Array>;
+};
 
 const MIME_BY_EXTENSION: Record<string, string> = {
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  png: 'image/png',
-  gif: 'image/gif',
-  webp: 'image/webp',
-  svg: 'image/svg+xml',
-  pdf: 'application/pdf',
-}
-
-export function hasR2MediaConfig() {
-  return Boolean(
-    process.env.R2_ACCESS_KEY_ID
-    && process.env.R2_SECRET_ACCESS_KEY
-    && process.env.R2_BUCKET
-    && process.env.R2_ENDPOINT,
-  )
-}
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+  pdf: "application/pdf",
+};
 
 export async function serveR2MediaObject(event: H3Event, pathname: string) {
-  if (!hasR2MediaConfig()) {
+  const mediaConfig = getR2MediaConfig(event)
+
+  if (!mediaConfig) {
     return null
   }
 
   const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3')
   const s3 = new S3Client({
     region: 'auto',
-    endpoint: process.env.R2_ENDPOINT,
+    endpoint: mediaConfig.endpoint,
     credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+      accessKeyId: mediaConfig.accessKeyId,
+      secretAccessKey: mediaConfig.secretAccessKey,
     },
   })
 
   try {
-    const object = await s3.send(new GetObjectCommand({
-      Bucket: process.env.R2_BUCKET,
-      Key: pathname,
-    }))
+    const object = await s3.send(
+      new GetObjectCommand({
+        Bucket: mediaConfig.bucket,
+        Key: pathname,
+      }),
+    )
     const body = await readS3Body(object.Body as S3Body | Readable | undefined)
 
     if (!body) {
       return null
     }
 
-    setHeader(event, 'Content-Type', object.ContentType || getContentType(pathname))
+    setHeader(
+      event,
+      'Content-Type',
+      object.ContentType || getContentType(pathname),
+    )
     setHeader(event, 'Content-Length', body.byteLength)
 
     if (object.ETag) {
@@ -59,12 +62,11 @@ export async function serveR2MediaObject(event: H3Event, pathname: string) {
 
     return new ReadableStream({
       start(controller) {
-        controller.enqueue(body)s
+        controller.enqueue(body)
         controller.close()
       },
     })
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -88,7 +90,48 @@ async function readS3Body(body: S3Body | Readable | undefined) {
     return new Uint8Array(Buffer.concat(chunks))
   }
 
+  if ('arrayBuffer' in body && body.arrayBuffer) {
+    return new Uint8Array(await body.arrayBuffer())
+  }
+
+  if ('transformToWebStream' in body && body.transformToWebStream) {
+    return readWebStream(body.transformToWebStream())
+  }
+
+  if (body instanceof ReadableStream) {
+    return readWebStream(body)
+  }
+
   return null
+}
+
+async function readWebStream(stream: ReadableStream<Uint8Array>) {
+  const reader = stream.getReader()
+  const chunks: Uint8Array[] = []
+  let totalLength = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+
+    if (done) {
+      break
+    }
+
+    if (value) {
+      chunks.push(value)
+      totalLength += value.byteLength
+    }
+  }
+
+  const merged = new Uint8Array(totalLength)
+  let offset = 0
+
+  for (const chunk of chunks) {
+    merged.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+
+  return merged
 }
 
 function getContentType(pathname: string) {

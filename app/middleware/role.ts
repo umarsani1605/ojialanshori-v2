@@ -1,9 +1,12 @@
+import { getRoleHomePath } from '~/utils/roleRoute'
+
 type Role = 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
 
 const ROLE_HIERARCHY: Record<string, Role[]> = {
   all: ['superadmin', 'pengurus', 'reviewer', 'santri'],
   santri: ['santri'],
-  reviewer: ['superadmin', 'pengurus', 'reviewer'],
+  dashboard: ['reviewer', 'santri'],
+  reviewer: ['reviewer'],
   admin: ['superadmin', 'pengurus'],
   superadmin: ['superadmin'],
 }
@@ -22,5 +25,5 @@ export default defineNuxtRouteMiddleware((to) => {
 
   const requiredRole = (to.meta.requiredRole as string) ?? 'all'
   const allowed = checkAccess(auth.user.value?.role, requiredRole)
-  if (!allowed) return navigateTo('/dashboard')
+  if (!allowed) return navigateTo(getRoleHomePath(auth.user.value?.role))
 })

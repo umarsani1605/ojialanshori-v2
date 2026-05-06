@@ -9,7 +9,9 @@ type Post = {
   createdAt: string | Date;
   categorySlug?: string;
   categoryName?: string;
+  categoryParentSlug?: string | null;
   authorName?: string;
+  authorUsername?: string;
 };
 
 type PostListingResponse = {
@@ -25,9 +27,10 @@ type PostListingResponse = {
 const route = useRoute();
 const currentPage = computed(() => Math.max(1, Number(route.query.page) || 1));
 
-const { data: listing, error } = await useFetch<PostListingResponse>('/api/public/posts/berita', {
+const { data: listing, error } = await useFetch<PostListingResponse>('/api/public/posts', {
   key: () => `public-berita-page-${currentPage.value}`,
   query: computed(() => ({
+    type: 'berita',
     page: currentPage.value,
     limit: 9,
   })),

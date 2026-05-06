@@ -88,7 +88,7 @@ Untuk styling teks di komponen publik, pilih sesuai hirarki — jangan asal hard
 
 | Hirarki | Class | Kapan dipakai |
 | --- | --- | --- |
-| Body / heading (default gelap) | _(tanpa class)_ | Inherit dari body. Jangan tulis `text-slate-900` / `text-ink-900` / `text-neutral-900`. |
+| Body / heading (default gelap) | _(tanpa class)_ | Inherit dari body. Jangan tulis `text-slate-900` / `text-ink-900` / `text-slate-900`. |
 | Sekunder / muted | `text-muted` (Nuxt UI semantic) | Paragraf pendukung, deskripsi, copy sekunder. |
 | Lebih dim / metadata | `text-dimmed` (Nuxt UI semantic) | Caption, timestamp, role di bawah nama, helper text. |
 | Fallback grayscale | `text-slate-500` / `text-slate-400` | Hanya kalau semantic tidak cocok atau perlu tone spesifik. |

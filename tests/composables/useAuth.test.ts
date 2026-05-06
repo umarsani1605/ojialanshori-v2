@@ -59,6 +59,24 @@ describe('useAuth', () => {
     expect(useAuth().canPublish.value).toBe(false)
   })
 
+  it('homePath dan profilePath mengikuti cluster role', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'superadmin', avatar: null }
+    expect(useAuth().homePath.value).toBe('/admin')
+    expect(useAuth().profilePath.value).toBe('/admin/profile')
+
+    mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
+    expect(useAuth().homePath.value).toBe('/dashboard')
+    expect(useAuth().profilePath.value).toBe('/dashboard/profile')
+  })
+
+  it('canWritePosts hanya true untuk santri', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'santri', avatar: null }
+    expect(useAuth().canWritePosts.value).toBe(true)
+
+    mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
+    expect(useAuth().canWritePosts.value).toBe(false)
+  })
+
   it('isLoggedIn false jika tidak ada user', () => {
     mockUser.value = null
     const { loggedIn } = useAuth()

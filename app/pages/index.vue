@@ -8,7 +8,20 @@ type Post = {
   publishedAt: string | Date | null;
   createdAt: string | Date;
   categorySlug?: string;
+  categoryName?: string;
+  categoryParentSlug?: string | null;
   authorName?: string;
+  authorUsername?: string;
+};
+
+type PostListingResponse = {
+  data: Post[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };
 
 type GalleryItem = {
@@ -60,15 +73,41 @@ const [
     key: "public-settings",
     default: () => ({}),
   }),
-  useFetch<Post[]>("/api/public/home/posts-berita", {
+  useFetch<PostListingResponse>("/api/public/posts", {
     key: "home-posts-berita",
-    default: () => [],
+    query: {
+      type: "berita",
+      page: 1,
+      limit: 4,
+    },
+    default: () => ({
+      data: [],
+      pagination: {
+        page: 1,
+        limit: 4,
+        total: 0,
+        totalPages: 1,
+      },
+    }),
   }),
-  useFetch<Post[]>("/api/public/home/posts-pena", {
+  useFetch<PostListingResponse>("/api/public/posts", {
     key: "home-posts-pena",
-    default: () => [],
+    query: {
+      type: "pena_santri",
+      page: 1,
+      limit: 4,
+    },
+    default: () => ({
+      data: [],
+      pagination: {
+        page: 1,
+        limit: 4,
+        total: 0,
+        totalPages: 1,
+      },
+    }),
   }),
-  useFetch<GalleryItem[]>("/api/public/home/gallery", {
+  useFetch<GalleryItem[]>("/api/public/gallery", {
     key: "home-gallery",
     default: () => [],
   }),
@@ -218,19 +257,19 @@ useSeoMeta({
     <!-- 2. Fitur -->
     <section id="kenalan" class="py-10 md:py-16">
       <UContainer>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
           <div
             v-for="feature in features"
             :key="feature.title"
             class="group flex flex-col items-center text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
           >
             <div
-              class="size-24 md:size-28 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
+              class="size-24 md:size-28 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
             >
               <NuxtImg
                 :src="feature.image"
                 :alt="feature.title"
-                class="size-16 md:size-20 object-contain"
+                class="size-20 md:size-24 object-contain"
               />
             </div>
             <h4 class="text-base md:text-lg font-semibold">
@@ -258,6 +297,11 @@ useSeoMeta({
           next-icon="i-lucide-chevron-right"
           :prev="{ variant: 'ghost', color: 'neutral' }"
           :next="{ variant: 'ghost', color: 'neutral' }"
+          :ui="{
+            root: 'group/testimonials relative',
+            prev: 'absolute rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
+            next: 'absolute rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
+          }"
         >
           <div class="max-w-3xl mx-auto px-4 text-center">
             <p class="text-base md:text-lg leading-relaxed mb-8">
@@ -283,25 +327,24 @@ useSeoMeta({
     <!-- 4. Berita Terbaru -->
     <section class="py-10 md:py-16">
       <UContainer>
-        <div
-          class="flex items-end justify-between border-b-2 border-default pb-4 mb-12"
-        >
-          <h2 class="font-bold text-xl md:text-2xl tracking-wide">Berita</h2>
-          <NuxtLink
-            to="/berita"
-            class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
-          >
-            Lainnya
-            <UIcon name="i-lucide-arrow-right" class="size-4" />
-          </NuxtLink>
-        </div>
+        <PublicSectionHeading title="Berita">
+          <template #action>
+            <NuxtLink
+              to="/berita"
+              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
+            >
+              Lainnya
+              <UIcon name="i-lucide-chevron-right" class="size-4" />
+            </NuxtLink>
+          </template>
+        </PublicSectionHeading>
 
         <div
-          v-if="berita && berita.length > 0"
-          class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+          v-if="berita.data.length > 0"
+          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8"
         >
           <PublicPostCard
-            v-for="post in berita"
+            v-for="post in berita.data"
             :key="post.id"
             :post="post"
             base-path="/berita"
@@ -318,27 +361,24 @@ useSeoMeta({
     <!-- 5. Pena Santri -->
     <section class="py-10 md:py-16">
       <UContainer>
-        <div
-          class="flex items-end justify-between border-b border-default pb-4 mb-12"
-        >
-          <h2 class="font-bold text-xl md:text-2xl tracking-wide">
-            Pena Santri
-          </h2>
-          <NuxtLink
-            to="/pena-santri"
-            class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
-          >
-            Lainnya
-            <UIcon name="i-lucide-arrow-right" class="size-4" />
-          </NuxtLink>
-        </div>
+        <PublicSectionHeading title="Pena Santri">
+          <template #action>
+            <NuxtLink
+              to="/pena-santri"
+              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
+            >
+              Lainnya
+              <UIcon name="i-lucide-chevron-right" class="size-4" />
+            </NuxtLink>
+          </template>
+        </PublicSectionHeading>
 
         <div
-          v-if="pena && pena.length > 0"
-          class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+          v-if="pena.data.length > 0"
+          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8"
         >
           <PublicPostCard
-            v-for="post in pena"
+            v-for="post in pena.data"
             :key="post.id"
             :post="post"
             base-path="/pena-santri"
@@ -362,20 +402,20 @@ useSeoMeta({
               class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
             >
               Lainnya
-              <UIcon name="i-lucide-arrow-right" class="size-4" />
+              <UIcon name="i-lucide-chevron-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
 
         <div
           v-if="visibleGallery.length > 0"
-          class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
+          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8"
         >
           <button
             v-for="(item, index) in visibleGallery"
             :key="item.id"
             type="button"
-            class="aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 group relative text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            class="aspect-3/2 rounded-2xl overflow-hidden bg-slate-100 group relative text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             :aria-label="`Lihat foto ${item.title}`"
             @click="galleryLightbox.open(index)"
           >
@@ -401,108 +441,14 @@ useSeoMeta({
       </UContainer>
     </section>
 
-    <UModal
+    <PublicGalleryLightbox
       v-model:open="galleryLightbox.isOpen.value"
-      fullscreen
-      :transition="true"
-      :ui="{
-        content: 'bg-slate-950/10 shadow-none ring-0',
-      }"
-    >
-      <template #content>
-        <div class="flex min-h-screen flex-col text-white">
-          <div
-            class="flex items-center justify-between gap-4 px-4 py-4 md:px-6"
-          >
-            <div>
-              <p class="text-sm text-white/70">
-                {{ galleryLightbox.activeIndex.value + 1 }} /
-                {{ visibleGallery.length }}
-              </p>
-              <h3 class="mt-1 text-lg font-semibold">
-                {{ galleryLightbox.activeItem.value?.title }}
-              </h3>
-            </div>
-
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-x"
-              class="text-white hover:bg-white/10"
-              aria-label="Tutup lightbox"
-              @click="galleryLightbox.close"
-            />
-          </div>
-
-          <div
-            class="flex flex-1 items-center justify-center gap-3 px-4 pb-6 md:gap-6 md:px-6"
-          >
-            <UButton
-              v-if="galleryLightbox.hasMultipleItems.value"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-chevron-left"
-              class="hidden md:inline-flex text-white hover:bg-white/10"
-              aria-label="Foto sebelumnya"
-              @click="galleryLightbox.prev"
-            />
-
-            <div
-              class="flex w-full max-w-6xl flex-col items-center justify-center gap-4"
-            >
-              <div class="overflow-hidden rounded-2xl bg-white/5">
-                <NuxtImg
-                  v-if="galleryLightbox.activeItem.value"
-                  :src="galleryLightbox.activeItem.value.imagePath"
-                  :alt="galleryLightbox.activeItem.value.title"
-                  class="max-h-[72vh] w-auto max-w-full object-contain"
-                  loading="eager"
-                />
-              </div>
-
-              <p
-                v-if="galleryLightbox.activeItem.value?.album"
-                class="text-sm text-white/70"
-              >
-                {{ galleryLightbox.activeItem.value.album }}
-              </p>
-
-              <div
-                v-if="galleryLightbox.hasMultipleItems.value"
-                class="flex items-center gap-3 md:hidden"
-              >
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-chevron-left"
-                  class="text-white hover:bg-white/10"
-                  aria-label="Foto sebelumnya"
-                  @click="galleryLightbox.prev"
-                />
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-chevron-right"
-                  class="text-white hover:bg-white/10"
-                  aria-label="Foto berikutnya"
-                  @click="galleryLightbox.next"
-                />
-              </div>
-            </div>
-
-            <UButton
-              v-if="galleryLightbox.hasMultipleItems.value"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-chevron-right"
-              class="hidden md:inline-flex text-white hover:bg-white/10"
-              aria-label="Foto berikutnya"
-              @click="galleryLightbox.next"
-            />
-          </div>
-        </div>
-      </template>
-    </UModal>
+      :items="visibleGallery"
+      :active-index="galleryLightbox.activeIndex.value"
+      @close="galleryLightbox.close"
+      @prev="galleryLightbox.prev"
+      @next="galleryLightbox.next"
+    />
 
     <!-- 7. Instagram -->
     <section class="py-10 md:py-16">
@@ -512,7 +458,7 @@ useSeoMeta({
           :href="instagramUrl"
           target="_blank"
           rel="noopener"
-          class="group flex flex-col sm:flex-row items-center justify-between gap-6 rounded-2xl border border-default bg-white p-6 md:p-8 transition-colors hover:border-brand-300"
+          class="group flex flex-col md:flex-row gap-6 items-center text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
         >
           <div class="flex items-center gap-5">
             <div
@@ -520,18 +466,18 @@ useSeoMeta({
             >
               <UIcon name="i-lucide-instagram" class="size-8" />
             </div>
-            <div class="text-center sm:text-left">
+            <div class="text-left">
               <h4 class="font-bold text-lg md:text-xl mb-0.5">@omahngaji_</h4>
               <p class="font-ui text-sm text-muted">
                 Akun Resmi Omah Ngaji Al-Anshori Surakarta
               </p>
             </div>
           </div>
-          <span
-            class="font-ui font-semibold bg-brand-500 text-white group-hover:bg-brand-600 px-5 py-2 rounded-lg transition-colors"
+          <div
+            class="font-semibold bg-brand-500 text-white group-hover:bg-brand-600 px-4 py-1.5 rounded-lg transition-colors"
           >
             Ikuti Kami
-          </span>
+          </div>
         </a>
       </UContainer>
     </section>
@@ -541,7 +487,7 @@ useSeoMeta({
       <UContainer>
         <PublicSectionHeading title="Youtube" />
 
-        <div class="aspect-video rounded-2xl overflow-hidden bg-neutral-100">
+        <div class="aspect-video rounded-2xl overflow-hidden bg-slate-100">
           <iframe
             :src="youtubeEmbedUrl"
             title="YouTube video Omah Ngaji Al-Anshori"

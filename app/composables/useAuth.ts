@@ -1,3 +1,5 @@
+import { getRoleCluster, getRoleHomePath, getRoleProfilePath } from '~/utils/roleRoute'
+
 /**
  * Exposes reactive authentication state, role-based flags, and a logout action for the current user session.
  *
@@ -12,9 +14,11 @@
  */
 export function useAuth() {
   const { user, loggedIn, clear, fetch } = useUserSession()
+  const role = computed(() => user.value?.role)
 
   return {
     user,
+    role,
     loggedIn,
     fetch,
     isSuperadmin: computed(() => user.value?.role === 'superadmin'),
@@ -24,6 +28,10 @@ export function useAuth() {
     isAdmin: computed(() => ['superadmin', 'pengurus'].includes(user.value?.role ?? '')),
     canPublish: computed(() => ['superadmin', 'pengurus', 'reviewer'].includes(user.value?.role ?? '')),
     canReview: computed(() => ['superadmin', 'pengurus', 'reviewer'].includes(user.value?.role ?? '')),
+    canWritePosts: computed(() => user.value?.role === 'santri'),
+    cluster: computed(() => getRoleCluster(role.value)),
+    homePath: computed(() => getRoleHomePath(role.value)),
+    profilePath: computed(() => getRoleProfilePath(role.value)),
     async logout() {
       await $fetch('/api/auth/logout', { method: 'POST' })
       await clear()

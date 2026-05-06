@@ -2,7 +2,7 @@
   <aside class="w-64 h-full flex bg-white border-r border-default flex-col">
     <!-- Logo -->
     <div class="h-18 flex items-center px-6 border-b border-default shrink-0">
-      <NuxtLink to="/dashboard" class="text-xl font-bold text-primary">
+      <NuxtLink :to="auth.homePath.value" class="text-xl font-bold text-primary">
         Omah Ngaji
       </NuxtLink>
     </div>
@@ -10,7 +10,7 @@
     <!-- Navigation Links -->
     <UScrollArea class="flex-1 py-4 px-3">
       <ul class="space-y-0.5">
-        <li v-for="item in mainLinks" :key="item.to as string">
+        <li v-for="item in navLinks" :key="item.to as string">
           <NuxtLink
             :to="item.to as string"
             class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative"
@@ -36,24 +36,20 @@
     <div class="border-t border-default shrink-0">
       <!-- Profil Saya link -->
       <div class="px-3 pt-3 pb-2">
-        <li v-for="item in footerLinks" :key="item.to as string" class="list-none">
-          <NuxtLink
-            :to="item.to as string"
-            class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative"
-            :class="[
-              isActive(item.to as string)
-                ? 'bg-primary-50 text-primary-600'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            ]"
-          >
-            <span
-              v-if="isActive(item.to as string)"
-              class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-2/3 bg-primary-500 rounded-r-full"
-            />
-            <UIcon :name="item.icon as string" class="w-4.5 h-4.5 shrink-0" />
-            <span>{{ item.label }}</span>
-          </NuxtLink>
-        </li>
+        <NuxtLink
+          :to="profileLink.to"
+          class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative"
+          :class="isActive(profileLink.to)
+            ? 'bg-primary-50 text-primary-600'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+        >
+          <span
+            v-if="isActive(profileLink.to)"
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-2/3 bg-primary-500 rounded-r-full"
+          />
+          <UIcon :name="profileLink.icon" class="w-4.5 h-4.5 shrink-0" />
+          <span>{{ profileLink.label }}</span>
+        </NuxtLink>
       </div>
 
       <!-- User info + logout -->
@@ -84,7 +80,27 @@ import type { RoleColor } from '~/utils/roleDisplay'
 
 const route = useRoute()
 const auth = useAuth()
-const { mainLinks, footerLinks } = useNavigation()
+
+const navLinks = computed(() => {
+  const items = [
+    { label: 'Beranda', icon: 'i-lucide-home', to: '/admin' },
+    { label: 'Review Post', icon: 'i-lucide-inbox', to: '/admin/review' },
+    { label: 'Semua Post', icon: 'i-lucide-files', to: '/admin/posts' },
+    { label: 'Kategori', icon: 'i-lucide-tag', to: '/admin/categories' },
+    { label: 'Galeri', icon: 'i-lucide-image', to: '/admin/gallery' },
+    { label: 'Banner', icon: 'i-lucide-megaphone', to: '/admin/banner' },
+  ]
+  if (auth.isSuperadmin.value) {
+    items.push(
+      { label: 'Halaman Statis', icon: 'i-lucide-layout', to: '/admin/pages' },
+      { label: 'Users', icon: 'i-lucide-users', to: '/admin/users' },
+      { label: 'Pengaturan', icon: 'i-lucide-settings', to: '/admin/settings' },
+    )
+  }
+  return items
+})
+
+const profileLink = { label: 'Profil Saya', icon: 'i-lucide-user-circle', to: '/admin/profile' }
 
 const userInitial = computed(() => auth.user.value?.name?.charAt(0) ?? '?')
 const userRole = computed(() => auth.user.value?.role ?? '')
@@ -92,10 +108,10 @@ const roleLabel = computed(() => roleLabelMap[userRole.value] ?? userRole.value)
 const roleColor = computed<RoleColor>(() => roleColorMap[userRole.value] ?? 'primary')
 
 function isActive(to: string) {
-  if (to === '/dashboard') {
-    return route.path === '/dashboard'
+  if (to === '/admin') {
+    return route.path === '/admin'
   }
-  return route.path.startsWith(to)
+  return route.path === to || route.path.startsWith(`${to}/`)
 }
 </script>
 

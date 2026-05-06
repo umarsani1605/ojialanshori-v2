@@ -1,21 +1,21 @@
 import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
 
-import * as schema from '~~/server/db/schema'
-import { requireRole } from '~~/server/utils/guard'
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireRole } from '#server/utils/guard'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import {
   assertSubmitPayload,
   ensureCategoryExists,
   getSantriOwnedPost,
-  parseSantriPostPayload,
   syncPostTags,
-} from '~~/server/utils/santriPostEditor'
+} from '#server/utils/santriPostEditor'
+import { validateRouteIdParams, validateSantriPostBody } from '#server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const currentUser = requireRole(event, ['santri'])
-  const postId = Number(getRouterParam(event, 'id'))
-  const payload = parseSantriPostPayload(await readBody(event))
+  const { id: postId } = await getValidatedRouterParams(event, validateRouteIdParams)
+  const payload = await readValidatedBody(event, validateSantriPostBody)
 
   if (!Number.isInteger(postId) || postId <= 0) {
     throw createError({ statusCode: 400, message: 'ID post tidak valid.' })
@@ -23,45 +23,38 @@ export default defineEventHandler(async (event) => {
 
   assertSubmitPayload(payload)
 
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) {
-    throw createError({ statusCode: 500, statusMessage: 'MYSQL_URL is not configured' })
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
+  const db = useDb(event)
 
-  try {
-    const existing = await getSantriOwnedPost(db, postId, currentUser.id)
+  const existing = await getSantriOwnedPost(db, postId, currentUser.id)
 
-    if (existing.status === 'pending_review') {
-      throw createError({ statusCode: 403, message: 'Post yang sedang direview tidak bisa dikirim ulang.' })
-    }
+  if (existing.status === 'pending_review') {
+    throw createError({ statusCode: 403, message: 'Post yang sedang direview tidak bisa dikirim ulang.' })
+  }
 
-    await ensureCategoryExists(db, payload.categoryId)
+  await ensureCategoryExists(db, payload.categoryId)
 
-    await db.update(schema.posts)
-      .set({
-        title: payload.title,
-        slug: existing.slug,
-        content: payload.content,
-        excerpt: payload.excerpt,
-        featuredImage: payload.featuredImage,
-        categoryId: payload.categoryId,
-        status: 'pending_review',
-        rejectionNote: null,
-      })
-      .where(eq(schema.posts.id, existing.id))
-
-    await syncPostTags(db, existing.id, payload.tags)
-
-    return {
-      id: existing.id,
+  await db.update(schema.posts)
+    .set({
+      title: payload.title,
       slug: existing.slug,
+      content: payload.content,
+      excerpt: payload.excerpt,
+      featuredImage: payload.featuredImage,
+      categoryId: payload.categoryId,
       status: 'pending_review',
-    }
-  }
-  finally {
-    await connection.end()
+      rejectionNote: null,
+    })
+    .where(eq(schema.posts.id, existing.id))
+
+  await syncPostTags(db, existing.id, payload.tags)
+
+  return {
+    id: existing.id,
+    slug: existing.slug,
+    status: 'pending_review',
   }
 })

@@ -1,21 +1,15 @@
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
 import { eq } from 'drizzle-orm'
-import * as schema from '../../db/schema'
+
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import { validateLoginBody } from '#server/utils/validation'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_SEC = 15 * 60 // 15 menit
 
 export default defineEventHandler(async (event) => {
-  const { identifier, password, remember } = await readBody<{
-    identifier: string
-    password: string
-    remember?: boolean
-  }>(event)
-
-  if (!identifier || !password) {
-    throw createError({ statusCode: 400, message: 'Identifier dan password wajib diisi.' })
-  }
+  const { identifier, password, remember } = await readValidatedBody(event, validateLoginBody)
 
   // Rate limiting via Cloudflare KV
   const ip = getRequestIP(event, { xForwardedFor: true })
@@ -53,90 +47,91 @@ export default defineEventHandler(async (event) => {
   }
 
   // Query user dari DB
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) {
-    throw createError({ statusCode: 500, message: 'Database tidak terkonfigurasi.' })
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
+  const db = useDb(event)
 
-  try {
-    // Determine column to query: email contains '@', otherwise treat as username
-    const isEmail = identifier.includes('@')
-    const user = await db.query.users.findFirst({
-      where: isEmail
-        ? eq(schema.users.email, identifier)
-        : eq(schema.users.username, identifier),
+  // Determine column to query: email contains '@', otherwise treat as username
+  const isEmail = identifier.includes('@')
+  const [user] = await db
+    .select({
+      id: schema.users.id,
+      name: schema.users.name,
+      email: schema.users.email,
+      username: schema.users.username,
+      passwordHash: schema.users.passwordHash,
+      passwordType: schema.users.passwordType,
+      role: schema.users.role,
+      avatar: schema.users.avatar,
+      isActive: schema.users.isActive,
     })
+    .from(schema.users)
+    .where(isEmail
+      ? eq(schema.users.email, identifier)
+      : eq(schema.users.username, identifier))
+    .limit(1)
 
-    if (!user) {
-      await recordFailedAttempt()
-      throw createError({ statusCode: 401, message: 'Username atau password salah.' })
+  if (!user) {
+    await recordFailedAttempt()
+    throw createError({ statusCode: 401, message: 'Username atau password salah.' })
+  }
+
+  // Verify password before checking isActive so rate limiting applies to all attempts
+  const isValid = await verifyUserPassword(password, user.passwordHash, user.passwordType)
+  if (!isValid) {
+    await recordFailedAttempt()
+    throw createError({ statusCode: 401, message: 'Username atau password salah.' })
+  }
+
+  if (!user.isActive) {
+    throw createError({ statusCode: 403, message: 'Akun tidak aktif.' })
+  }
+
+  // Progressive migration: phpass → bcrypt (fire-and-forget, tidak menambah latency)
+  if (user.passwordType === 'phpass') {
+    const userId = user.id
+    const migrateTask = (async () => {
+      const newHash = await hashUserPassword(password)
+      await useDb(event)
+        .update(schema.users)
+        .set({ passwordHash: newHash, passwordType: 'bcrypt' })
+        .where(eq(schema.users.id, userId))
+    })()
+
+    event.waitUntil?.(migrateTask)
+    if (!event.waitUntil) {
+      migrateTask.catch(() => {})
     }
+  }
 
-    // Verify password before checking isActive so rate limiting applies to all attempts
-    const isValid = await verifyUserPassword(password, user.passwordHash, user.passwordType)
-    if (!isValid) {
-      await recordFailedAttempt()
-      throw createError({ statusCode: 401, message: 'Username atau password salah.' })
-    }
+  // Hapus rate limit setelah login berhasil
+  await kv.removeItem(rateLimitKey)
 
-    if (!user.isActive) {
-      throw createError({ statusCode: 403, message: 'Akun tidak aktif.' })
-    }
-
-    // Progressive migration: phpass → bcrypt (fire-and-forget, tidak menambah latency)
-    if (user.passwordType === 'phpass') {
-      const userId = user.id
-      const migrateTask = (async () => {
-        const migConn = await mysql.createConnection(mysqlUrl)
-        const migDb = drizzle(migConn, { schema, casing: 'snake_case', mode: 'default' })
-        try {
-          const newHash = await hashUserPassword(password)
-          await migDb
-            .update(schema.users)
-            .set({ passwordHash: newHash, passwordType: 'bcrypt' })
-            .where(eq(schema.users.id, userId))
-        }
-        finally {
-          await migConn.end()
-        }
-      })()
-
-      // Cloudflare Workers: gunakan waitUntil agar task selesai setelah response
-      const cfCtx = (event.context as { cloudflare?: { context?: { waitUntil: (p: Promise<unknown>) => void } } }).cloudflare?.context
-      cfCtx ? cfCtx.waitUntil(migrateTask) : migrateTask.catch(() => {})
-    }
-
-    // Hapus rate limit setelah login berhasil
-    await kv.removeItem(rateLimitKey)
-
-    // Set session (remember: 30 hari, default: 1 hari)
-    const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24
-    await setUserSession(
-      event,
-      {
-        user: {
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          avatar: user.avatar ?? null,
-        },
-      },
-      { maxAge },
-    )
-
-    return {
+  // Set session (remember: 30 hari, default: 1 hari)
+  const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24
+  await setUserSession(
+    event,
+    {
       user: {
         id: user.id,
         name: user.name,
+        email: user.email,
         role: user.role,
         avatar: user.avatar ?? null,
       },
-    }
-  }
-  finally {
-    await connection.end()
+    },
+    { maxAge },
+  )
+
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar ?? null,
+    },
   }
 })

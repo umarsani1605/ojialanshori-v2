@@ -1,13 +1,14 @@
 import { and, eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
 
-import * as schema from '~~/server/db/schema'
-import { requireRole } from '~~/server/utils/guard'
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireRole } from '#server/utils/guard'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import { validateRouteIdParams } from '#server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const currentUser = requireRole(event, ['santri'])
-  const id = Number(getRouterParam(event, 'id'))
+  const { id } = await getValidatedRouterParams(event, validateRouteIdParams)
 
   if (!Number.isInteger(id) || id <= 0) {
     throw createError({
@@ -16,42 +17,32 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) {
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
+  }
+
+  const db = useDb(event)
+
+  const post = await db.query.posts.findFirst({
+    where: and(
+      eq(schema.posts.id, id),
+      eq(schema.posts.authorId, currentUser.id),
+    ),
+    columns: {
+      id: true,
+    },
+  })
+
+  if (!post) {
     throw createError({
-      statusCode: 500,
-      statusMessage: 'MYSQL_URL is not configured',
+      statusCode: 403,
+      statusMessage: 'Post tidak ditemukan atau bukan milik Anda',
     })
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
+  await db.delete(schema.posts).where(eq(schema.posts.id, id))
 
-  try {
-    const post = await db.query.posts.findFirst({
-      where: and(
-        eq(schema.posts.id, id),
-        eq(schema.posts.authorId, currentUser.id),
-      ),
-      columns: {
-        id: true,
-      },
-    })
-
-    if (!post) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Post tidak ditemukan atau bukan milik Anda',
-      })
-    }
-
-    await db.delete(schema.posts).where(eq(schema.posts.id, id))
-
-    return {
-      ok: true,
-    }
-  }
-  finally {
-    await connection.end()
+  return {
+    ok: true,
   }
 })

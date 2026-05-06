@@ -1,8 +1,7 @@
 import { asc, eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
 
-import * as schema from '~~/server/db/schema'
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
 
 const fallbackFaqs = [
   {
@@ -61,16 +60,14 @@ Untuk putra dihuni 3-5 orang per kamar sesuai ukuran kamar.`,
   },
 ] as const
 
-export default defineCachedEventHandler(async () => {
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) {
+export default defineCachedEventHandler(async (event) => {
+  if (!isMysqlConfigured(event)) {
     return fallbackFaqs
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
-
   try {
+    const db = useDb(event)
+
     const rows = await db.select({
       question: schema.faqs.question,
       answer: schema.faqs.answer,
@@ -86,8 +83,8 @@ export default defineCachedEventHandler(async () => {
 
     return rows.map(({ question, answer }) => ({ question, answer }))
   }
-  finally {
-    await connection.end()
+  catch {
+    return fallbackFaqs
   }
 }, {
   maxAge: 60,

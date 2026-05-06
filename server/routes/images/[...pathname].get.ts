@@ -1,6 +1,6 @@
 import { blob } from '@nuxthub/blob'
-import { getServerLogger, markErrorLogged, serializeError } from '../../utils/logger'
-import { serveR2MediaObject } from '../../utils/r2Media'
+import { getServerLogger, markErrorLogged, serializeError } from '#server/utils/logger'
+import { serveR2MediaObject } from '#server/utils/r2Media'
 
 export default defineEventHandler(async (event) => {
   const { pathname } = getRouterParams(event)

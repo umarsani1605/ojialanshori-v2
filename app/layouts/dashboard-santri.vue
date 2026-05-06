@@ -1,96 +1,107 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from "@nuxt/ui";
 
-const route = useRoute()
-const auth = useAuth()
+const route = useRoute();
+const auth = useAuth();
 
-const mobileOpen = ref(false)
+const mobileOpen = ref(false);
 
-const firstName = computed(() => auth.user.value?.name?.trim().split(/\s+/)[0] || 'User')
+const writePath = "/dashboard/posts/create";
 
-const navItems = [
-  { label: 'Dashboard', to: '/dashboard', exact: true },
-  { label: 'Post Saya', to: '/dashboard/posts' },
-  { label: 'Profil', to: '/dashboard/profile' },
-] as const
-
-const dropdownItems = computed<DropdownMenuItem[][]>(() => [[
-  {
-    label: 'Profil Saya',
-    icon: 'i-lucide-user',
-    to: '/dashboard/profile',
-  },
-  {
-    label: 'Keluar',
-    icon: 'i-lucide-log-out',
-    color: 'error',
-    onSelect: () => auth.logout(),
-  },
-]])
-
-watch(() => route.path, () => {
-  mobileOpen.value = false
-})
-
-function isActive(to: string, exact = false) {
-  if (exact) {
-    return route.path === to
+const navLinks = computed(() => {
+  const items = [
+    { label: "Dashboard", to: "/dashboard" },
+    { label: "Post Saya", to: "/dashboard/posts" },
+  ];
+  if (auth.isReviewer.value) {
+    items.push({ label: "Antrian Review", to: "/dashboard/review" });
   }
+  items.push({ label: "Profil", to: "/dashboard/profile" });
+  return items;
+});
 
-  return route.path === to || route.path.startsWith(`${to}/`)
+const dropdownItems = computed<DropdownMenuItem[][]>(() => [
+  [
+    {
+      label: "Profil Saya",
+      icon: "i-lucide-user-circle",
+      to: "/dashboard/profile",
+    },
+  ],
+  [
+    {
+      label: "Keluar",
+      icon: "i-lucide-log-out",
+      color: "error",
+      onSelect: () => auth.logout(),
+    },
+  ],
+]);
+
+watch(
+  () => route.path,
+  () => {
+    mobileOpen.value = false;
+  },
+);
+
+function isActive(to: string) {
+  if (to === "/dashboard") {
+    return route.path === "/dashboard";
+  }
+  return route.path === to || route.path.startsWith(`${to}/`);
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-50">
-    <header class="sticky top-0 z-40 h-[60px] border-b border-neutral-200 bg-white">
-      <UContainer class="flex h-full items-center gap-4 px-5">
-        <NuxtLink to="/dashboard" class="shrink-0">
+  <div class="min-h-screen bg-slate-50">
+    <header class="border-b border-default bg-white">
+      <UContainer class="flex h-16 items-center justify-between gap-8">
+        <NuxtLink :to="auth.homePath.value" class="shrink-0 mr-4">
           <img
-            src="/images/logo/logo1.png"
+            src="/images/logo/logo_santri.png"
             alt="Omah Ngaji Al-Anshori"
-            class="h-[42px] w-auto object-contain"
-          >
+            class="h-16 w-auto object-contain"
+          />
         </NuxtLink>
 
-        <div class="hidden min-w-0 flex-1 items-center gap-2 md:flex">
-          <UButton
-            to="/dashboard/posts/create"
-            color="primary"
-            icon="i-lucide-pen-line"
-            size="sm"
-            class="shrink-0"
+        <ul class="hidden items-center gap-2 md:flex">
+          <li
+            v-for="item in navLinks"
+            :key="String(item.to ?? item.label)"
+            class="[&>a]:relative [&>a]:inline-flex [&>a]:h-9 [&>a]:items-center [&>a]:justify-center [&>a]:rounded-lg [&>a]:px-4 [&>a]:py-2 [&>a]:text-sm [&>a]:font-medium [&>a]:text-slate-700 [&>a]:transition-colors [&>a]:hover:text-brand-600 [&>a]:after:content-[''] [&>a]:after:absolute [&>a]:after:bottom-0 [&>a]:after:left-1/4 [&>a]:after:h-[3px] [&>a]:after:w-1/2 [&>a]:after:scale-x-0 [&>a]:after:rounded-full [&>a]:after:bg-brand-500 [&>a]:after:transition-transform [&>a]:after:duration-300 [&>a]:after:ease-in-out [&>a]:hover:after:scale-x-100 [&>a[aria-current=page]]:text-brand-600 [&>a[aria-current=page]]:after:scale-x-100"
           >
-            Tulis Post
-          </UButton>
-
-          <nav class="flex min-w-0 items-center">
             <NuxtLink
-              v-for="item in navItems"
-              :key="item.to"
-              :to="item.to"
-              class="flex h-[60px] items-center border-b-2 px-3.5 text-sm font-medium transition-colors"
-              :class="isActive(item.to, item.exact) ? 'border-primary-500 text-primary-600' : 'border-transparent text-muted hover:text-neutral-900'"
+              :to="item.to as string"
+              :aria-current="isActive(item.to as string) ? 'page' : undefined"
             >
               {{ item.label }}
             </NuxtLink>
-          </nav>
-        </div>
+          </li>
+        </ul>
 
-        <div class="ml-auto hidden items-center md:flex">
+        <div class="hidden md:flex items-center gap-4 ml-auto">
+          <NuxtLink
+            v-if="auth.canWritePosts.value"
+            :to="writePath"
+            class="hidden shrink-0 md:block"
+          >
+            <UButton variant="ghost">
+              <UIcon name="i-lucide-pen-line" size="16" class="mr-1" />
+              Tulis Post
+            </UButton>
+          </NuxtLink>
           <UDropdownMenu :items="dropdownItems" :ui="{ content: 'min-w-52' }">
-            <button
-              type="button"
-              class="flex items-center gap-2 rounded-lg border border-neutral-200 px-2 py-1 transition-colors hover:bg-neutral-100"
-            >
+            <UButton variant="ghost" trailing-icon="i-lucide-chevron-down">
               <AppAvatar
                 :name="auth.user.value?.name"
                 :src="auth.user.value?.avatar"
                 size="xs"
               />
-              <span class="text-sm font-medium">{{ firstName }}</span>
-              <UIcon name="i-lucide-chevron-down" class="size-4 text-muted" />
-            </button>
+              <span class="text-sm font-medium">{{
+                auth.user.value?.name
+              }}</span>
+            </UButton>
           </UDropdownMenu>
         </div>
 
@@ -112,13 +123,15 @@ function isActive(to: string, exact = false) {
     >
       <template #content>
         <div class="flex h-full flex-col bg-white">
-          <div class="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-            <NuxtLink to="/dashboard" class="shrink-0">
+          <div
+            class="flex items-center justify-between border-b border-default px-5 py-4"
+          >
+            <NuxtLink :to="auth.homePath.value" class="shrink-0">
               <img
                 src="/images/logo/logo1.png"
                 alt="Omah Ngaji Al-Anshori"
                 class="h-10 w-auto object-contain"
-              >
+              />
             </NuxtLink>
 
             <UButton
@@ -131,67 +144,72 @@ function isActive(to: string, exact = false) {
           </div>
 
           <div class="flex flex-1 flex-col px-5 py-5">
-            <UButton
-              to="/dashboard/posts/create"
-              color="primary"
-              icon="i-lucide-pen-line"
-              class="justify-center"
-            >
-              Tulis Post
-            </UButton>
-
-            <nav class="mt-5 flex flex-col border-t border-neutral-200 pt-3">
+            <nav class="flex flex-col gap-1">
               <NuxtLink
-                v-for="item in navItems"
-                :key="item.to"
-                :to="item.to"
-                class="rounded-lg px-3 py-3 text-sm font-medium transition-colors"
-                :class="isActive(item.to, item.exact) ? 'bg-primary-50 text-primary-600' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'"
+                v-if="auth.canWritePosts.value"
+                :to="writePath"
+                class="mb-1"
+              >
+                <UButton
+                  size="sm"
+                  color="primary"
+                  variant="solid"
+                  icon="i-lucide-pen-line"
+                  class="w-full justify-center"
+                >
+                  Tulis Post
+                </UButton>
+              </NuxtLink>
+              <NuxtLink
+                v-for="item in navLinks"
+                :key="String(item.to ?? item.label)"
+                :to="item.to as string"
+                class="rounded-md px-3 py-3 text-sm transition-colors"
+                :class="
+                  isActive(item.to as string)
+                    ? 'bg-primary/8 text-primary font-medium'
+                    : 'text-muted hover:text-default hover:bg-slate-50'
+                "
               >
                 {{ item.label }}
               </NuxtLink>
             </nav>
 
-            <div class="mt-auto border-t border-neutral-200 pt-4">
-              <div class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3">
+            <div class="mt-auto border-t border-default pt-4">
+              <div
+                class="flex items-center gap-3 rounded-xl bg-slate-100/70 p-3"
+              >
                 <AppAvatar
                   :name="auth.user.value?.name"
                   :src="auth.user.value?.avatar"
                   size="sm"
                 />
                 <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-semibold">{{ auth.user.value?.name }}</p>
-                  <p class="truncate text-xs text-dimmed">{{ auth.user.value?.email }}</p>
+                  <p class="truncate text-sm font-medium">
+                    {{ auth.user.value?.name }}
+                  </p>
+                  <p class="truncate text-xs text-dimmed">
+                    {{ auth.user.value?.email }}
+                  </p>
                 </div>
               </div>
 
-              <div class="mt-3 flex flex-col gap-2">
-                <UButton
-                  to="/dashboard/profile"
-                  color="neutral"
-                  variant="outline"
-                  icon="i-lucide-user"
-                  class="justify-center"
-                >
-                  Profil Saya
-                </UButton>
-                <UButton
-                  color="error"
-                  variant="ghost"
-                  icon="i-lucide-log-out"
-                  class="justify-center"
-                  @click="auth.logout()"
-                >
-                  Keluar
-                </UButton>
-              </div>
+              <UButton
+                color="error"
+                variant="ghost"
+                icon="i-lucide-log-out"
+                class="mt-3 w-full justify-center"
+                @click="auth.logout()"
+              >
+                Keluar
+              </UButton>
             </div>
           </div>
         </div>
       </template>
     </USlideover>
 
-    <main class="min-h-[calc(100vh-60px)] bg-neutral-50">
+    <main class="py-6 md:py-8">
       <slot />
     </main>
   </div>

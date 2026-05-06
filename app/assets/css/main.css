@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap");
 
-@import 'tailwindcss';
-@import '@nuxt/ui';
+@import "tailwindcss";
+@import "@nuxt/ui";
 
 @theme static {
-  --font-sans: 'Rubik', sans-serif;
-  --font-display: 'Poppins', sans-serif;
-  --font-ui: 'Rubik', sans-serif;
+  --font-sans: "Rubik", sans-serif;
+  --font-sans: "Rubik", sans-serif;
+  --font-ui: "Rubik", sans-serif;
 
   /* Brand palette — sourced from ojialanshori.com */
   --color-brand-50: #f0fdf2;
@@ -38,7 +38,12 @@
     font-family: var(--font-sans);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
@@ -56,42 +61,13 @@
   font-family: var(--font-ui);
 }
 
-.table-primary {
-  @apply min-w-full;
-}
-
-.table-primary th {
-  @apply px-4 py-4 text-left font-semibold bg-slate-50/50 border-b text-[14px] border-default;
-}
-
-.table-primary td {
-  @apply px-4 py-4 border-b border-default text-[14px] align-top;
-}
-
-.table-primary tbody tr:last-child td {
-  @apply border-b-0;
-}
-
-/* Zebra */
-.table-primary tbody tr:nth-child(even) {
-  @apply bg-white;
-}
-
-.table-primary tbody tr:nth-child(odd) {
-  @apply bg-white;
-}
-
-.table-primary tbody tr:hover {
-  @apply bg-gray-50/50;
-}
-
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
 /* Firefox */
-input[type='number'] {
+input[type="number"] {
   -moz-appearance: textfield;
 }

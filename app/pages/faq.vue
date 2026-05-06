@@ -2,19 +2,19 @@
 type FaqItem = {
   question: string;
   answer: string;
-}
+};
 
-const { data: faqs, error } = await useFetch<FaqItem[]>('/api/public/faqs', {
-  key: 'public-faqs',
+const { data: faqs, error } = await useFetch<FaqItem[]>("/api/public/faqs", {
+  key: "public-faqs",
   default: () => [],
-})
+});
 
 if (error.value) {
   throw createError({
     statusCode: 500,
-    statusMessage: 'Failed to load FAQ items',
+    statusMessage: "Failed to load FAQ items",
     cause: error.value,
-  })
+  });
 }
 
 const accordionItems = computed(() =>
@@ -23,12 +23,12 @@ const accordionItems = computed(() =>
     content: item.answer,
     value: `faq-${index}`,
   })),
-)
+);
 
 useSeoMeta({
-  title: 'Frequently Asked Questions',
-  description: 'Pertanyaan yang sering diajukan tentang Omah Ngaji Al-Anshori.',
-})
+  title: "Frequently Asked Questions",
+  description: "Pertanyaan yang sering diajukan tentang Omah Ngaji Al-Anshori.",
+});
 </script>
 
 <template>
@@ -40,15 +40,11 @@ useSeoMeta({
         <UAccordion
           v-if="accordionItems.length > 0"
           :items="accordionItems"
-          default-value="faq-0"
-          :unmount-on-hide="false"
           :ui="{
-            root: 'space-y-5',
-            item: 'rounded-3xl border border-default bg-white px-5 md:px-6',
-            trigger: 'py-5 text-left text-lg font-semibold hover:text-brand-600 transition-colors',
-            label: 'leading-8',
-            content: 'pb-6',
-            body: 'whitespace-pre-line text-base leading-8 text-muted',
+            root: 'space-y-4',
+            item: 'rounded-2xl border border-default bg-white px-5 md:px-6 border-b!',
+            trigger: 'cursor-pointer text-lg',
+            body: 'text-base',
           }"
         />
 

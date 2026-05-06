@@ -1,81 +1,50 @@
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
 import { eq, or } from 'drizzle-orm'
-import * as schema from '~~/server/db/schema'
-import type { Role } from '~~/server/db/schema'
 
-const VALID_ROLES: Role[] = ['superadmin', 'pengurus', 'reviewer', 'santri']
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireSuperadmin } from '#server/utils/guard'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import { validateDashboardUserCreateBody } from '#server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   requireSuperadmin(event)
 
-  const body = await readBody<{
-    name?: string
-    username?: string
-    email?: string
-    role?: Role
-    password?: string
-  }>(event)
+  const { name, username, email, role, password } = await readValidatedBody(event, validateDashboardUserCreateBody)
 
-  const name = body.name?.trim()
-  const username = body.username?.trim()
-  const email = body.email?.trim().toLowerCase()
-  const role = body.role
-  const password = body.password
-
-  if (!name || !username || !email || !role || !password) {
-    throw createError({ statusCode: 400, message: 'Semua field wajib diisi.' })
-  }
-  if (!EMAIL_REGEX.test(email)) {
-    throw createError({ statusCode: 400, message: 'Format email tidak valid.' })
-  }
-  if (!VALID_ROLES.includes(role)) {
-    throw createError({ statusCode: 400, message: 'Role tidak valid.' })
-  }
-  if (password.length < 8) {
-    throw createError({ statusCode: 400, message: 'Password minimal 8 karakter.' })
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
   }
 
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) throw createError({ statusCode: 500, message: 'Database tidak terkonfigurasi.' })
+  const db = useDb(event)
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
-
-  try {
-    const existing = await db.query.users.findFirst({
-      where: or(eq(schema.users.email, email), eq(schema.users.username, username)),
-    })
-    if (existing) {
-      if (existing.email === email) {
-        throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
-      }
-      throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
+  const existing = await db.query.users.findFirst({
+    where: or(eq(schema.users.email, email), eq(schema.users.username, username)),
+  })
+  if (existing) {
+    if (existing.email === email) {
+      throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
     }
-
-    const passwordHash = await hashUserPassword(password)
-
-    const result = await db.insert(schema.users).values({
-      name,
-      username,
-      email,
-      passwordHash,
-      passwordType: 'bcrypt',
-      role,
-      avatar: null,
-      isActive: true,
-    })
-
-    const newId = result[0].insertId
-    const user = await db.query.users.findFirst({
-      where: eq(schema.users.id, newId),
-      columns: { passwordHash: false, passwordType: false },
-    })
-
-    return { user }
+    throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
   }
-  finally {
-    await connection.end()
-  }
+
+  const passwordHash = await hashUserPassword(password)
+
+  const result = await db.insert(schema.users).values({
+    name,
+    username,
+    email,
+    passwordHash,
+    passwordType: 'bcrypt',
+    role,
+    avatar: null,
+    isActive: true,
+  })
+
+  const newId = result[0].insertId
+  const user = await db.query.users.findFirst({
+    where: eq(schema.users.id, newId),
+    columns: { passwordHash: false, passwordType: false },
+  })
+
+  return { user }
 })

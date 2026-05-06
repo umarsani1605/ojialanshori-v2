@@ -95,7 +95,7 @@ const dropdownItems = computed(() => [
       label: auth.user.value?.name || 'Profil',
       icon: 'i-lucide-circle-user-round',
       slot: 'profile',
-      onSelect: () => navigateTo('/dashboard/profile'),
+      onSelect: () => navigateTo(auth.profilePath.value),
     },
   ],
   [

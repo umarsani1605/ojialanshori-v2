@@ -20,41 +20,35 @@ const href = computed(
   () => `${props.basePath ?? "/berita"}/${props.post.slug}`,
 );
 
-const dateFormatted = computed(() => {
-  const date = props.post.publishedAt ?? props.post.createdAt;
-  return new Date(date).toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-});
+const dateFormatted = computed(() =>
+  formatDateLong(props.post.publishedAt ?? props.post.createdAt),
+);
 </script>
 
 <template>
   <NuxtLink :to="href" class="group flex flex-col">
-    <div class="aspect-[16/10] bg-neutral-100 rounded-2xl overflow-hidden">
+    <div class="aspect-3/2 bg-slate-100 rounded-2xl overflow-hidden">
       <NuxtImg
         v-if="post.featuredImage"
         :src="post.featuredImage"
         :alt="post.title"
         loading="lazy"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
       />
       <div
         v-else
-        class="w-full h-full flex items-center justify-center text-neutral-400"
+        class="w-full h-full flex items-center justify-center text-slate-400"
       >
         <UIcon name="i-lucide-image" class="size-10" />
       </div>
     </div>
     <h3
-      class="text-xl font-bold leading-snug line-clamp-2 mt-6 transition-colors group-hover:text-primary"
+      class="text-xl font-bold line-clamp-2 mt-6 transition-colors group-hover:text-primary"
     >
       {{ post.title }}
     </h3>
-    <p class="text-base text-slate-500 mt-4">
-      {{ dateFormatted }}
-    </p>
+    <div class="text-base text-slate-500 mt-4">
+      <span>{{ post.authorName }} • {{ dateFormatted }}</span>
+    </div>
   </NuxtLink>
 </template>

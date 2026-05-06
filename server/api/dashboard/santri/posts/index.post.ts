@@ -1,32 +1,27 @@
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
-
-import * as schema from '~~/server/db/schema'
-import { requireRole } from '~~/server/utils/guard'
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireRole } from '#server/utils/guard'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import {
   assertDraftPayload,
   ensureCategoryExists,
   generateUniquePostSlug,
-  parseSantriPostPayload,
   syncPostTags,
-} from '~~/server/utils/santriPostEditor'
+} from '#server/utils/santriPostEditor'
+import { validateSantriPostBody } from '#server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const currentUser = requireRole(event, ['santri'])
-  const payload = parseSantriPostPayload(await readBody(event))
+  const payload = await readValidatedBody(event, validateSantriPostBody)
 
   assertDraftPayload(payload)
 
-  const mysqlUrl = process.env.MYSQL_URL
-  if (!mysqlUrl) {
-    throw createError({ statusCode: 500, statusMessage: 'MYSQL_URL is not configured' })
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
   }
 
-  const connection = await mysql.createConnection(mysqlUrl)
-  const db = drizzle(connection, { schema, casing: 'snake_case', mode: 'default' })
-
-  try {
-    await ensureCategoryExists(db, payload.categoryId)
+  const db = useDb(event)
+  await ensureCategoryExists(db, payload.categoryId)
 
     const slug = await generateUniquePostSlug(db, payload.title)
     const result = await db.insert(schema.posts).values({
@@ -40,16 +35,12 @@ export default defineEventHandler(async (event) => {
       status: 'draft',
     })
 
-    const postId = Number(result.insertId)
+    const postId = result[0].insertId
     await syncPostTags(db, postId, payload.tags)
 
-    return {
-      id: postId,
-      slug,
-      status: 'draft',
-    }
-  }
-  finally {
-    await connection.end()
+  return {
+    id: postId,
+    slug,
+    status: 'draft',
   }
 })

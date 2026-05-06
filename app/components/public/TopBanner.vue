@@ -32,7 +32,7 @@ function dismiss() {
     v-if="visible && banner"
     class="bg-brand-300 text-white text-sm font-ui"
   >
-    <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-3 relative">
+    <div class="mx-auto flex max-w-7xl items-center justify-center gap-3 px-6 py-2.5 md:px-8 lg:px-10 relative">
       <p class="text-center italic">
         {{ banner.text }}
         <NuxtLink

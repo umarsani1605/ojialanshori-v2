@@ -1,8 +1,11 @@
 <script setup lang="ts">
-const { data: settings } = await useFetch<Record<string, string>>('/api/public/settings', {
-  key: 'public-settings',
-  default: () => ({}),
-})
+const { data: settings } = await useFetch<Record<string, string>>(
+  "/api/public/settings",
+  {
+    key: "public-settings",
+    default: () => ({}),
+  },
+);
 </script>
 
 <template>
