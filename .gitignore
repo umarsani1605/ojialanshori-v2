@@ -35,5 +35,7 @@ scripts/migrate-users-map.json
 .aidesigner/*
 !.aidesigner/.gitkeep
 
-docs
+docs/**
+!docs/superpowers/
+!docs/superpowers/**
 .claude/worktrees
