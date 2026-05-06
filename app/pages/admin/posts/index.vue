@@ -76,19 +76,19 @@ const UBadge = resolveComponent("UBadge");
 
 const columns: TableColumn<AdminPost>[] = [
   {
-    key: "title",
-    label: "Judul",
+    accessorKey: "title",
+    header: "Judul",
     cell: ({ row }) =>
       h("span", { class: "font-medium line-clamp-2" }, row.original.title),
   },
   {
-    key: "author",
-    label: "Penulis",
+    accessorKey: "author",
+    header: "Penulis",
     cell: ({ row }) => h("span", {}, row.original.author.name),
   },
   {
-    key: "status",
-    label: "Status",
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) =>
       h(UBadge, {
         label: STATUS_LABEL[row.original.status] ?? row.original.status,
@@ -97,16 +97,16 @@ const columns: TableColumn<AdminPost>[] = [
       }),
   },
   {
-    key: "category",
-    label: "Kategori",
+    accessorKey: "category",
+    header: "Kategori",
     cell: ({ row }) =>
       row.original.category
         ? h("span", {}, row.original.category.name)
         : h("span", { class: "text-muted" }, "—"),
   },
   {
-    key: "updatedAt",
-    label: "Diperbarui",
+    accessorKey: "updatedAt",
+    header: "Diperbarui",
     cell: ({ row }) =>
       h(
         "span",

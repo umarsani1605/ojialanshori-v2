@@ -44,19 +44,19 @@ const UButton = resolveComponent("UButton");
 
 const columns: TableColumn<QueuePost>[] = [
   {
-    key: "title",
-    label: "Judul",
+    accessorKey: "title",
+    header: "Judul",
     cell: ({ row }) =>
       h("span", { class: "font-medium line-clamp-2" }, row.original.title),
   },
   {
-    key: "author",
-    label: "Penulis",
+    accessorKey: "author",
+    header: "Penulis",
     cell: ({ row }) => h("span", {}, row.original.author.name),
   },
   {
-    key: "category",
-    label: "Kategori",
+    accessorKey: "category",
+    header: "Kategori",
     cell: ({ row }) =>
       row.original.category
         ? h(UBadge, {
@@ -68,8 +68,8 @@ const columns: TableColumn<QueuePost>[] = [
         : h("span", { class: "text-muted" }, "—"),
   },
   {
-    key: "updatedAt",
-    label: "Dikirim",
+    accessorKey: "updatedAt",
+    header: "Dikirim",
     cell: ({ row }) =>
       h(
         "span",
@@ -82,8 +82,8 @@ const columns: TableColumn<QueuePost>[] = [
       ),
   },
   {
-    key: "actions",
-    label: "",
+    accessorKey: "id",
+    header: "",
     cell: ({ row }) =>
       h(UButton, {
         label: "Buka",
