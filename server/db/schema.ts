@@ -60,8 +60,9 @@ export const posts = mysqlTable('posts', {
   featuredImage: varchar({ length: 500 }),
   categoryId: int().references(() => categories.id),
   authorId: int().notNull().references(() => users.id),
+  reviewedBy: int().references(() => users.id),
   status: mysqlEnum(['draft', 'pending_review', 'published', 'rejected']).notNull().default('draft'),
-  rejectionNote: text(),
+  reviewNote: longtext(),
   publishedAt: timestamp(),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
@@ -143,7 +144,8 @@ export const postTags = mysqlTable('post_tags', {
 // ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
-  posts: many(posts),
+  posts: many(posts, { relationName: 'authoredPosts' }),
+  reviewedPosts: many(posts, { relationName: 'reviewedPosts' }),
 }))
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -164,6 +166,12 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   author: one(users, {
     fields: [posts.authorId],
     references: [users.id],
+    relationName: 'authoredPosts',
+  }),
+  reviewer: one(users, {
+    fields: [posts.reviewedBy],
+    references: [users.id],
+    relationName: 'reviewedPosts',
   }),
   postTags: many(postTags),
 }))
