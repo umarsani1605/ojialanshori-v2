@@ -27,7 +27,8 @@ type EditorPost = {
   featuredImage: string | null;
   categoryId: number | null;
   status: "draft" | "pending_review" | "published" | "rejected";
-  rejectionNote: string | null;
+  reviewNote: string | null;
+  reviewer: { id: number; name: string } | null;
   tags: string[];
 };
 
@@ -56,7 +57,8 @@ const form = reactive({
 });
 
 const currentStatus = ref<EditorPost["status"]>("draft");
-const rejectionNote = ref<string | null>(null);
+const reviewNote = ref<string | null>(null);
+const reviewerName = ref<string | null>(null);
 const loadingAction = ref<"draft" | "submit" | null>(null);
 const uploadingEditorImage = ref(false);
 const coverInputKey = ref(0);
@@ -387,7 +389,8 @@ watch(
     form.featuredImage = post.featuredImage;
     form.tags = [...post.tags];
     currentStatus.value = post.status;
-    rejectionNote.value = post.rejectionNote;
+    reviewNote.value = post.reviewNote;
+    reviewerName.value = post.reviewer?.name ?? null;
 
     if (post.status === "pending_review" && import.meta.client) {
       toast.add({
@@ -588,7 +591,7 @@ async function saveDraft({
         );
 
     currentStatus.value = response.status;
-    rejectionNote.value = null;
+    reviewNote.value = null;
 
     if (!isEdit.value && redirectAfterCreate) {
       await router.replace(`/dashboard/posts/${response.id}/edit`);
@@ -650,7 +653,7 @@ async function submitReview() {
     );
 
     currentStatus.value = response.status;
-    rejectionNote.value = null;
+    reviewNote.value = null;
 
     toast.add({
       title:
@@ -796,13 +799,19 @@ async function submitReview() {
 
         <aside class="min-w-0 h-full">
           <UAlert
-            v-if="currentStatus === 'rejected' && rejectionNote"
+            v-if="currentStatus === 'rejected' && reviewNote"
             color="error"
             variant="subtle"
             icon="i-lucide-triangle-alert"
             title="Catatan Penolakan"
-            :description="rejectionNote"
-          />
+          >
+            <template #description>
+              <p v-if="reviewerName" class="text-xs text-muted mb-2">
+                Direview oleh: <strong>{{ reviewerName }}</strong>
+              </p>
+              <div class="prose prose-sm max-w-none" v-html="reviewNote" />
+            </template>
+          </UAlert>
 
           <UCard
             class="h-full"
