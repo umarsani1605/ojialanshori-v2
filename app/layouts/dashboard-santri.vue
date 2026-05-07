@@ -82,7 +82,7 @@ function isActive(to: string) {
 
         <div class="hidden md:flex items-center gap-4">
           <NuxtLink
-            v-if="auth.canWritePosts.value"
+            v-if="auth.canWritePenaSantri.value"
             :to="writePath"
             class="hidden shrink-0 md:block"
           >
@@ -146,7 +146,7 @@ function isActive(to: string) {
           <div class="flex flex-1 flex-col px-5 py-5">
             <nav class="flex flex-col gap-1">
               <NuxtLink
-                v-if="auth.canWritePosts.value"
+                v-if="auth.canWritePenaSantri.value"
                 :to="writePath"
                 class="mb-1"
               >
