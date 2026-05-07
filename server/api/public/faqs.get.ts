@@ -1,7 +1,5 @@
-import { asc, eq } from 'drizzle-orm'
-
-import * as schema from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { getPublicFaqList } from '#server/services/public/publicContentService'
 
 const fallbackFaqs = [
   {
@@ -61,26 +59,11 @@ Untuk putra dihuni 3-5 orang per kamar sesuai ukuran kamar.`,
 ] as const
 
 export default defineCachedEventHandler(async (event) => {
-  if (!isMysqlConfigured(event)) {
-    return fallbackFaqs
-  }
+  if (!isMysqlConfigured(event)) return fallbackFaqs
 
   try {
-    const db = useDb(event)
-
-    const rows = await db.select({
-      question: schema.faqs.question,
-      answer: schema.faqs.answer,
-      order: schema.faqs.order,
-    })
-      .from(schema.faqs)
-      .where(eq(schema.faqs.isActive, true))
-      .orderBy(asc(schema.faqs.order), asc(schema.faqs.id))
-
-    if (rows.length === 0) {
-      return fallbackFaqs
-    }
-
+    const rows = await getPublicFaqList(useDb(event))
+    if (rows.length === 0) return fallbackFaqs
     return rows.map(({ question, answer }) => ({ question, answer }))
   }
   catch {
