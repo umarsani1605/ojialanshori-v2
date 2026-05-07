@@ -22,7 +22,7 @@ type CategoryForm = {
 
 const toast = useToast()
 
-const { data, refresh } = await useFetch<{ data: Category[] }>('/api/admin/categories')
+const { data, refresh } = useLazyFetch<{ data: Category[] }>('/api/admin/categories')
 const categories = computed(() => data.value?.data ?? [])
 
 const typeFilter = ref<CategoryType | 'all'>('all')
@@ -218,91 +218,65 @@ const typeSelectOptions = [
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
-    <div>
-      <h1 class="text-xl font-semibold">Kategori</h1>
-      <p class="text-muted text-sm mt-1">Kelola kategori artikel berita dan pena santri.</p>
-    </div>
+  <AdminDataTable :data="filteredCategories" :columns="columns">
+    <template #toolbar-left>
+      <UInput v-model="search" placeholder="Cari kategori…" icon="i-ph-magnifying-glass-bold" class="w-52" />
+      <USelect v-model="typeFilter" :items="typeFilterOptions" value-key="value" label-key="label" class="w-44" />
+    </template>
+    <template #toolbar-right>
+      <UButton label="Tambah Kategori" icon="i-ph-plus-bold" @click="openCreate" />
+    </template>
+  </AdminDataTable>
 
-    <AdminDataTable :data="filteredCategories" :columns="columns">
-      <template #header>
-        <div class="flex flex-wrap items-center gap-3 justify-between">
-          <div class="flex items-center gap-3">
-            <UInput
-              v-model="search"
-              placeholder="Cari kategori…"
-              icon="i-lucide-search"
-              class="w-52"
-            />
-            <USelect
-              v-model="typeFilter"
-              :items="typeFilterOptions"
-              value-key="value"
-              label-key="label"
-              class="w-44"
-            />
-          </div>
-          <UButton
-            label="Tambah Kategori"
-            icon="i-lucide-plus"
-            @click="openCreate"
+  <UModal v-model:open="isModalOpen" :title="editingId ? 'Edit Kategori' : 'Tambah Kategori'">
+    <template #body>
+      <div class="space-y-4">
+        <UFormField label="Nama" required>
+          <UInput v-model="form.name" placeholder="Nama kategori" class="w-full" @input="onNameInput" />
+        </UFormField>
+        <UFormField label="Slug" required>
+          <UInput v-model="form.slug" placeholder="slug-kategori" class="w-full" @input="onSlugInput" />
+        </UFormField>
+        <UFormField label="Tipe" required>
+          <USelect
+            v-model="form.type"
+            :items="typeSelectOptions"
+            value-key="value"
+            label-key="label"
+            placeholder="Pilih tipe…"
+            class="w-full"
+            @update:model-value="form.parentId = null"
           />
-        </div>
-      </template>
-    </AdminDataTable>
+        </UFormField>
+        <UFormField label="Parent (opsional)">
+          <USelect
+            v-model="form.parentId"
+            :items="parentOptions"
+            value-key="value"
+            label-key="label"
+            class="w-full"
+            :disabled="!form.type"
+          />
+        </UFormField>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
+        <UButton label="Simpan" :loading="saving" @click="save" />
+      </div>
+    </template>
+  </UModal>
 
-    <!-- Create/Edit Modal -->
-    <UModal v-model:open="isModalOpen" :title="editingId ? 'Edit Kategori' : 'Tambah Kategori'">
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Nama" required>
-            <UInput v-model="form.name" placeholder="Nama kategori" class="w-full" @input="onNameInput" />
-          </UFormField>
-          <UFormField label="Slug" required>
-            <UInput v-model="form.slug" placeholder="slug-kategori" class="w-full" @input="onSlugInput" />
-          </UFormField>
-          <UFormField label="Tipe" required>
-            <USelect
-              v-model="form.type"
-              :items="typeSelectOptions"
-              value-key="value"
-              label-key="label"
-              placeholder="Pilih tipe…"
-              class="w-full"
-              @update:model-value="form.parentId = null"
-            />
-          </UFormField>
-          <UFormField label="Parent (opsional)">
-            <USelect
-              v-model="form.parentId"
-              :items="parentOptions"
-              value-key="value"
-              label-key="label"
-              class="w-full"
-              :disabled="!form.type"
-            />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-          <UButton label="Simpan" :loading="saving" @click="save" />
-        </div>
-      </template>
-    </UModal>
-
-    <!-- Delete Confirm Modal -->
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus Kategori">
-      <template #body>
-        <p class="text-sm">Apakah kamu yakin ingin menghapus kategori ini? Kategori tidak bisa dihapus jika masih digunakan oleh artikel atau memiliki sub-kategori.</p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
-          <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
-        </div>
-      </template>
-    </UModal>
-  </div>
+  <UModal v-model:open="isDeleteModalOpen" title="Hapus Kategori">
+    <template #body>
+      <p class="text-sm">Apakah kamu yakin ingin menghapus kategori ini? Kategori tidak bisa dihapus jika masih digunakan oleh artikel atau memiliki sub-kategori.</p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
+        <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
+      </div>
+    </template>
+  </UModal>
 </template>

@@ -2,6 +2,7 @@
 definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
+  navbarTitle: 'Users',
 })
 </script>
 

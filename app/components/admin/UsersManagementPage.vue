@@ -2,6 +2,7 @@
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { RoleColor } from "~/constants/roleDisplay";
+import { roleColorMap, roleLabelMap } from "~/constants/roleDisplay";
 
 type Role = "admin" | "reviewer" | "santri";
 
@@ -16,76 +17,63 @@ type User = {
   createdAt: string;
 };
 
-type ListResponse = {
-  data: User[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
-
 const auth = useAuth();
 const toast = useToast();
 
+const PAGE_SIZE = 20;
+const page = ref(1);
+
 const filters = reactive({
-  role: undefined as Role | undefined,
-  status: undefined as "active" | "inactive" | undefined,
+  role: "" as Role | "",
+  status: "" as "active" | "inactive" | "",
   search: "",
 });
-const page = ref(1);
-const limit = 20;
 
-const searchDebounced = ref(filters.search);
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
-watch(
-  () => filters.search,
-  (val) => {
-    if (searchTimer) clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      searchDebounced.value = val;
-      page.value = 1;
-    }, 300);
-  },
-);
-
-watch([() => filters.role, () => filters.status], () => {
+watch([() => filters.role, () => filters.status, () => filters.search], () => {
   page.value = 1;
 });
 
-const queryParams = computed(() => ({
-  page: page.value,
-  limit,
-  ...(filters.role ? { role: filters.role } : {}),
-  ...(filters.status ? { status: filters.status } : {}),
-  ...(searchDebounced.value ? { search: searchDebounced.value } : {}),
-}));
-
-const { data, status, refresh } = await useFetch<ListResponse>(
+const { data, status, refresh } = useLazyFetch<{ data: User[] }>(
   "/api/dashboard/users",
-  {
-    query: queryParams,
-  },
 );
 
 const users = computed(() => data.value?.data ?? []);
-const pagination = computed(
-  () => data.value?.pagination ?? { page: 1, limit, total: 0, totalPages: 0 },
-);
 
-const roleOptions: { label: string; value: Role | undefined }[] = [
-  { label: "Semua role", value: undefined },
+const filteredUsers = computed(() => {
+  let result = users.value;
+  if (filters.role) {
+    result = result.filter((u) => u.role === filters.role);
+  }
+  if (filters.status) {
+    const active = filters.status === "active";
+    result = result.filter((u) => u.isActive === active);
+  }
+  if (filters.search.trim()) {
+    const q = filters.search.toLowerCase();
+    result = result.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.username.toLowerCase().includes(q),
+    );
+  }
+  return result;
+});
+
+const total = computed(() => filteredUsers.value.length);
+
+const paginatedUsers = computed(() => {
+  const start = (page.value - 1) * PAGE_SIZE;
+  return filteredUsers.value.slice(start, start + PAGE_SIZE);
+});
+
+const roleOptions: { label: string; value: Role }[] = [
   { label: "Administrator", value: "admin" },
   { label: "Reviewer", value: "reviewer" },
   { label: "Santri", value: "santri" },
 ];
 
-const statusOptions: {
-  label: string;
-  value: "active" | "inactive" | undefined;
-}[] = [
-  { label: "Semua status", value: undefined },
+const statusOptions: { label: string; value: "active" | "inactive" }[] = [
   { label: "Aktif", value: "active" },
   { label: "Nonaktif", value: "inactive" },
 ];
@@ -252,7 +240,6 @@ async function runConfirm() {
   }
 }
 
-
 function isSelf(user: User) {
   return auth.user.value?.id === user.id;
 }
@@ -269,22 +256,10 @@ const columns: TableColumn<User>[] = [
     cell: ({ row }) => {
       const u = row.original;
       return h("div", { class: "flex items-center gap-3" }, [
-        h(AppAvatar, {
-          name: u.name,
-          src: u.avatar,
-          size: "sm",
-        }),
+        h(AppAvatar, { name: u.name, src: u.avatar, size: "sm" }),
         h("div", { class: "min-w-0" }, [
-          h(
-            "p",
-            { class: "text-sm font-medium text-slate-800 truncate" },
-            u.name,
-          ),
-          h(
-            "p",
-            { class: "text-xs text-slate-500 truncate" },
-            `@${u.username}`,
-          ),
+          h("p", { class: "text-sm font-medium truncate" }, u.name),
+          h("p", { class: "text-xs text-muted truncate" }, `@${u.username}`),
         ]),
       ]);
     },
@@ -293,7 +268,7 @@ const columns: TableColumn<User>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) =>
-      h("span", { class: "text-sm text-slate-700" }, row.original.email),
+      h("span", { class: "text-sm" }, row.original.email),
   },
   {
     accessorKey: "role",
@@ -327,11 +302,7 @@ const columns: TableColumn<User>[] = [
     accessorKey: "createdAt",
     header: "Bergabung",
     cell: ({ row }) =>
-      h(
-        "span",
-        { class: "text-sm text-slate-500" },
-        formatDate(row.original.createdAt),
-      ),
+      h("span", { class: "text-sm text-muted" }, formatDate(row.original.createdAt)),
   },
   {
     id: "actions",
@@ -378,11 +349,7 @@ const columns: TableColumn<User>[] = [
 
       const wrap = (btn: ReturnType<typeof h>) =>
         self
-          ? h(
-              UTooltip,
-              { text: "Tidak tersedia untuk akun sendiri" },
-              () => btn,
-            )
+          ? h(UTooltip, { text: "Tidak tersedia untuk akun sendiri" }, () => btn)
           : btn;
 
       return h("div", { class: "flex justify-end gap-1" }, [
@@ -396,84 +363,72 @@ const columns: TableColumn<User>[] = [
 </script>
 
 <template>
-  <AppContent title="Manajemen User">
-    <template #action>
-      <UButton
-        icon="i-lucide-user-plus"
-        color="primary"
-        size="sm"
-        @click="openCreate"
-      >
-        Tambah User
-      </UButton>
+  <UCard
+    class="shadow-none!"
+    :ui="{
+      root: 'ring-transparent divide-y divide-default overflow-hidden',
+      header: 'px-4 py-3',
+      footer: 'px-4 py-3',
+    }"
+  >
+    <template #header>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <UInput
+            v-model="filters.search"
+            placeholder="Cari nama atau email…"
+            icon="i-ph-magnifying-glass-bold"
+            class="w-full sm:w-64"
+          />
+          <USelect
+            v-model="filters.role"
+            :items="roleOptions"
+            value-key="value"
+            placeholder="Semua role"
+            class="w-40"
+          />
+          <USelect
+            v-model="filters.status"
+            :items="statusOptions"
+            value-key="value"
+            placeholder="Semua status"
+            class="w-40"
+          />
+        </div>
+        <UButton icon="i-ph-user-plus-bold" @click="openCreate">
+          Tambah User
+        </UButton>
+      </div>
     </template>
 
-    <div class="p-6 space-y-4">
-      <!-- Filters -->
-      <div class="flex flex-col sm:flex-row gap-3">
-        <UInput
-          v-model="filters.search"
-          placeholder="Cari nama atau email…"
-          icon="i-lucide-search"
-          class="sm:w-72"
-        />
-        <USelect
-          v-model="filters.role"
-          :items="roleOptions"
-          value-key="value"
-          placeholder="Semua role"
-          class="sm:w-48"
-        />
-        <USelect
-          v-model="filters.status"
-          :items="statusOptions"
-          value-key="value"
-          placeholder="Semua status"
-          class="sm:w-48"
-        />
-      </div>
-
-      <!-- Table -->
-      <UCard :ui="{ body: 'p-0 sm:p-0' }">
-        <template v-if="status === 'pending'">
-          <div class="flex items-center justify-center py-16">
-            <UIcon
-              name="i-lucide-loader-circle"
-              class="animate-spin text-slate-400 text-2xl"
-            />
-          </div>
-        </template>
-        <template v-else-if="users.length === 0">
-          <div class="py-16 text-center text-sm text-slate-500">
-            Tidak ada user yang cocok dengan filter.
-          </div>
-        </template>
-        <template v-else>
-          <UTable
-            :data="users"
-            :columns="columns"
-            :ui="{ th: 'text-xs', td: 'align-middle' }"
-          />
-        </template>
-      </UCard>
-
-      <!-- Pagination -->
-      <div
-        v-if="pagination.totalPages > 1"
-        class="flex items-center justify-between"
+    <div class="overflow-x-auto">
+      <UTable
+        :data="paginatedUsers"
+        :columns="columns"
+        :loading="status === 'pending'"
+        :ui="{ th: 'text-xs', td: 'align-middle' }"
       >
-        <p class="text-xs text-slate-500">
-          Halaman {{ pagination.page }} dari {{ pagination.totalPages }} ·
-          {{ pagination.total }} user
-        </p>
+        <template #empty>
+          <div class="py-12 text-center">
+            <p class="text-muted">Tidak ada user yang cocok dengan filter.</p>
+          </div>
+        </template>
+      </UTable>
+    </div>
+
+    <template #footer>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-sm text-muted shrink-0">Total {{ total }} user</p>
         <UPagination
           v-model:page="page"
-          :total="pagination.total"
-          :items-per-page="limit"
+          :total="total"
+          :items-per-page="PAGE_SIZE"
+          size="sm"
+          variant="ghost"
         />
       </div>
-    </div>
-  </AppContent>
+    </template>
+  </UCard>
 
   <!-- Form Modal -->
   <UModal
@@ -483,26 +438,13 @@ const columns: TableColumn<User>[] = [
     <template #body>
       <form class="space-y-4" @submit.prevent="submitForm">
         <UFormField label="Nama lengkap" required>
-          <UInput
-            v-model="form.name"
-            :disabled="formSubmitting"
-            class="w-full"
-          />
+          <UInput v-model="form.name" :disabled="formSubmitting" class="w-full" />
         </UFormField>
         <UFormField label="Username" required>
-          <UInput
-            v-model="form.username"
-            :disabled="formSubmitting"
-            class="w-full"
-          />
+          <UInput v-model="form.username" :disabled="formSubmitting" class="w-full" />
         </UFormField>
         <UFormField label="Email" required>
-          <UInput
-            v-model="form.email"
-            type="email"
-            :disabled="formSubmitting"
-            class="w-full"
-          />
+          <UInput v-model="form.email" type="email" :disabled="formSubmitting" class="w-full" />
         </UFormField>
         <UFormField label="Role" required>
           <USelect
@@ -527,10 +469,7 @@ const columns: TableColumn<User>[] = [
           />
         </UFormField>
 
-        <p
-          v-if="formError"
-          class="text-sm text-red-600 bg-red-50 rounded px-3 py-2"
-        >
+        <p v-if="formError" class="text-sm text-red-600 bg-red-50 rounded px-3 py-2">
           {{ formError }}
         </p>
 
@@ -554,9 +493,7 @@ const columns: TableColumn<User>[] = [
   <!-- Confirm Modal -->
   <UModal v-model:open="confirm.open" :title="confirm.title">
     <template #body>
-      <p class="text-sm text-slate-600">
-        {{ confirm.description }}
-      </p>
+      <p class="text-sm text-muted">{{ confirm.description }}</p>
       <div class="flex justify-end gap-2 pt-4">
         <UButton
           color="neutral"
@@ -566,11 +503,7 @@ const columns: TableColumn<User>[] = [
         >
           Batal
         </UButton>
-        <UButton
-          :color="confirm.color"
-          :loading="confirmRunning"
-          @click="runConfirm"
-        >
+        <UButton :color="confirm.color" :loading="confirmRunning" @click="runConfirm">
           {{ confirm.confirmLabel }}
         </UButton>
       </div>

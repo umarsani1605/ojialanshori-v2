@@ -15,9 +15,10 @@ export default defineAppConfig({
     },
     card: {
       slots: {
-        root: ["rounded-xl"],
-        header: ["border-none"],
-        footer: ["border-none"],
+        root: ["rounded-xl shadow-subtle"],
+        header: ["p-6! pb-0! border-none"],
+        body: ["border-none"],
+        footer: ["pt-0! border-none"],
       },
     },
     table: {
@@ -294,6 +295,27 @@ export default defineAppConfig({
       defaultVariants: {
         size: "lg",
       },
+    },
+    navigationMenu: {
+      variants: {
+        orientation: {
+          vertical: {
+            list: "flex flex-col gap-1.5!",
+            link: "px-3 py-2",
+          },
+        },
+      },
+      compoundVariants: [
+        {
+          color: "primary",
+          variant: "pill",
+          active: true,
+          highlight: false,
+          class: {
+            link: "before:bg-primary-50",
+          },
+        },
+      ],
     },
     selectMenu: {
       slots: {

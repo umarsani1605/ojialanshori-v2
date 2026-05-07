@@ -39,7 +39,7 @@ useSeoMeta({
   ogTitle: "Profil — Omah Ngaji Al-Anshori",
   ogDescription:
     "Selayang pandang, visi, misi, dan struktur pengurus Omah Ngaji Al-Anshori.",
-  ogImage: "/images/logo/logo1.png",
+  ogImage: "/images/logo/logo.png",
 });
 </script>
 

@@ -26,7 +26,7 @@ const {
   data: adminStats,
   status,
   refresh,
-} = await useFetch<AdminDashboardStats>("/api/dashboard/stats", {
+} = useLazyFetch<AdminDashboardStats>("/api/dashboard/stats", {
   key: `admin-dashboard-stats-${auth.user.value?.id}`,
 });
 
@@ -38,27 +38,24 @@ const roleColor = computed<RoleColor>(
   () => roleColorMap[userRole.value] ?? "primary",
 );
 
-onMounted(() => {
-  const hour = new Date().getHours();
+const hour = new Date().getHours();
 
-  if (hour < 10) greeting.value = "Selamat Pagi";
-  else if (hour < 15) greeting.value = "Selamat Siang";
-  else if (hour < 18) greeting.value = "Selamat Sore";
-  else greeting.value = "Selamat Malam";
-});
+if (hour < 10) greeting.value = "Selamat Pagi";
+else if (hour < 15) greeting.value = "Selamat Siang";
+else if (hour < 18) greeting.value = "Selamat Sore";
+else greeting.value = "Selamat Malam";
 </script>
 
 <template>
-  <AppContent title="Beranda" :loading="status === 'pending'">
-    <div class="space-y-6">
-      <div>
-        <h2 class="text-xl font-semibold text-slate-800">
-          {{ greeting }}, {{ auth.user.value?.name?.split(" ")[0] }}!
-        </h2>
-        <p class="mt-1 text-sm text-slate-500">
-          Selamat datang di area admin Omah Ngaji Al-Anshori.
-        </p>
-      </div>
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-xl font-semibold">
+        {{ greeting }}, {{ auth.user.value?.name?.split(" ")[0] }}!
+      </h2>
+      <p class="mt-1 text-sm text-muted">
+        Selamat datang di area admin Omah Ngaji Al-Anshori.
+      </p>
+    </div>
 
       <template v-if="status === 'error'">
         <div class="flex flex-col items-center gap-3 py-12 text-center">
@@ -178,6 +175,5 @@ onMounted(() => {
           </ul>
         </UCard>
       </template>
-    </div>
-  </AppContent>
+  </div>
 </template>

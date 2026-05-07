@@ -17,27 +17,21 @@ type QueuePost = {
   category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
 };
 
-type QueueResponse = {
-  data: QueuePost[];
-  total: number;
-  page: number;
-  limit: number;
-};
-
 const PAGE_SIZE = 10;
 const page = ref(1);
 
-const { data, status } = await useFetch<QueueResponse>(
+const { data, status } = useLazyFetch<{ data: QueuePost[] }>(
   "/api/dashboard/review/queue",
-  {
-    key: "dashboard-review-queue",
-    query: computed(() => ({ page: page.value, limit: PAGE_SIZE })),
-    watch: [page],
-  }
+  { key: "dashboard-review-queue" },
 );
 
 const posts = computed(() => data.value?.data ?? []);
-const total = computed(() => data.value?.total ?? 0);
+const total = computed(() => posts.value.length);
+
+const paginatedPosts = computed(() => {
+  const start = (page.value - 1) * PAGE_SIZE;
+  return posts.value.slice(start, start + PAGE_SIZE);
+});
 
 const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
@@ -78,7 +72,7 @@ const columns: TableColumn<QueuePost>[] = [
           day: "numeric",
           month: "short",
           year: "numeric",
-        })
+        }),
       ),
   },
   {
@@ -90,7 +84,7 @@ const columns: TableColumn<QueuePost>[] = [
         size: "sm",
         color: "primary",
         variant: "outline",
-        to: `/dashboard/review/${row.original.id}`,
+        to: `/dashboard/posts/${row.original.id}/edit`,
       }),
   },
 ];
@@ -106,7 +100,7 @@ const columns: TableColumn<QueuePost>[] = [
     </div>
 
     <UTable
-      :data="posts"
+      :data="paginatedPosts"
       :columns="columns"
       :loading="status === 'pending'"
     >

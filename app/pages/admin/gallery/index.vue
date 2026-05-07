@@ -3,6 +3,7 @@ definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
   requiredRole: 'admin',
+  navbarTitle: 'Galeri',
 })
 </script>
 

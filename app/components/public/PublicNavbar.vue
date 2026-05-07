@@ -39,7 +39,7 @@ function isActive(to: string) {
     >
       <NuxtLink to="/" class="flex items-center gap-3 shrink-0">
         <img
-          src="/images/logo/logo1.png"
+          src="/images/logo/logo.png"
           alt="Omah Ngaji Al-Anshori"
           class="h-12 w-auto object-contain"
         />

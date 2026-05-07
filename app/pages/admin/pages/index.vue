@@ -6,6 +6,7 @@ definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
   requiredRole: 'admin',
+  navbarTitle: 'Halaman Statis',
 })
 
 type PageItem = {
@@ -17,12 +18,14 @@ type PageItem = {
 }
 
 const toast = useToast()
-const router = useRouter()
 
-const { data, refresh } = await useFetch<{ data: PageItem[] }>('/api/admin/pages')
+const PAGE_SIZE = 10
+const page = ref(1)
+const search = ref('')
+
+const { data, refresh } = useLazyFetch<{ data: PageItem[] }>('/api/admin/pages')
 const pages = computed(() => data.value?.data ?? [])
 
-const search = ref('')
 const filteredPages = computed(() => {
   const q = search.value.toLowerCase()
   if (!q) return pages.value
@@ -30,6 +33,15 @@ const filteredPages = computed(() => {
     p => p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q),
   )
 })
+
+const total = computed(() => filteredPages.value.length)
+
+const paginatedPages = computed(() => {
+  const start = (page.value - 1) * PAGE_SIZE
+  return filteredPages.value.slice(start, start + PAGE_SIZE)
+})
+
+watch(search, () => { page.value = 1 })
 
 const isDeleteModalOpen = ref(false)
 const deletingId = ref<number | null>(null)
@@ -119,40 +131,54 @@ const columns: TableColumn<PageItem>[] = [
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
-    <div>
-      <h1 class="text-xl font-semibold">Halaman Statis</h1>
-      <p class="text-muted text-sm mt-1">Kelola halaman konten statis website.</p>
+  <UCard
+    class="shadow-none!"
+    :ui="{
+      root: 'ring-transparent divide-y divide-default overflow-hidden',
+      header: 'px-4 py-3',
+      footer: 'px-4 py-3',
+    }"
+  >
+    <template #header>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <UInput v-model="search" placeholder="Cari halaman…" icon="i-ph-magnifying-glass-bold" class="w-56" />
+        <UButton label="Buat Halaman Baru" icon="i-ph-plus-bold" to="/admin/pages/create" />
+      </div>
+    </template>
+
+    <div class="overflow-x-auto">
+      <UTable :data="paginatedPages" :columns="columns">
+        <template #empty>
+          <div class="py-12 text-center">
+            <p class="text-muted">Tidak ada halaman ditemukan.</p>
+          </div>
+        </template>
+      </UTable>
     </div>
 
-    <AdminDataTable :data="filteredPages" :columns="columns">
-      <template #header>
-        <div class="flex items-center justify-between gap-4">
-          <UInput
-            v-model="search"
-            placeholder="Cari halaman…"
-            icon="i-lucide-search"
-            class="w-64"
-          />
-          <UButton
-            label="Buat Halaman Baru"
-            icon="i-lucide-plus"
-            to="/admin/pages/create"
-          />
-        </div>
-      </template>
-    </AdminDataTable>
+    <template #footer>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-sm text-muted shrink-0">Total {{ total }} halaman</p>
+        <UPagination
+          v-model:page="page"
+          :total="total"
+          :items-per-page="PAGE_SIZE"
+          size="sm"
+          variant="ghost"
+        />
+      </div>
+    </template>
+  </UCard>
 
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus Halaman">
-      <template #body>
-        <p class="text-sm">Apakah kamu yakin ingin menghapus halaman ini? Tindakan ini tidak bisa dibatalkan.</p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
-          <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
-        </div>
-      </template>
-    </UModal>
-  </div>
+  <UModal v-model:open="isDeleteModalOpen" title="Hapus Halaman">
+    <template #body>
+      <p class="text-sm">Apakah kamu yakin ingin menghapus halaman ini? Tindakan ini tidak bisa dibatalkan.</p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
+        <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
+      </div>
+    </template>
+  </UModal>
 </template>

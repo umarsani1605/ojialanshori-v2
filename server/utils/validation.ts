@@ -264,8 +264,6 @@ export function validateAdminPostsQuery(value: unknown) {
   const status = getOptionalString(query.status)
 
   return {
-    page: getPositiveInteger(query.page, 1),
-    limit: getPositiveInteger(query.limit, 10, { max: 100 }),
     status: status && VALID_SANTRI_POST_STATUSES.includes(status as PostStatus)
       ? status as PostStatus
       : undefined,
@@ -359,6 +357,35 @@ export function validateAdminCategoryBody(value: unknown) {
   }
 
   return { name, slug: slug ?? null, type: type as CategoryType, parentId }
+}
+
+export function validateReviewActionBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  return {
+    title: getOptionalString(body.title),
+    content: typeof body.content === 'string' ? body.content : undefined,
+    excerpt: 'excerpt' in body ? (getOptionalString(body.excerpt) ?? null) : undefined,
+    categoryId: (() => {
+      if (!('categoryId' in body) || body.categoryId === null || body.categoryId === undefined) return undefined
+      const raw = getSingleValue(body.categoryId)
+      const n = typeof raw === 'number' ? raw : Number(raw)
+      return Number.isInteger(n) && n > 0 ? n : undefined
+    })(),
+    featuredImage: 'featuredImage' in body ? (getOptionalString(body.featuredImage) ?? null) : undefined,
+    tags: Array.isArray(body.tags) && body.tags.every(t => typeof t === 'string') ? body.tags as string[] : undefined,
+  }
+}
+
+export function validateRejectWithContentBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  const reviewNote = getOptionalString(body.reviewNote)
+
+  if (!reviewNote) {
+    throw createError({ statusCode: 400, message: 'Catatan review wajib diisi saat menolak artikel.' })
+  }
+
+  const contentFields = validateReviewActionBody(value)
+  return { reviewNote, ...contentFields }
 }
 
 export function validateAdminGalleryBody(value: unknown) {

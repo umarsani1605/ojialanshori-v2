@@ -172,7 +172,7 @@ useSeoMeta({
   description: () => heroDescription.value,
   ogTitle: () => `${siteName.value} — ${siteTagline.value}`,
   ogDescription: () => heroDescription.value,
-  ogImage: () => settings.value?.og_image ?? "/images/logo/logo1.png",
+  ogImage: () => settings.value?.og_image ?? "/images/logo/logo.png",
 });
 </script>
 
@@ -246,7 +246,7 @@ useSeoMeta({
         <!-- Default slot = the visual on the opposite side of text (logo) -->
         <div class="flex justify-center">
           <NuxtImg
-            src="/images/logo/logo3.png"
+            src="/images/logo/logo_white.png"
             alt="Omah Ngaji Al-Anshori"
             class="max-w-sm object-contain"
           />

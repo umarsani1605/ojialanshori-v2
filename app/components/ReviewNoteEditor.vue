@@ -28,14 +28,20 @@ const toolbarItems: EditorToolbarItem[][] = [
 </script>
 
 <template>
-  <UEditor
-    v-slot="{ editor }"
-    :model-value="modelValue"
-    :editable="!disabled"
-    content-type="html"
-    class="min-h-32"
-    @update:model-value="$emit('update:modelValue', $event as string)"
-  >
-    <UEditorToolbar :editor="editor" :items="toolbarItems" />
-  </UEditor>
+  <UCard>
+    <template #header>
+      <p class="font-medium text-sm">Catatan Review</p>
+    </template>
+    <UEditor
+      v-slot="{ editor }"
+      :model-value="modelValue"
+      :editable="!disabled"
+      content-type="html"
+      class="min-h-32"
+      @update:model-value="$emit('update:modelValue', $event as string)"
+    >
+      <UEditorToolbar :editor="editor" :items="toolbarItems" />
+    </UEditor>
+    <p class="text-xs text-muted mt-2">Wajib diisi saat menolak artikel.</p>
+  </UCard>
 </template>

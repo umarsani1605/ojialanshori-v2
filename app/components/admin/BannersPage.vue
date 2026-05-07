@@ -21,7 +21,7 @@ type BannerForm = {
 
 const toast = useToast()
 
-const { data, refresh } = await useFetch<{ data: Banner[] }>('/api/admin/banners')
+const { data, refresh } = useLazyFetch<{ data: Banner[] }>('/api/admin/banners')
 const banners = computed(() => data.value?.data ?? [])
 
 const search = ref('')
@@ -200,70 +200,52 @@ const columns: TableColumn<Banner>[] = [
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
-    <div>
-      <h1 class="text-xl font-semibold">Banner</h1>
-      <p class="text-muted text-sm mt-1">Kelola banner yang ditampilkan di website.</p>
-    </div>
+  <AdminDataTable :data="filteredBanners" :columns="columns">
+    <template #toolbar-left>
+      <UInput v-model="search" placeholder="Cari banner…" icon="i-ph-magnifying-glass-bold" class="w-56" />
+    </template>
+    <template #toolbar-right>
+      <UButton label="Tambah Banner" icon="i-ph-plus-bold" @click="openCreate" />
+    </template>
+  </AdminDataTable>
 
-    <AdminDataTable :data="filteredBanners" :columns="columns">
-      <template #header>
-        <div class="flex items-center justify-between gap-4">
-          <UInput
-            v-model="search"
-            placeholder="Cari banner…"
-            icon="i-lucide-search"
-            class="w-64"
-          />
-          <UButton
-            label="Tambah Banner"
-            icon="i-lucide-plus"
-            @click="openCreate"
-          />
-        </div>
-      </template>
-    </AdminDataTable>
+  <UModal v-model:open="isModalOpen" :title="editingId ? 'Edit Banner' : 'Tambah Banner'">
+    <template #body>
+      <div class="space-y-4">
+        <UFormField label="Teks Banner" required>
+          <UTextarea v-model="form.text" placeholder="Teks yang ditampilkan…" :rows="3" class="w-full" />
+        </UFormField>
+        <UFormField label="Link (opsional)">
+          <UInput v-model="form.link" placeholder="https://…" class="w-full" />
+        </UFormField>
+        <UFormField label="Tanggal Mulai">
+          <UInput v-model="form.startDate" type="date" class="w-full" />
+        </UFormField>
+        <UFormField label="Tanggal Selesai">
+          <UInput v-model="form.endDate" type="date" class="w-full" />
+        </UFormField>
+        <UFormField label="Status">
+          <USwitch v-model="form.isActive" label="Aktif" />
+        </UFormField>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
+        <UButton label="Simpan" :loading="saving" @click="save" />
+      </div>
+    </template>
+  </UModal>
 
-    <!-- Create/Edit Modal -->
-    <UModal v-model:open="isModalOpen" :title="editingId ? 'Edit Banner' : 'Tambah Banner'">
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Teks Banner" required>
-            <UTextarea v-model="form.text" placeholder="Teks yang ditampilkan…" :rows="3" class="w-full" />
-          </UFormField>
-          <UFormField label="Link (opsional)">
-            <UInput v-model="form.link" placeholder="https://…" class="w-full" />
-          </UFormField>
-          <UFormField label="Tanggal Mulai">
-            <UInput v-model="form.startDate" type="date" class="w-full" />
-          </UFormField>
-          <UFormField label="Tanggal Selesai">
-            <UInput v-model="form.endDate" type="date" class="w-full" />
-          </UFormField>
-          <UFormField label="Status">
-            <USwitch v-model="form.isActive" label="Aktif" />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-          <UButton label="Simpan" :loading="saving" @click="save" />
-        </div>
-      </template>
-    </UModal>
-
-    <!-- Delete Confirm Modal -->
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus Banner">
-      <template #body>
-        <p class="text-sm">Apakah kamu yakin ingin menghapus banner ini? Tindakan ini tidak bisa dibatalkan.</p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
-          <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
-        </div>
-      </template>
-    </UModal>
-  </div>
+  <UModal v-model:open="isDeleteModalOpen" title="Hapus Banner">
+    <template #body>
+      <p class="text-sm">Apakah kamu yakin ingin menghapus banner ini? Tindakan ini tidak bisa dibatalkan.</p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
+        <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
+      </div>
+    </template>
+  </UModal>
 </template>

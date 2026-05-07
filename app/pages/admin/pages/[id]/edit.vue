@@ -21,7 +21,7 @@ const pageId = Number(route.params.id)
 const toast = useToast()
 const router = useRouter()
 
-const { data, status: fetchStatus } = await useFetch<{ data: Page }>(
+const { data, status: fetchStatus } = useLazyFetch<{ data: Page }>(
   `/api/admin/pages/${pageId}`,
   { key: `admin-page-edit-${pageId}` },
 )

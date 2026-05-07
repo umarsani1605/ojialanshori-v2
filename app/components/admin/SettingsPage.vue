@@ -7,7 +7,7 @@ type Setting = {
 
 const toast = useToast()
 
-const { data, refresh } = await useFetch<{ data: Setting[] }>('/api/admin/settings')
+const { data, refresh } = useLazyFetch<{ data: Setting[] }>('/api/admin/settings')
 const settings = computed(() => data.value?.data ?? [])
 
 const form = reactive<Record<string, string>>({})
@@ -38,11 +38,8 @@ async function save() {
 </script>
 
 <template>
-  <div class="p-6 space-y-6 max-w-2xl">
-    <div>
-      <h1 class="text-xl font-semibold">Pengaturan</h1>
-      <p class="text-muted text-sm mt-1">Konfigurasi global website.</p>
-    </div>
+  <div class="space-y-6 max-w-2xl">
+    <p class="text-muted text-sm">Konfigurasi global website.</p>
 
     <div v-if="settings.length === 0" class="py-12 text-center">
       <p class="text-muted">Belum ada pengaturan yang tersimpan di database.</p>

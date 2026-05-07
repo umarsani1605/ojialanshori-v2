@@ -13,7 +13,7 @@ type GalleryItem = {
 
 const toast = useToast()
 
-const { data, refresh } = await useFetch<{ data: GalleryItem[] }>('/api/admin/gallery')
+const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>('/api/admin/gallery')
 const items = computed(() => data.value?.data ?? [])
 
 const search = ref('')
@@ -193,31 +193,16 @@ const columns: TableColumn<GalleryItem>[] = [
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
-    <div>
-      <h1 class="text-xl font-semibold">Galeri</h1>
-      <p class="text-muted text-sm mt-1">Kelola foto-foto galeri website.</p>
-    </div>
+  <AdminDataTable :data="filteredItems" :columns="columns">
+    <template #toolbar-left>
+      <UInput v-model="search" placeholder="Cari foto atau album…" icon="i-ph-magnifying-glass-bold" class="w-56" />
+    </template>
+    <template #toolbar-right>
+      <UButton label="Upload Foto" icon="i-ph-upload-bold" @click="openUpload" />
+    </template>
+  </AdminDataTable>
 
-    <AdminDataTable :data="filteredItems" :columns="columns">
-      <template #header>
-        <div class="flex items-center justify-between gap-4">
-          <UInput
-            v-model="search"
-            placeholder="Cari foto atau album…"
-            icon="i-lucide-search"
-            class="w-64"
-          />
-          <UButton
-            label="Upload Foto"
-            icon="i-lucide-upload"
-            @click="openUpload"
-          />
-        </div>
-      </template>
-    </AdminDataTable>
-
-    <!-- Upload Modal -->
+  <!-- Upload Modal -->
     <UModal v-model:open="isUploadModalOpen" title="Upload Foto">
       <template #body>
         <div class="space-y-4">
@@ -292,6 +277,5 @@ const columns: TableColumn<GalleryItem>[] = [
           <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
         </div>
       </template>
-    </UModal>
-  </div>
+  </UModal>
 </template>

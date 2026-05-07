@@ -6,6 +6,7 @@ definePageMeta({
   layout: "admin",
   middleware: ["auth", "role"],
   requiredRole: "admin",
+  navbarTitle: "Artikel",
 });
 
 type AdminPost = {
@@ -19,15 +20,7 @@ type AdminPost = {
   category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
 };
 
-type AdminPostsResponse = {
-  data: AdminPost[];
-  total: number;
-  page: number;
-  limit: number;
-};
-
 const STATUS_OPTIONS = [
-  { label: "Semua", value: "" },
   { label: "Terbit", value: "published" },
   { label: "Dalam Ulasan", value: "pending_review" },
   { label: "Draft", value: "draft" },
@@ -55,24 +48,61 @@ const PAGE_SIZE = 10;
 const page = ref(1);
 const statusFilter = ref("");
 
+const toast = useToast();
+
+const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>(
+  "/api/admin/posts",
+);
+
+const posts = computed(() => data.value?.data ?? []);
+
+const filteredPosts = computed(() => {
+  if (!statusFilter.value) return posts.value;
+  return posts.value.filter((p) => p.status === statusFilter.value);
+});
+
+const total = computed(() => filteredPosts.value.length);
+
+const paginatedPosts = computed(() => {
+  const start = (page.value - 1) * PAGE_SIZE;
+  return filteredPosts.value.slice(start, start + PAGE_SIZE);
+});
+
 watch(statusFilter, () => {
   page.value = 1;
 });
 
-const { data, status } = await useFetch<AdminPostsResponse>("/api/admin/posts", {
-  key: "admin-posts",
-  query: computed(() => ({
-    page: page.value,
-    limit: PAGE_SIZE,
-    ...(statusFilter.value ? { status: statusFilter.value } : {}),
-  })),
-  watch: [page, statusFilter],
-});
+const isDeleteModalOpen = ref(false);
+const deletingId = ref<number | null>(null);
+const deleting = ref(false);
 
-const posts = computed(() => data.value?.data ?? []);
-const total = computed(() => data.value?.total ?? 0);
+function confirmDelete(id: number) {
+  deletingId.value = id;
+  isDeleteModalOpen.value = true;
+}
+
+async function doDelete() {
+  if (deletingId.value === null) return;
+  deleting.value = true;
+  try {
+    await $fetch(`/api/admin/posts/${deletingId.value}`, { method: "DELETE" });
+    toast.add({ title: "Artikel dihapus", color: "success", icon: "i-lucide-check-circle" });
+    isDeleteModalOpen.value = false;
+    await refresh();
+  } catch (e: unknown) {
+    const msg =
+      (e as { data?: { message?: string } }).data?.message ??
+      (e as Error).message ??
+      "Terjadi kesalahan.";
+    toast.add({ title: "Gagal menghapus", description: msg, color: "error", icon: "i-lucide-x-circle" });
+  } finally {
+    deleting.value = false;
+    deletingId.value = null;
+  }
+}
 
 const UBadge = resolveComponent("UBadge");
+const UButton = resolveComponent("UButton");
 
 const columns: TableColumn<AdminPost>[] = [
   {
@@ -115,48 +145,86 @@ const columns: TableColumn<AdminPost>[] = [
           day: "numeric",
           month: "short",
           year: "numeric",
-        })
+        }),
       ),
+  },
+  {
+    accessorKey: "id",
+    header: "",
+    cell: ({ row }) =>
+      h("div", { class: "flex gap-1 justify-end" }, [
+        h(UButton, {
+          size: "sm",
+          variant: "ghost",
+          icon: "i-lucide-pencil",
+          to: `/admin/posts/${row.original.id}/edit`,
+        }),
+        h(UButton, {
+          size: "sm",
+          variant: "ghost",
+          color: "error",
+          icon: "i-lucide-trash-2",
+          onClick: () => confirmDelete(row.original.id),
+        }),
+      ]),
   },
 ];
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-semibold">Semua Artikel</h1>
-        <p class="text-muted text-sm mt-1">
-          Seluruh artikel dari semua penulis.
-        </p>
+  <UCard>
+    <template #header>
+      <div class="flex items-center justify-between gap-3">
+        <USelect
+          v-model="statusFilter"
+          :items="STATUS_OPTIONS"
+          value-key="value"
+          label-key="label"
+          placeholder="Semua status"
+          class="w-44"
+        />
       </div>
-      <USelect
-        v-model="statusFilter"
-        :items="STATUS_OPTIONS"
-        value-key="value"
-        label-key="label"
-        class="w-44"
-      />
+    </template>
+
+    <div class="overflow-x-auto">
+      <UTable
+        :data="paginatedPosts"
+        :columns="columns"
+        :loading="status === 'pending'"
+      >
+        <template #empty>
+          <div class="py-12 text-center">
+            <p class="text-muted">Tidak ada artikel ditemukan.</p>
+          </div>
+        </template>
+      </UTable>
     </div>
 
-    <UTable
-      :data="posts"
-      :columns="columns"
-      :loading="status === 'pending'"
-    >
-      <template #empty>
-        <div class="py-12 text-center">
-          <p class="text-muted">Tidak ada artikel ditemukan.</p>
-        </div>
-      </template>
-    </UTable>
+    <template #footer>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-sm text-muted shrink-0">Total {{ total }} artikel</p>
+        <UPagination
+          v-model:page="page"
+          :total="total"
+          :items-per-page="PAGE_SIZE"
+          size="sm"
+          variant="ghost"
+        />
+      </div>
+    </template>
+  </UCard>
 
-    <div v-if="total > PAGE_SIZE" class="flex justify-center">
-      <UPagination
-        v-model:page="page"
-        :total="total"
-        :items-per-page="PAGE_SIZE"
-      />
-    </div>
-  </div>
+  <UModal v-model:open="isDeleteModalOpen" title="Hapus Artikel">
+    <template #body>
+      <p class="text-sm">
+        Apakah kamu yakin ingin menghapus artikel ini? Tindakan ini tidak bisa dibatalkan.
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
+        <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
+      </div>
+    </template>
+  </UModal>
 </template>

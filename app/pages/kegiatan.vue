@@ -39,7 +39,7 @@ useSeoMeta({
   ogTitle: "Kegiatan — Omah Ngaji Al-Anshori",
   ogDescription:
     "Program kegiatan rutin Omah Ngaji Al-Anshori — dari ngaji Al-Qur'an sampai diskusi tematik.",
-  ogImage: "/images/logo/logo1.png",
+  ogImage: "/images/logo/logo.png",
 });
 </script>
 
