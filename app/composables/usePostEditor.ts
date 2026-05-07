@@ -7,7 +7,9 @@ type RichTextEditor = {
   chain: () => {
     focus: () => {
       run?: () => boolean;
-      setImage: (attrs: { alt?: string; src: string }) => { run: () => boolean };
+      setImage: (attrs: { alt?: string; src: string }) => {
+        run: () => boolean;
+      };
     };
   };
   isActive: (name: string) => boolean;
@@ -25,12 +27,19 @@ type EditorPost = {
   reviewNote: string | null;
   author?: { id: number; name: string; email: string };
   reviewer?: { id: number; name: string } | null;
-  category?: { id: number; name: string; type: "berita" | "pena_santri" } | null;
+  category?: {
+    id: number;
+    name: string;
+    type: "berita" | "pena_santri";
+  } | null;
 };
 
 type CategoryItem = { id: number; name: string; type: string };
 
-export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pena_santri" }) {
+export function usePostEditor(opts: {
+  postId?: number;
+  postType?: "berita" | "pena_santri";
+}) {
   const auth = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -49,7 +58,9 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
   const existingReviewNote = ref<string | null>(null);
   const reviewerName = ref<string | null>(null);
   const reviewNote = ref(""); // reviewer's input for rejection
-  const loadingAction = ref<"save" | "send" | "approve" | "reject" | null>(null);
+  const loadingAction = ref<"save" | "send" | "approve" | "reject" | null>(
+    null,
+  );
   const uploadingEditorImage = ref(false);
   const coverInputKey = ref(0);
   const coverFile = ref<File | null>(null);
@@ -63,26 +74,29 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         return res.data;
       }
       const res = await $fetch<{ categories: CategoryItem[] }>(
-        "/api/posts/meta"
+        "/api/posts/meta",
       );
       return res.categories;
     },
-    { lazy: true, default: () => [] as CategoryItem[] }
+    { default: () => [] as CategoryItem[] },
   );
 
   // --- Post fetch ---
-  const { data: postData, status: postStatus } = useAsyncData<EditorPost | null>(
-    `post-editor-${postId ?? "new"}`,
-    () => {
-      if (!postId) return Promise.resolve(null);
-      return $fetch<{ data: EditorPost }>(`/api/posts/${postId}`).then((r) => r.data);
-    },
-    { lazy: true, immediate: !!postId, default: () => null }
-  );
+  const { data: postData, status: postStatus } =
+    useAsyncData<EditorPost | null>(
+      `post-editor-${postId ?? "new"}`,
+      () => {
+        if (!postId) return Promise.resolve(null);
+        return $fetch<{ data: EditorPost }>(`/api/posts/${postId}`).then(
+          (r) => r.data,
+        );
+      },
+      { lazy: true, immediate: !!postId, default: () => null },
+    );
 
   // --- effectivePostType: prop takes priority, falls back to post's category type ---
   const effectivePostType = computed<"berita" | "pena_santri" | undefined>(
-    () => opts.postType ?? postData.value?.category?.type ?? undefined
+    () => opts.postType ?? postData.value?.category?.type ?? undefined,
   );
 
   // --- isOwnPost ---
@@ -93,7 +107,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
 
   // --- showBeritaActions: admin writing/editing berita (direct publish, no review) ---
   const showBeritaActions = computed(
-    () => auth.canReview.value && effectivePostType.value === "berita"
+    () => auth.canReview.value && effectivePostType.value === "berita",
   );
 
   // --- showReviewActions: reviewer reviewing someone else's pena_santri post ---
@@ -102,7 +116,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       auth.canReview.value &&
       !!postId &&
       !isOwnPost.value &&
-      effectivePostType.value === "pena_santri"
+      effectivePostType.value === "pena_santri",
   );
 
   // --- Filtered categories by effectivePostType ---
@@ -112,7 +126,8 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       ? all.filter((c) => c.type === effectivePostType.value)
       : all;
     return filtered.map((c) => ({
-      label: c.type === "berita" ? `Berita · ${c.name}` : `Pena Santri · ${c.name}`,
+      label:
+        c.type === "berita" ? `Berita · ${c.name}` : `Pena Santri · ${c.name}`,
       value: c.id,
     }));
   });
@@ -127,7 +142,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         form.categoryId = beritaCat.id;
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   // --- Populate form when post loads ---
@@ -152,17 +167,22 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       ) {
         toast.add({
           title: "Artikel sedang direview",
-          description: "Artikel yang berstatus menunggu review tidak bisa diedit.",
+          description:
+            "Artikel yang berstatus menunggu review tidak bisa diedit.",
           color: "warning",
           icon: "i-lucide-clock-3",
         });
-        void navigateTo("/dashboard/posts?status=pending_review", { replace: true });
+        void navigateTo("/dashboard/posts?status=pending_review", {
+          replace: true,
+        });
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 
-  watch(coverFile, (file) => { void handleCoverChange(file); });
+  watch(coverFile, (file) => {
+    void handleCoverChange(file);
+  });
 
   // --- Computed ---
   const canSubmit = computed(() => {
@@ -180,15 +200,15 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       .replace(/<[^>]+>/g, " ")
       .replace(/&nbsp;/g, " ")
       .replace(/\s+/g, " ")
-      .trim()
+      .trim(),
   );
 
   const wordCount = computed(() =>
-    plainTextContent.value ? plainTextContent.value.split(" ").length : 0
+    plainTextContent.value ? plainTextContent.value.split(" ").length : 0,
   );
 
   const readingTime = computed(() =>
-    wordCount.value > 0 ? Math.ceil(wordCount.value / 200) : 0
+    wordCount.value > 0 ? Math.ceil(wordCount.value / 200) : 0,
   );
 
   const statusLabel = computed(
@@ -198,7 +218,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         pending_review: "Dalam Ulasan",
         rejected: "Ditolak",
         published: "Terbit",
-      })[currentStatus.value]
+      })[currentStatus.value],
   );
 
   const statusColor = computed(
@@ -208,7 +228,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         pending_review: "warning",
         rejected: "error",
         published: "success",
-      })[currentStatus.value] as "neutral" | "warning" | "error" | "success"
+      })[currentStatus.value] as "neutral" | "warning" | "error" | "success",
   );
 
   // --- Editor config exposed for template ---
@@ -237,7 +257,11 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
   }
 
   // --- Actions ---
-  async function saveDraft({ silent = false, redirectAfterCreate = true, manageLoading = true } = {}) {
+  async function saveDraft({
+    silent = false,
+    redirectAfterCreate = true,
+    manageLoading = true,
+  } = {}) {
     if (manageLoading) loadingAction.value = "save";
     try {
       const payload = buildPayload();
@@ -259,15 +283,20 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       existingReviewNote.value = null;
 
       if (!postId && redirectAfterCreate) {
-        const editPath = effectivePostType.value === "berita"
-          ? `/admin/berita/${response.id}/edit`
-          : effectivePostType.value === "pena_santri"
-            ? `/admin/pena-santri/${response.id}/edit`
-            : `/dashboard/posts/${response.id}/edit`;
+        const editPath =
+          effectivePostType.value === "berita"
+            ? `/admin/berita/${response.id}/edit`
+            : effectivePostType.value === "pena_santri"
+              ? `/admin/pena-santri/${response.id}/edit`
+              : `/dashboard/posts/${response.id}/edit`;
         await router.replace(editPath);
       }
       if (!silent) {
-        toast.add({ title: "Draft disimpan", color: "success", icon: "i-lucide-check" });
+        toast.add({
+          title: "Draft disimpan",
+          color: "success",
+          icon: "i-lucide-check",
+        });
       }
       return response.id;
     } catch (e) {
@@ -295,7 +324,11 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         // If no postId yet (new berita), create draft first then publish
         const resolvedId = postId
           ? postId
-          : await saveDraft({ silent: true, redirectAfterCreate: false, manageLoading: false });
+          : await saveDraft({
+              silent: true,
+              redirectAfterCreate: false,
+              manageLoading: false,
+            });
 
         if (!resolvedId) return;
 
@@ -303,8 +336,15 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
           method: "POST",
           body: payload,
         });
-        const backPath = effectivePostType.value === "berita" ? "/admin/berita" : "/admin/pena-santri";
-        toast.add({ title: "Artikel dipublish", color: "success", icon: "i-lucide-check-circle" });
+        const backPath =
+          effectivePostType.value === "berita"
+            ? "/admin/berita"
+            : "/admin/pena-santri";
+        toast.add({
+          title: "Artikel dipublish",
+          color: "success",
+          icon: "i-lucide-check-circle",
+        });
         await navigateTo(backPath);
         return;
       }
@@ -312,13 +352,17 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       // Santri: submit for review (pending_review)
       const resolvedId = postId
         ? postId
-        : await saveDraft({ silent: true, redirectAfterCreate: false, manageLoading: false });
+        : await saveDraft({
+            silent: true,
+            redirectAfterCreate: false,
+            manageLoading: false,
+          });
 
       if (!resolvedId) return;
 
       const response = await $fetch<{ status: EditorPost["status"] }>(
         `/api/posts/${resolvedId}/submit`,
-        { method: "POST", body: payload }
+        { method: "POST", body: payload },
       );
 
       currentStatus.value = response.status;
@@ -350,7 +394,11 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         method: "POST",
         body: buildPayload(),
       });
-      toast.add({ title: "Artikel dipublish", color: "success", icon: "i-lucide-check-circle" });
+      toast.add({
+        title: "Artikel dipublish",
+        color: "success",
+        icon: "i-lucide-check-circle",
+      });
       await navigateTo("/admin/pena-santri");
     } catch (e) {
       toast.add({
@@ -380,7 +428,11 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         method: "POST",
         body: { reviewNote: reviewNote.value, ...buildPayload() },
       });
-      toast.add({ title: "Artikel ditolak", color: "warning", icon: "i-lucide-x-circle" });
+      toast.add({
+        title: "Artikel ditolak",
+        color: "warning",
+        icon: "i-lucide-x-circle",
+      });
       await navigateTo("/admin/pena-santri");
     } catch (e) {
       toast.add({
@@ -394,39 +446,28 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
     }
   }
 
-  // --- Cover upload ---
-  async function getImageDimensions(file: File) {
-    const objectUrl = URL.createObjectURL(file);
-    try {
-      return await new Promise<{ width: number; height: number }>((resolve, reject) => {
-        const image = new Image();
-        image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-        image.onerror = () => reject(new Error("Cover tidak bisa dibaca."));
-        image.src = objectUrl;
-      });
-    } finally {
-      URL.revokeObjectURL(objectUrl);
-    }
-  }
-
   async function handleCoverChange(file: File | null | undefined) {
     if (!file) return;
     try {
-      if (file.size > 2 * 1024 * 1024) throw new Error("Ukuran cover maksimal 2MB.");
-      const { width, height } = await getImageDimensions(file);
-      if (width < 1000 || height < 1000) {
-        throw new Error("Ukuran cover minimal 1000px di sisi lebar dan tinggi.");
-      }
+      if (file.size > 2 * 1024 * 1024)
+        throw new Error("Ukuran cover maksimal 2MB.");
       const formData = new FormData();
       formData.append("cover", file);
-      const response = await $fetch<{ path: string }>("/api/posts/upload/cover", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await $fetch<{ path: string }>(
+        "/api/posts/upload/cover",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
       form.featuredImage = response.path;
       coverInputKey.value += 1;
       coverFile.value = null;
-      toast.add({ title: "Cover berhasil diunggah", color: "success", icon: "i-lucide-check" });
+      toast.add({
+        title: "Cover berhasil diunggah",
+        color: "success",
+        icon: "i-lucide-check",
+      });
     } catch (e) {
       toast.add({
         title: "Gagal mengunggah cover",
@@ -448,19 +489,27 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       if (!file) return;
       try {
         uploadingEditorImage.value = true;
-        if (file.size > 2 * 1024 * 1024) throw new Error("Ukuran gambar maksimal 2MB.");
+        if (file.size > 2 * 1024 * 1024)
+          throw new Error("Ukuran gambar maksimal 2MB.");
         const formData = new FormData();
         formData.append("image", file);
         const response = await $fetch<{ url: string }>(
           "/api/posts/upload/editor-image",
-          { method: "POST", body: formData }
+          { method: "POST", body: formData },
         );
         editor
           .chain()
           .focus()
-          .setImage({ src: response.url, alt: file.name.replace(/\.[^/.]+$/, "") })
+          .setImage({
+            src: response.url,
+            alt: file.name.replace(/\.[^/.]+$/, ""),
+          })
           .run();
-        toast.add({ title: "Gambar berhasil diunggah", color: "success", icon: "i-lucide-check" });
+        toast.add({
+          title: "Gambar berhasil diunggah",
+          color: "success",
+          icon: "i-lucide-check",
+        });
       } catch (e) {
         toast.add({
           title: "Gagal mengunggah gambar",
