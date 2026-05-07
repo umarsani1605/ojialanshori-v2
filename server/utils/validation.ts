@@ -4,7 +4,6 @@ import type { CategoryType, PageStatus, PostStatus, Role } from '#server/db/sche
 import { parseSantriPostPayload } from '#server/utils/santriPostEditor'
 
 const VALID_ROLES: Role[] = ['admin', 'reviewer', 'santri']
-const VALID_USER_STATUSES = ['active', 'inactive'] as const
 const VALID_PUBLIC_POST_TYPES = ['berita', 'pena_santri'] as const
 const VALID_SANTRI_POST_STATUSES = ['draft', 'pending_review', 'published', 'rejected'] as const satisfies PostStatus[]
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -96,25 +95,9 @@ export function validatePublicPostsQuery(value: unknown) {
     author: getOptionalString(query.author),
     page: getPositiveInteger(query.page, 1),
     limit: getPositiveInteger(query.limit, 9),
-    sort: getOptionalString(query.sort),
   }
 }
 
-export function validateDashboardUsersQuery(value: unknown) {
-  const query = getRequiredRecord(value, 'Query tidak valid.')
-  const role = getOptionalString(query.role)
-  const status = getOptionalString(query.status)
-
-  return {
-    page: getPositiveInteger(query.page, 1),
-    limit: getPositiveInteger(query.limit, 20, { max: 100 }),
-    role: role && VALID_ROLES.includes(role as Role) ? role as Role : undefined,
-    status: status && VALID_USER_STATUSES.includes(status as (typeof VALID_USER_STATUSES)[number])
-      ? status as (typeof VALID_USER_STATUSES)[number]
-      : undefined,
-    search: getOptionalString(query.search) ?? '',
-  }
-}
 
 export function validateDashboardUserCreateBody(value: unknown) {
   const body = getRequiredRecord(value)
@@ -228,36 +211,7 @@ export function validateSantriPostBody(value: unknown) {
   return parseSantriPostPayload(value)
 }
 
-export function validateSantriPostListQuery(value: unknown) {
-  const query = getRequiredRecord(value, 'Query tidak valid.')
-  const status = getOptionalString(query.status)
 
-  return {
-    status: status && VALID_SANTRI_POST_STATUSES.includes(status as PostStatus)
-      ? status as PostStatus
-      : undefined,
-  }
-}
-
-export function validateRejectBody(value: unknown) {
-  const body = getRequiredRecord(value)
-  const reviewNote = getOptionalString(body.reviewNote)
-
-  if (!reviewNote) {
-    throw createError({ statusCode: 400, message: 'Catatan review wajib diisi saat menolak artikel.' })
-  }
-
-  return { reviewNote }
-}
-
-export function validateReviewQueueQuery(value: unknown) {
-  const query = getRequiredRecord(value, 'Query tidak valid.')
-
-  return {
-    page: getPositiveInteger(query.page, 1),
-    limit: getPositiveInteger(query.limit, 10, { max: 50 }),
-  }
-}
 
 export function validateAdminPostsQuery(value: unknown) {
   const query = getRequiredRecord(value, 'Query tidak valid.')
