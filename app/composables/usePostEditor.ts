@@ -75,10 +75,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
     `post-editor-${postId ?? "new"}`,
     () => {
       if (!postId) return Promise.resolve(null);
-      const url = auth.canReview.value
-        ? `/api/admin/posts/${postId}`
-        : `/api/dashboard/santri/posts/${postId}`;
-      return $fetch<{ data: EditorPost }>(url).then((r) => r.data);
+      return $fetch<{ data: EditorPost }>(`/api/posts/${postId}`).then((r) => r.data);
     },
     { lazy: true, immediate: !!postId, default: () => null }
   );
@@ -246,25 +243,13 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       const payload = buildPayload();
       let response: { id: number; status: EditorPost["status"] };
 
-      if (auth.canReview.value && postId) {
-        // Admin/reviewer editing own post — use admin PATCH endpoint (status → draft)
-        response = await $fetch(`/api/admin/posts/${postId}`, {
-          method: "PATCH",
-          body: payload,
-        });
-      } else if (auth.canReview.value && !postId) {
-        // Admin/reviewer creating a new post — use admin create endpoint
-        response = await $fetch("/api/admin/posts", {
-          method: "POST",
-          body: payload,
-        });
-      } else if (postId) {
-        response = await $fetch(`/api/dashboard/santri/posts/${postId}`, {
+      if (postId) {
+        response = await $fetch(`/api/posts/${postId}`, {
           method: "PATCH",
           body: payload,
         });
       } else {
-        response = await $fetch("/api/dashboard/santri/posts", {
+        response = await $fetch("/api/posts", {
           method: "POST",
           body: payload,
         });
@@ -314,7 +299,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
 
         if (!resolvedId) return;
 
-        await $fetch(`/api/admin/posts/${resolvedId}/publish`, {
+        await $fetch(`/api/posts/${resolvedId}/publish`, {
           method: "POST",
           body: payload,
         });
@@ -332,7 +317,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       if (!resolvedId) return;
 
       const response = await $fetch<{ status: EditorPost["status"] }>(
-        `/api/dashboard/santri/posts/${resolvedId}/submit`,
+        `/api/posts/${resolvedId}/submit`,
         { method: "POST", body: payload }
       );
 
@@ -361,7 +346,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
     if (!postId) return;
     loadingAction.value = "approve";
     try {
-      await $fetch(`/api/dashboard/review/${postId}/approve`, {
+      await $fetch(`/api/posts/${postId}/approve`, {
         method: "POST",
         body: buildPayload(),
       });
@@ -391,7 +376,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
     }
     loadingAction.value = "reject";
     try {
-      await $fetch(`/api/dashboard/review/${postId}/reject`, {
+      await $fetch(`/api/posts/${postId}/reject`, {
         method: "POST",
         body: { reviewNote: reviewNote.value, ...buildPayload() },
       });

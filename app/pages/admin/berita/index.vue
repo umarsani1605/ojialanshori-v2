@@ -48,7 +48,7 @@ const page = ref(1)
 const search = ref('')
 const statusFilter = ref<string | undefined>()
 
-const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>('/api/admin/posts')
+const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>('/api/posts')
 
 const posts = computed(() =>
   (data.value?.data ?? []).filter(post => post.category?.type === 'berita'),
@@ -96,7 +96,7 @@ async function doDelete() {
   deleting.value = true
 
   try {
-    await $fetch(`/api/admin/posts/${deletingId.value}`, { method: 'DELETE' })
+    await $fetch(`/api/posts/${deletingId.value}`, { method: 'DELETE' })
     toast.add({ title: 'Berita dihapus', color: 'success', icon: 'i-lucide-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()

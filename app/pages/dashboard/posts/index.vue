@@ -37,7 +37,7 @@ watch(activeStatus, () => {
 });
 
 const { data, status, refresh } = await useFetch<ListResponse>(
-  "/api/dashboard/santri/posts",
+  "/api/posts",
   { key: "dashboard-santri-posts" },
 );
 
@@ -123,7 +123,7 @@ async function confirmDelete() {
 
   deleting.value = true;
   try {
-    await $fetch(`/api/dashboard/santri/posts/${deleteTarget.value.id}`, {
+    await $fetch(`/api/posts/${deleteTarget.value.id}`, {
       method: "DELETE",
     });
     toast.add({

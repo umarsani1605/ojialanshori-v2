@@ -1,0 +1,31 @@
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireReviewer } from '#server/utils/guard'
+import { sendEmail } from '#server/utils/email'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import { approvePostForActor } from '#server/services/posts/postService'
+import { validateReviewActionBody, validateRouteIdParams } from '#server/utils/validation'
+
+export default defineEventHandler(async (event) => {
+  const actor = requireReviewer(event)
+  const { id: postId } = await getValidatedRouterParams(event, validateRouteIdParams)
+  const payload = await readValidatedBody(event, validateReviewActionBody)
+
+  if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
+
+  const result = await approvePostForActor(useDb(event), actor, postId, payload)
+
+  await sendEmail(event, {
+    to: result.authorEmail,
+    toName: result.authorName,
+    subject: `Artikel kamu telah dipublish — ${result.postTitle}`,
+    htmlContent: `
+      <p>Halo ${result.authorName},</p>
+      <p>Artikel kamu <strong>${result.postTitle}</strong> telah disetujui dan dipublish oleh <strong>${actor.name}</strong>.</p>
+      <p>Baca di: <a href="https://ojialanshori.com/post/${result.postSlug}">ojialanshori.com/post/${result.postSlug}</a></p>
+      <p>Terimakasih sudah berkontribusi!</p>
+    `,
+    textContent: `Halo ${result.authorName},\n\nArtikel "${result.postTitle}" telah dipublish oleh ${actor.name}.\n\nhttps://ojialanshori.com/post/${result.postSlug}`,
+  })
+
+  return { id: result.id, status: result.status, publishedAt: result.publishedAt }
+})

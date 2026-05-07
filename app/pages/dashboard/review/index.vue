@@ -21,7 +21,7 @@ const PAGE_SIZE = 10;
 const page = ref(1);
 
 const { data, status } = useLazyFetch<{ data: QueuePost[] }>(
-  "/api/dashboard/review/queue",
+  "/api/posts",
   { key: "dashboard-review-queue" },
 );
 

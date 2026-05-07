@@ -51,7 +51,7 @@ const statusFilter = ref("");
 const toast = useToast();
 
 const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>(
-  "/api/admin/posts",
+  "/api/posts",
 );
 
 const posts = computed(() => data.value?.data ?? []);
@@ -85,7 +85,7 @@ async function doDelete() {
   if (deletingId.value === null) return;
   deleting.value = true;
   try {
-    await $fetch(`/api/admin/posts/${deletingId.value}`, { method: "DELETE" });
+    await $fetch(`/api/posts/${deletingId.value}`, { method: "DELETE" });
     toast.add({ title: "Artikel dihapus", color: "success", icon: "i-lucide-check-circle" });
     isDeleteModalOpen.value = false;
     await refresh();
