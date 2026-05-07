@@ -97,6 +97,11 @@ export async function createPostForActor(
 ) {
   assertDraftPayload(payload)
 
+  // Admin creating berita without a categoryId: auto-assign the default berita category
+  if (actor.role === 'admin' && !payload.categoryId) {
+    payload.categoryId = await getDefaultBeritaCategoryId(db)
+  }
+
   await ensureCategoryExists(db, payload.categoryId)
 
   const categoryType = payload.categoryId
@@ -345,4 +350,13 @@ async function getCategoryType(db: Database, categoryId: number) {
     columns: { type: true },
   })
   return cat?.type ?? 'pena_santri'
+}
+
+async function getDefaultBeritaCategoryId(db: Database): Promise<number | null> {
+  const cat = await db.query.categories.findFirst({
+    where: eq(schema.categories.type, 'berita'),
+    columns: { id: true },
+    orderBy: (c, { asc }) => [asc(c.id)],
+  })
+  return cat?.id ?? null
 }
