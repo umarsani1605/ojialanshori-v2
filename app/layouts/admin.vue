@@ -51,10 +51,19 @@ const navLinks = computed<NavigationMenuItem[]>(() => {
       },
     },
     {
-      label: "Artikel",
-      icon: "i-ph-files-duotone",
-      to: "/admin/posts",
-      active: isActive("/admin/posts"),
+      label: "Berita",
+      icon: "i-ph-newspaper-duotone",
+      to: "/admin/berita",
+      active: isActive("/admin/berita"),
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: "Pena Santri",
+      icon: "i-ph-pen-nib-duotone",
+      to: "/admin/pena-santri",
+      active: isActive("/admin/pena-santri"),
       onSelect: () => {
         open.value = false;
       },

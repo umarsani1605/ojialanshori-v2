@@ -23,14 +23,14 @@ type EditorPost = {
   categoryId: number | null;
   status: "draft" | "pending_review" | "published" | "rejected";
   reviewNote: string | null;
-  tags: string[];
   author?: { id: number; name: string; email: string };
   reviewer?: { id: number; name: string } | null;
+  category?: { id: number; name: string; type: "berita" | "pena_santri" } | null;
 };
 
 type CategoryItem = { id: number; name: string; type: string };
 
-export function usePostEditor(opts: { postId?: number }) {
+export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pena_santri" }) {
   const auth = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -43,7 +43,6 @@ export function usePostEditor(opts: { postId?: number }) {
     excerpt: "",
     categoryId: undefined as number | undefined,
     featuredImage: null as string | null,
-    tags: [] as string[],
   });
 
   const currentStatus = ref<EditorPost["status"]>("draft");
@@ -71,14 +70,6 @@ export function usePostEditor(opts: { postId?: number }) {
     { lazy: true, default: () => [] as CategoryItem[] }
   );
 
-  const categories = computed(() =>
-    (categoriesRaw.value ?? []).map((c) => ({
-      label:
-        c.type === "berita" ? `Berita · ${c.name}` : `Pena Santri · ${c.name}`,
-      value: c.id,
-    }))
-  );
-
   // --- Post fetch ---
   const { data: postData, status: postStatus } = useAsyncData<EditorPost | null>(
     `post-editor-${postId ?? "new"}`,
@@ -92,15 +83,54 @@ export function usePostEditor(opts: { postId?: number }) {
     { lazy: true, immediate: !!postId, default: () => null }
   );
 
+  // --- effectivePostType: prop takes priority, falls back to post's category type ---
+  const effectivePostType = computed<"berita" | "pena_santri" | undefined>(
+    () => opts.postType ?? postData.value?.category?.type ?? undefined
+  );
+
   // --- isOwnPost ---
   const isOwnPost = computed(() => {
     if (!auth.canReview.value) return true; // santri API filters by authorId
     return auth.user.value?.id === postData.value?.author?.id;
   });
 
-  // --- showReviewActions: single flag controlling all UI differences ---
+  // --- showBeritaActions: admin writing/editing berita (direct publish, no review) ---
+  const showBeritaActions = computed(
+    () => auth.canReview.value && effectivePostType.value === "berita"
+  );
+
+  // --- showReviewActions: reviewer reviewing someone else's pena_santri post ---
   const showReviewActions = computed(
-    () => auth.canReview.value && !!postId && !isOwnPost.value
+    () =>
+      auth.canReview.value &&
+      !!postId &&
+      !isOwnPost.value &&
+      effectivePostType.value === "pena_santri"
+  );
+
+  // --- Filtered categories by effectivePostType ---
+  const categories = computed(() => {
+    const all = categoriesRaw.value ?? [];
+    const filtered = effectivePostType.value
+      ? all.filter((c) => c.type === effectivePostType.value)
+      : all;
+    return filtered.map((c) => ({
+      label: c.type === "berita" ? `Berita · ${c.name}` : `Pena Santri · ${c.name}`,
+      value: c.id,
+    }));
+  });
+
+  // --- Auto-assign berita category (single category, hidden selector) ---
+  watch(
+    [categoriesRaw, effectivePostType],
+    ([cats, type]) => {
+      if (type !== "berita" || !cats?.length) return;
+      const beritaCat = cats.find((c) => c.type === "berita");
+      if (beritaCat && !form.categoryId) {
+        form.categoryId = beritaCat.id;
+      }
+    },
+    { immediate: true }
   );
 
   // --- Populate form when post loads ---
@@ -113,7 +143,6 @@ export function usePostEditor(opts: { postId?: number }) {
       form.excerpt = post.excerpt ?? "";
       form.categoryId = post.categoryId ?? undefined;
       form.featuredImage = post.featuredImage;
-      form.tags = [...post.tags];
       currentStatus.value = post.status;
       existingReviewNote.value = post.reviewNote;
       reviewerName.value = post.reviewer?.name ?? null;
@@ -139,9 +168,13 @@ export function usePostEditor(opts: { postId?: number }) {
   watch(coverFile, (file) => { void handleCoverChange(file); });
 
   // --- Computed ---
-  const canSubmit = computed(() =>
-    Boolean(form.featuredImage && form.categoryId !== undefined)
-  );
+  const canSubmit = computed(() => {
+    if (effectivePostType.value === "berita") {
+      // Category is auto-assigned for berita; only cover required
+      return Boolean(form.featuredImage);
+    }
+    return Boolean(form.featuredImage && form.categoryId !== undefined);
+  });
 
   const titleCount = computed(() => form.title.length);
 
@@ -195,7 +228,6 @@ export function usePostEditor(opts: { postId?: number }) {
       excerpt: form.excerpt.trim() || null,
       categoryId: form.categoryId ?? null,
       featuredImage: form.featuredImage,
-      tags: form.tags,
     };
   }
 
@@ -220,6 +252,12 @@ export function usePostEditor(opts: { postId?: number }) {
           method: "PATCH",
           body: payload,
         });
+      } else if (auth.canReview.value && !postId) {
+        // Admin/reviewer creating a new post — use admin create endpoint
+        response = await $fetch("/api/admin/posts", {
+          method: "POST",
+          body: payload,
+        });
       } else if (postId) {
         response = await $fetch(`/api/dashboard/santri/posts/${postId}`, {
           method: "PATCH",
@@ -236,7 +274,12 @@ export function usePostEditor(opts: { postId?: number }) {
       existingReviewNote.value = null;
 
       if (!postId && redirectAfterCreate) {
-        await router.replace(`/dashboard/posts/${response.id}/edit`);
+        const editPath = effectivePostType.value === "berita"
+          ? `/admin/berita/${response.id}/edit`
+          : effectivePostType.value === "pena_santri"
+            ? `/admin/pena-santri/${response.id}/edit`
+            : `/dashboard/posts/${response.id}/edit`;
+        await router.replace(editPath);
       }
       if (!silent) {
         toast.add({ title: "Draft disimpan", color: "success", icon: "i-lucide-check" });
@@ -262,14 +305,22 @@ export function usePostEditor(opts: { postId?: number }) {
     try {
       const payload = buildPayload();
 
-      if (auth.canReview.value && postId) {
-        // Admin/reviewer publishing own post directly — no review queue
-        await $fetch(`/api/admin/posts/${postId}/publish`, {
+      if (auth.canReview.value) {
+        // Admin/reviewer publishes directly — no review queue
+        // If no postId yet (new berita), create draft first then publish
+        const resolvedId = postId
+          ? postId
+          : await saveDraft({ silent: true, redirectAfterCreate: false, manageLoading: false });
+
+        if (!resolvedId) return;
+
+        await $fetch(`/api/admin/posts/${resolvedId}/publish`, {
           method: "POST",
           body: payload,
         });
+        const backPath = effectivePostType.value === "berita" ? "/admin/berita" : "/admin/pena-santri";
         toast.add({ title: "Artikel dipublish", color: "success", icon: "i-lucide-check-circle" });
-        await navigateTo("/admin/posts");
+        await navigateTo(backPath);
         return;
       }
 
@@ -315,7 +366,7 @@ export function usePostEditor(opts: { postId?: number }) {
         body: buildPayload(),
       });
       toast.add({ title: "Artikel dipublish", color: "success", icon: "i-lucide-check-circle" });
-      await navigateTo("/admin/posts");
+      await navigateTo("/admin/pena-santri");
     } catch (e) {
       toast.add({
         title: "Gagal publish",
@@ -345,7 +396,7 @@ export function usePostEditor(opts: { postId?: number }) {
         body: { reviewNote: reviewNote.value, ...buildPayload() },
       });
       toast.add({ title: "Artikel ditolak", color: "warning", icon: "i-lucide-x-circle" });
-      await navigateTo("/admin/posts");
+      await navigateTo("/admin/pena-santri");
     } catch (e) {
       toast.add({
         title: "Gagal menolak",
@@ -453,12 +504,14 @@ export function usePostEditor(opts: { postId?: number }) {
     coverInputKey,
     // Computed
     categories,
+    effectivePostType,
     canSubmit,
     titleCount,
     wordCount,
     readingTime,
     statusLabel,
     statusColor,
+    showBeritaActions,
     showReviewActions,
     isOwnPost,
     // Editor config

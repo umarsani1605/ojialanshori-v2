@@ -1,0 +1,40 @@
+import * as schema from '#server/db/schema'
+import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { requireReviewer } from '#server/utils/guard'
+import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import {
+  assertDraftPayload,
+  generateUniquePostSlug,
+  syncPostTags,
+} from '#server/utils/santriPostEditor'
+import { validateSantriPostBody } from '#server/utils/validation'
+
+export default defineEventHandler(async (event) => {
+  const user = requireReviewer(event)
+  const payload = await readValidatedBody(event, validateSantriPostBody)
+
+  assertDraftPayload(payload)
+
+  if (!isMysqlConfigured(event)) {
+    throw createDatabaseNotConfiguredError()
+  }
+
+  const db = useDb(event)
+  const slug = await generateUniquePostSlug(db, payload.title)
+
+  const result = await db.insert(schema.posts).values({
+    title: payload.title,
+    slug,
+    content: payload.content,
+    excerpt: payload.excerpt,
+    featuredImage: payload.featuredImage,
+    categoryId: payload.categoryId,
+    authorId: user.id,
+    status: 'draft',
+  })
+
+  const postId = result[0].insertId
+  await syncPostTags(db, postId, payload.tags)
+
+  return { id: postId, status: 'draft' as const }
+})

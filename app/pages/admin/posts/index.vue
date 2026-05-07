@@ -157,7 +157,10 @@ const columns: TableColumn<AdminPost>[] = [
           size: "sm",
           variant: "ghost",
           icon: "i-lucide-pencil",
-          to: `/admin/posts/${row.original.id}/edit`,
+          to:
+            row.original.category?.type === "berita"
+              ? `/admin/berita/${row.original.id}/edit`
+              : `/admin/pena-santri/${row.original.id}/edit`,
         }),
         h(UButton, {
           size: "sm",
