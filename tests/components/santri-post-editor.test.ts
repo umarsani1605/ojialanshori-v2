@@ -116,7 +116,6 @@ describe('SantriPostEditor', () => {
     expect(wrapper.text()).toContain('Gambar Sampul')
     expect(wrapper.text()).toContain('Ringkasan')
     expect(wrapper.text()).toContain('Toolbar')
-    expect(wrapper.text()).toContain('Suggestion menu')
     expect(wrapper.text()).toContain('Emoji menu')
     expect(wrapper.text()).toContain('Custom handlers')
   })

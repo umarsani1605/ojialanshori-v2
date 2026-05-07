@@ -29,7 +29,7 @@ describe('dashboard user routes', () => {
           id: 1,
           name: 'Admin',
           email: 'admin@example.com',
-          role: 'superadmin',
+          role: 'admin',
         },
       },
     } as never)).rejects.toMatchObject({

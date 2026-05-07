@@ -7,6 +7,7 @@ import { validateDashboardUserUpdateBody, validateRouteIdParams } from '#server/
 export default defineEventHandler(async (event) => {
   const actor = requireAdmin(event)
   const { id: userId } = await getValidatedRouterParams(event, validateRouteIdParams)
+  if (!userId || userId <= 0) throw createError({ statusCode: 400, message: 'ID user tidak valid.' })
   const updates = await readValidatedBody(event, validateDashboardUserUpdateBody)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()

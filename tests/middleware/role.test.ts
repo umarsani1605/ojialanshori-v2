@@ -1,53 +1,68 @@
-import { describe, expect, it } from 'vitest'
-import { checkAccess } from '~/middleware/role'
+import { ref } from 'vue'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-describe('middleware/role — checkAccess', () => {
-  it("requiredRole 'all' — semua role bisa akses", () => {
-    expect(checkAccess('superadmin', 'all')).toBe(true)
-    expect(checkAccess('pengurus', 'all')).toBe(true)
-    expect(checkAccess('reviewer', 'all')).toBe(true)
-    expect(checkAccess('santri', 'all')).toBe(true)
+const navigateToMock = vi.fn()
+const mockAuth = {
+  loggedIn: ref(false),
+  isAdmin: ref(false),
+  homePath: ref('/dashboard'),
+}
+
+mockNuxtImport('useAuth', () => () => mockAuth)
+mockNuxtImport('navigateTo', () => (...args: unknown[]) => navigateToMock(...args))
+
+afterEach(() => {
+  vi.clearAllMocks()
+  vi.resetModules()
+})
+
+describe('middleware/role', () => {
+  it('does nothing when user is not logged in', async () => {
+    mockAuth.loggedIn.value = false
+    mockAuth.isAdmin.value = false
+
+    const { default: middleware } = await import('~/middleware/role')
+    middleware({ path: '/admin/posts' } as never)
+    expect(navigateToMock).not.toHaveBeenCalled()
   })
 
-  it("requiredRole 'reviewer' — santri tidak bisa akses", () => {
-    expect(checkAccess('santri', 'reviewer')).toBe(false)
+  it('redirects non-admin away from /admin routes', async () => {
+    mockAuth.loggedIn.value = true
+    mockAuth.isAdmin.value = false
+    mockAuth.homePath.value = '/dashboard'
+
+    const { default: middleware } = await import('~/middleware/role')
+    middleware({ path: '/admin/posts' } as never)
+    expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
   })
 
-  it("requiredRole 'reviewer' — reviewer bisa akses", () => {
-    expect(checkAccess('reviewer', 'reviewer')).toBe(true)
+  it('allows admin to access /admin routes', async () => {
+    mockAuth.loggedIn.value = true
+    mockAuth.isAdmin.value = true
+    mockAuth.homePath.value = '/admin'
+
+    const { default: middleware } = await import('~/middleware/role')
+    middleware({ path: '/admin/posts' } as never)
+    expect(navigateToMock).not.toHaveBeenCalled()
   })
 
-  it("requiredRole 'reviewer' — pengurus tidak bisa akses", () => {
-    expect(checkAccess('pengurus', 'reviewer')).toBe(false)
+  it('redirects admin away from /dashboard routes', async () => {
+    mockAuth.loggedIn.value = true
+    mockAuth.isAdmin.value = true
+    mockAuth.homePath.value = '/admin'
+
+    const { default: middleware } = await import('~/middleware/role')
+    middleware({ path: '/dashboard/profile' } as never)
+    expect(navigateToMock).toHaveBeenCalledWith('/admin')
   })
 
-  it("requiredRole 'dashboard' — reviewer dan santri bisa akses", () => {
-    expect(checkAccess('reviewer', 'dashboard')).toBe(true)
-    expect(checkAccess('santri', 'dashboard')).toBe(true)
-  })
+  it('allows non-admin to access /dashboard routes', async () => {
+    mockAuth.loggedIn.value = true
+    mockAuth.isAdmin.value = false
 
-  it("requiredRole 'admin' — reviewer tidak bisa akses", () => {
-    expect(checkAccess('reviewer', 'admin')).toBe(false)
-  })
-
-  it("requiredRole 'admin' — pengurus bisa akses", () => {
-    expect(checkAccess('pengurus', 'admin')).toBe(true)
-  })
-
-  it("requiredRole 'superadmin' — pengurus tidak bisa akses", () => {
-    expect(checkAccess('pengurus', 'superadmin')).toBe(false)
-  })
-
-  it("requiredRole 'superadmin' — superadmin bisa akses", () => {
-    expect(checkAccess('superadmin', 'superadmin')).toBe(true)
-  })
-
-  it('userRole undefined → false untuk semua requiredRole', () => {
-    expect(checkAccess(undefined, 'all')).toBe(false)
-    expect(checkAccess(undefined, 'superadmin')).toBe(false)
-  })
-
-  it('requiredRole tidak dikenali → false', () => {
-    expect(checkAccess('superadmin', 'unknown-role')).toBe(false)
+    const { default: middleware } = await import('~/middleware/role')
+    middleware({ path: '/dashboard/profile' } as never)
+    expect(navigateToMock).not.toHaveBeenCalled()
   })
 })

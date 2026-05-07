@@ -16,23 +16,8 @@ mockNuxtImport('useUserSession', () => {
 mockNuxtImport('navigateTo', () => vi.fn())
 
 describe('useAuth', () => {
-  it('isSuperadmin true jika role superadmin', () => {
-    mockUser.value = { id: 1, name: 'Test', role: 'superadmin', avatar: null }
-    const { isSuperadmin } = useAuth()
-    expect(isSuperadmin.value).toBe(true)
-  })
-
-  it('isSuperadmin false untuk role lain', () => {
-    mockUser.value = { id: 1, name: 'Test', role: 'santri', avatar: null }
-    const { isSuperadmin } = useAuth()
-    expect(isSuperadmin.value).toBe(false)
-  })
-
-  it('isAdmin true untuk superadmin dan pengurus', () => {
-    mockUser.value = { id: 1, name: 'Test', role: 'superadmin', avatar: null }
-    expect(useAuth().isAdmin.value).toBe(true)
-
-    mockUser.value = { id: 1, name: 'Test', role: 'pengurus', avatar: null }
+  it('isAdmin true only for admin role', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'admin', avatar: null }
     expect(useAuth().isAdmin.value).toBe(true)
 
     mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
@@ -42,42 +27,68 @@ describe('useAuth', () => {
     expect(useAuth().isAdmin.value).toBe(false)
   })
 
-  it('canReview true untuk reviewer, pengurus, superadmin', () => {
-    for (const role of ['superadmin', 'pengurus', 'reviewer']) {
+  it('isReviewer true only for reviewer role', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
+    expect(useAuth().isReviewer.value).toBe(true)
+
+    mockUser.value = { id: 1, name: 'Test', role: 'admin', avatar: null }
+    expect(useAuth().isReviewer.value).toBe(false)
+  })
+
+  it('isSantri true only for santri role', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'santri', avatar: null }
+    expect(useAuth().isSantri.value).toBe(true)
+
+    mockUser.value = { id: 1, name: 'Test', role: 'admin', avatar: null }
+    expect(useAuth().isSantri.value).toBe(false)
+  })
+
+  it('canReview true for admin and reviewer', () => {
+    for (const role of ['admin', 'reviewer']) {
       mockUser.value = { id: 1, name: 'Test', role, avatar: null }
       expect(useAuth().canReview.value).toBe(true)
     }
   })
 
-  it('canReview false untuk santri', () => {
+  it('canReview false for santri', () => {
     mockUser.value = { id: 1, name: 'Test', role: 'santri', avatar: null }
     expect(useAuth().canReview.value).toBe(false)
   })
 
-  it('canPublish false untuk santri', () => {
+  it('canWritePenaSantri true only for santri', () => {
     mockUser.value = { id: 1, name: 'Test', role: 'santri', avatar: null }
-    expect(useAuth().canPublish.value).toBe(false)
+    expect(useAuth().canWritePenaSantri.value).toBe(true)
+
+    mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
+    expect(useAuth().canWritePenaSantri.value).toBe(false)
+
+    mockUser.value = { id: 1, name: 'Test', role: 'admin', avatar: null }
+    expect(useAuth().canWritePenaSantri.value).toBe(false)
   })
 
-  it('homePath dan profilePath mengikuti cluster role', () => {
-    mockUser.value = { id: 1, name: 'Test', role: 'superadmin', avatar: null }
+  it('canManageBerita true only for admin', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'admin', avatar: null }
+    expect(useAuth().canManageBerita.value).toBe(true)
+
+    mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
+    expect(useAuth().canManageBerita.value).toBe(false)
+  })
+
+  it('homePath and profilePath follow role cluster', () => {
+    mockUser.value = { id: 1, name: 'Test', role: 'admin', avatar: null }
     expect(useAuth().homePath.value).toBe('/admin')
     expect(useAuth().profilePath.value).toBe('/admin/profile')
 
     mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
     expect(useAuth().homePath.value).toBe('/dashboard')
     expect(useAuth().profilePath.value).toBe('/dashboard/profile')
-  })
 
-  it('canWritePosts hanya true untuk santri', () => {
     mockUser.value = { id: 1, name: 'Test', role: 'santri', avatar: null }
-    expect(useAuth().canWritePosts.value).toBe(true)
-
-    mockUser.value = { id: 1, name: 'Test', role: 'reviewer', avatar: null }
-    expect(useAuth().canWritePosts.value).toBe(false)
+    expect(useAuth().homePath.value).toBe('/dashboard')
+    expect(useAuth().profilePath.value).toBe('/dashboard/profile')
   })
 
-  it('isLoggedIn false jika tidak ada user', () => {
+  it('loggedIn false when no user', () => {
     mockUser.value = null
     const { loggedIn } = useAuth()
     expect(loggedIn.value).toBe(false)

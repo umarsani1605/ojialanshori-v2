@@ -8,5 +8,6 @@ export default defineVitestConfig({
         domEnvironment: 'happy-dom',
       },
     },
+    exclude: ['.claude/**', 'node_modules/**'],
   },
 })

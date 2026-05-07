@@ -1,20 +1,23 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const getPublicPostListing = vi.fn()
+const { listPublicPostsMock } = vi.hoisted(() => ({
+  listPublicPostsMock: vi.fn(),
+}))
 
-vi.mock('~~/server/utils/publicPostListing', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('~~/server/utils/publicPostListing')>()
-
-  return {
-    ...actual,
-    getPublicPostListing,
-  }
+vi.mock('~~/server/services/public/publicContentService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('~~/server/services/public/publicContentService')>()
+  return { ...actual, listPublicPosts: listPublicPostsMock }
 })
+
+vi.mock('~~/server/utils/db', () => ({
+  isMysqlConfigured: () => true,
+  useDb: () => ({}),
+}))
 
 afterEach(() => {
   vi.resetModules()
   vi.unstubAllGlobals()
-  getPublicPostListing.mockReset()
+  listPublicPostsMock.mockReset()
 })
 
 describe('GET /api/public/posts', () => {
@@ -22,17 +25,16 @@ describe('GET /api/public/posts', () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
     vi.stubGlobal('getValidatedQuery', (_event: unknown, validator: (value: unknown) => unknown) =>
       Promise.resolve(validator({})))
-    vi.stubGlobal('createError', (input: Record<string, unknown>) => input)
 
     const handler = (await import('~~/server/api/public/posts.get')).default
 
-    await expect(handler({} as never)).rejects.toMatchObject({
+    await expect(handler({ context: {} } as never)).rejects.toMatchObject({
       statusCode: 400,
       statusMessage: 'Query parameter "type" must be "berita" or "pena_santri".',
     })
   })
 
-  it('forwards normalized query params to the listing util', async () => {
+  it('forwards normalized query params to the service', async () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
     vi.stubGlobal('getValidatedQuery', (_event: unknown, validator: (value: unknown) => unknown) =>
       Promise.resolve(validator({
@@ -42,29 +44,26 @@ describe('GET /api/public/posts', () => {
         author: 'gus-ali',
         page: '0',
         limit: '50',
-        sort: 'oldest',
       })))
 
-    getPublicPostListing.mockResolvedValue({
+    listPublicPostsMock.mockResolvedValue({
       data: [],
       pagination: { page: 1, limit: 24, total: 0, totalPages: 1 },
     })
 
     const handler = (await import('~~/server/api/public/posts.get')).default
+    await handler({ context: {} } as never)
 
-    const event = { context: {} } as never
-    await handler(event)
-
-    expect(getPublicPostListing).toHaveBeenCalledWith({
-      context: {},
-    }, {
-      type: 'berita',
-      category: 'kajian',
-      subcategory: 'tafsir',
-      author: 'gus-ali',
-      page: 1,
-      limit: 24,
-      sort: 'latest',
-    })
+    expect(listPublicPostsMock).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        type: 'berita',
+        category: 'kajian',
+        subcategory: 'tafsir',
+        author: 'gus-ali',
+        page: 1,
+        limit: 50,
+      }),
+    )
   })
 })

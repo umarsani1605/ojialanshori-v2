@@ -5,65 +5,75 @@ import {
   requireAuth,
   requireReviewer,
   requireAdmin,
-  requireSuperadmin,
 } from '@@/server/utils/guard'
 
-function makeEvent(user: { id: number, name: string, role: string } | null): H3Event {
+function makeEvent(user: { id: number, name: string, email?: string, role: string } | null): H3Event {
   return { context: user ? { user } : {} } as unknown as H3Event
 }
 
 describe('requireRole', () => {
-  it('throw 401 jika tidak ada session (user undefined)', () => {
-    expect(() => requireRole(makeEvent(null), ['superadmin'])).toThrow(
+  it('throws 401 when no session', () => {
+    expect(() => requireRole(makeEvent(null), ['admin'])).toThrow(
       expect.objectContaining({ statusCode: 401 }),
     )
   })
 
-  it('throw 403 jika role tidak ada dalam allowed roles', () => {
+  it('throws 403 when role not in allowed list', () => {
     const event = makeEvent({ id: 1, name: 'Test', role: 'santri' })
-    expect(() => requireRole(event, ['superadmin'])).toThrow(
+    expect(() => requireRole(event, ['admin'])).toThrow(
       expect.objectContaining({ statusCode: 403 }),
     )
   })
 
-  it('tidak throw jika role sesuai', () => {
-    const event = makeEvent({ id: 1, name: 'Test', role: 'superadmin' })
-    expect(() => requireRole(event, ['superadmin'])).not.toThrow()
-    const user = requireRole(event, ['superadmin'])
-    expect(user.role).toBe('superadmin')
+  it('does not throw when role matches', () => {
+    const event = makeEvent({ id: 1, name: 'Test', role: 'admin' })
+    const user = requireRole(event, ['admin'])
+    expect(user.role).toBe('admin')
   })
 })
 
 describe('shorthand guards', () => {
-  it('requireSuperadmin — throw 403 untuk pengurus', () => {
-    const event = makeEvent({ id: 1, name: 'Test', role: 'pengurus' })
-    expect(() => requireSuperadmin(event)).toThrow(
-      expect.objectContaining({ statusCode: 403 }),
-    )
-  })
-
-  it('requireAdmin — throw 403 untuk reviewer', () => {
+  it('requireAdmin — throws 403 for reviewer', () => {
     const event = makeEvent({ id: 1, name: 'Test', role: 'reviewer' })
     expect(() => requireAdmin(event)).toThrow(
       expect.objectContaining({ statusCode: 403 }),
     )
   })
 
-  it('requireReviewer — throw 403 untuk santri', () => {
+  it('requireAdmin — throws 403 for santri', () => {
+    const event = makeEvent({ id: 1, name: 'Test', role: 'santri' })
+    expect(() => requireAdmin(event)).toThrow(
+      expect.objectContaining({ statusCode: 403 }),
+    )
+  })
+
+  it('requireAdmin — allows admin', () => {
+    const event = makeEvent({ id: 1, name: 'Test', role: 'admin' })
+    expect(() => requireAdmin(event)).not.toThrow()
+  })
+
+  it('requireReviewer — throws 403 for santri', () => {
     const event = makeEvent({ id: 1, name: 'Test', role: 'santri' })
     expect(() => requireReviewer(event)).toThrow(
       expect.objectContaining({ statusCode: 403 }),
     )
   })
 
-  it('requireAuth — tidak throw untuk semua role yang login', () => {
-    for (const role of ['superadmin', 'pengurus', 'reviewer', 'santri']) {
+  it('requireReviewer — allows admin and reviewer', () => {
+    for (const role of ['admin', 'reviewer']) {
+      const event = makeEvent({ id: 1, name: 'Test', role })
+      expect(() => requireReviewer(event)).not.toThrow()
+    }
+  })
+
+  it('requireAuth — allows all valid roles', () => {
+    for (const role of ['admin', 'reviewer', 'santri']) {
       const event = makeEvent({ id: 1, name: 'Test', role })
       expect(() => requireAuth(event)).not.toThrow()
     }
   })
 
-  it('requireAuth — throw 401 jika tidak ada session', () => {
+  it('requireAuth — throws 401 when no session', () => {
     expect(() => requireAuth(makeEvent(null))).toThrow(
       expect.objectContaining({ statusCode: 401 }),
     )
