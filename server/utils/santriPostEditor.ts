@@ -1,4 +1,4 @@
-import { and, eq, inArray, ne } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import type { MySql2Database } from 'drizzle-orm/mysql2'
 
 import type { CategoryType } from '~~/server/db/schema'
@@ -36,7 +36,7 @@ function toNullableString(value: unknown) {
   return normalized.length > 0 ? normalized : null
 }
 
-export function slugify(input: string) {
+function slugify(input: string) {
   return input
     .toLowerCase()
     .trim()
@@ -115,7 +115,9 @@ export async function ensureCategoryExists(db: Database, categoryId: number | nu
   }
 }
 
-export async function getSantriEditorCategories(db: Database): Promise<SantriEditorCategory[]> {
+export async function getSantriEditorCategories(
+  db: Database,
+): Promise<SantriEditorCategory[]> {
   return db
     .select({
       id: schema.categories.id,
@@ -127,94 +129,3 @@ export async function getSantriEditorCategories(db: Database): Promise<SantriEdi
     .orderBy(schema.categories.type, schema.categories.name)
 }
 
-export async function generateUniquePostSlug(db: Database, title: string, excludeId?: number) {
-  const baseSlug = slugify(title)
-  let candidate = baseSlug
-  let suffix = 2
-
-  while (true) {
-    const existing = await db.query.posts.findFirst({
-      where: excludeId
-        ? and(eq(schema.posts.slug, candidate), ne(schema.posts.id, excludeId))
-        : eq(schema.posts.slug, candidate),
-      columns: { id: true },
-    })
-
-    if (!existing) {
-      return candidate
-    }
-
-    candidate = `${baseSlug}-${suffix}`
-    suffix += 1
-  }
-}
-
-export async function getSantriOwnedPost(db: Database, postId: number, authorId: number) {
-  const post = await db.query.posts.findFirst({
-    where: and(eq(schema.posts.id, postId), eq(schema.posts.authorId, authorId)),
-    columns: {
-      id: true,
-      title: true,
-      slug: true,
-      content: true,
-      excerpt: true,
-      featuredImage: true,
-      categoryId: true,
-      status: true,
-      reviewNote: true,
-    },
-  })
-
-  if (!post) {
-    throw createError({ statusCode: 404, message: 'Post tidak ditemukan.' })
-  }
-
-  return post
-}
-
-export async function syncPostTags(db: Database, postId: number, tags: string[]) {
-  await db.delete(schema.postTags).where(eq(schema.postTags.postId, postId))
-
-  if (!tags.length) {
-    return []
-  }
-
-  const slugs = tags.map(tag => slugify(tag))
-  const existingTags = await db
-    .select({
-      id: schema.tags.id,
-      name: schema.tags.name,
-      slug: schema.tags.slug,
-    })
-    .from(schema.tags)
-    .where(inArray(schema.tags.slug, slugs))
-
-  const existingBySlug = new Map(existingTags.map(tag => [tag.slug, tag]))
-  const missingTags = tags
-    .map((name, index) => ({ name, slug: slugs[index]! }))
-    .filter(tag => !existingBySlug.has(tag.slug))
-
-  if (missingTags.length) {
-    await db.insert(schema.tags).values(missingTags)
-  }
-
-  const finalTags = await db
-    .select({
-      id: schema.tags.id,
-      name: schema.tags.name,
-      slug: schema.tags.slug,
-    })
-    .from(schema.tags)
-    .where(inArray(schema.tags.slug, slugs))
-
-  if (finalTags.length) {
-    await db.insert(schema.postTags).values(
-      finalTags.map(tag => ({
-        postId,
-        tagId: tag.id,
-      })),
-    )
-  }
-
-  return finalTags
-}
