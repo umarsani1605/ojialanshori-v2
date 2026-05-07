@@ -9,7 +9,7 @@ describe('dashboard user routes', () => {
   it('rejects unauthenticated access to the users list', async () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 
-    const handler = (await import('~~/server/api/dashboard/users/index.get')).default
+    const handler = (await import('~~/server/api/users/index.get')).default
 
     await expect(handler({ context: {} } as never)).rejects.toMatchObject({
       statusCode: 401,
@@ -21,7 +21,7 @@ describe('dashboard user routes', () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
     vi.stubGlobal('getValidatedRouterParams', () => Promise.resolve({ id: 0 }))
 
-    const handler = (await import('~~/server/api/dashboard/users/[id].patch')).default
+    const handler = (await import('~~/server/api/users/[id].patch')).default
 
     await expect(handler({
       context: {

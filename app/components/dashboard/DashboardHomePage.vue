@@ -60,7 +60,7 @@ const {
   data: reviewerStats,
   status: reviewerStatus,
   refresh: refreshReviewerStats,
-} = await useFetch<ReviewerDashboardStats>("/api/dashboard/stats", {
+} = await useFetch<ReviewerDashboardStats>("/api/stats", {
   key: `dashboard-reviewer-stats-${auth.user.value?.id}`,
   immediate: auth.isReviewer.value,
 });
@@ -69,7 +69,7 @@ const {
   data: santriStats,
   status: santriStatsStatus,
   refresh: refreshSantriStats,
-} = await useFetch<SantriDashboardStats>("/api/dashboard/santri/stats", {
+} = await useFetch<SantriDashboardStats>("/api/posts/stats", {
   key: `dashboard-santri-stats-${auth.user.value?.id}`,
   immediate: auth.isSantri.value,
 });
@@ -78,7 +78,7 @@ const {
   data: santriMyPosts,
   status: santriMyPostsStatus,
   refresh: refreshSantriMyPosts,
-} = await useFetch<{ data: SantriMyPost[] }>("/api/dashboard/santri/my-posts", {
+} = await useFetch<{ data: SantriMyPost[] }>("/api/posts/my-posts", {
   key: `dashboard-santri-my-posts-${auth.user.value?.id}`,
   immediate: auth.isSantri.value,
 });
@@ -87,7 +87,7 @@ const {
   data: santriFeed,
   status: santriFeedStatus,
   refresh: refreshSantriFeed,
-} = await useFetch<{ data: SantriFeedPost[] }>("/api/dashboard/santri/feed", {
+} = await useFetch<{ data: SantriFeedPost[] }>("/api/posts/feed", {
   key: `dashboard-santri-feed-${auth.user.value?.id}`,
   immediate: auth.isSantri.value,
 });

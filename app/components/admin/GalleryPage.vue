@@ -13,7 +13,7 @@ type GalleryItem = {
 
 const toast = useToast()
 
-const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>('/api/admin/gallery')
+const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>('/api/gallery')
 const items = computed(() => data.value?.data ?? [])
 
 const search = ref('')
@@ -64,9 +64,9 @@ async function doUpload() {
   try {
     const fd = new FormData()
     fd.append('image', uploadFile.value)
-    const { path } = await $fetch<{ path: string }>('/api/admin/gallery/upload', { method: 'POST', body: fd })
+    const { path } = await $fetch<{ path: string }>('/api/gallery/upload', { method: 'POST', body: fd })
 
-    await $fetch('/api/admin/gallery', {
+    await $fetch('/api/gallery', {
       method: 'POST',
       body: { title: uploadForm.title, imagePath: path, album: uploadForm.album || undefined, order: 0 },
     })
@@ -99,7 +99,7 @@ async function saveEdit() {
   if (!editingItem.value) return
   saving.value = true
   try {
-    await $fetch(`/api/admin/gallery/${editingItem.value.id}`, {
+    await $fetch(`/api/gallery/${editingItem.value.id}`, {
       method: 'PATCH',
       body: { title: editForm.title, album: editForm.album || null, order: editForm.order },
     })
@@ -128,7 +128,7 @@ async function doDelete() {
   if (deletingId.value === null) return
   deleting.value = true
   try {
-    await $fetch(`/api/admin/gallery/${deletingId.value}`, { method: 'DELETE' })
+    await $fetch(`/api/gallery/${deletingId.value}`, { method: 'DELETE' })
     toast.add({ title: 'Foto dihapus', color: 'success', icon: 'i-lucide-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()

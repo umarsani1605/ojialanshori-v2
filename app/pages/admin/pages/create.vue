@@ -41,7 +41,7 @@ async function save() {
   }
   saving.value = true
   try {
-    const result = await $fetch<{ data: { id: number } }>('/api/admin/pages', {
+    const result = await $fetch<{ data: { id: number } }>('/api/pages', {
       method: 'POST',
       body: { title: form.title, slug: form.slug, content: form.content, status: form.status },
     })

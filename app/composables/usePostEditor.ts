@@ -59,11 +59,11 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
     "post-editor-categories",
     async () => {
       if (auth.canReview.value) {
-        const res = await $fetch<{ data: CategoryItem[] }>("/api/admin/categories");
+        const res = await $fetch<{ data: CategoryItem[] }>("/api/categories");
         return res.data;
       }
       const res = await $fetch<{ categories: CategoryItem[] }>(
-        "/api/dashboard/santri/posts/meta"
+        "/api/posts/meta"
       );
       return res.categories;
     },
@@ -419,7 +419,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
       }
       const formData = new FormData();
       formData.append("cover", file);
-      const response = await $fetch<{ path: string }>("/api/dashboard/santri/upload/cover", {
+      const response = await $fetch<{ path: string }>("/api/posts/upload/cover", {
         method: "POST",
         body: formData,
       });
@@ -452,7 +452,7 @@ export function usePostEditor(opts: { postId?: number; postType?: "berita" | "pe
         const formData = new FormData();
         formData.append("image", file);
         const response = await $fetch<{ url: string }>(
-          "/api/dashboard/santri/upload/editor-image",
+          "/api/posts/upload/editor-image",
           { method: "POST", body: formData }
         );
         editor

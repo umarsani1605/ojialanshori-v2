@@ -7,7 +7,7 @@ type Setting = {
 
 const toast = useToast()
 
-const { data, refresh } = useLazyFetch<{ data: Setting[] }>('/api/admin/settings')
+const { data, refresh } = useLazyFetch<{ data: Setting[] }>('/api/settings')
 const settings = computed(() => data.value?.data ?? [])
 
 const form = reactive<Record<string, string>>({})
@@ -22,7 +22,7 @@ watch(settings, (rows) => {
 async function save() {
   saving.value = true
   try {
-    await $fetch('/api/admin/settings', {
+    await $fetch('/api/settings', {
       method: 'PATCH',
       body: { updates: { ...form } },
     })

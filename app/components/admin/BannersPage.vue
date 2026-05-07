@@ -21,7 +21,7 @@ type BannerForm = {
 
 const toast = useToast()
 
-const { data, refresh } = useLazyFetch<{ data: Banner[] }>('/api/admin/banners')
+const { data, refresh } = useLazyFetch<{ data: Banner[] }>('/api/banners')
 const banners = computed(() => data.value?.data ?? [])
 
 const search = ref('')
@@ -78,10 +78,10 @@ async function save() {
       endDate: form.endDate || undefined,
     }
     if (editingId.value !== null) {
-      await $fetch(`/api/admin/banners/${editingId.value}`, { method: 'PATCH', body })
+      await $fetch(`/api/banners/${editingId.value}`, { method: 'PATCH', body })
       toast.add({ title: 'Banner diperbarui', color: 'success', icon: 'i-lucide-check-circle' })
     } else {
-      await $fetch('/api/admin/banners', { method: 'POST', body })
+      await $fetch('/api/banners', { method: 'POST', body })
       toast.add({ title: 'Banner ditambahkan', color: 'success', icon: 'i-lucide-check-circle' })
     }
     isModalOpen.value = false
@@ -103,7 +103,7 @@ async function doDelete() {
   if (deletingId.value === null) return
   deleting.value = true
   try {
-    await $fetch(`/api/admin/banners/${deletingId.value}`, { method: 'DELETE' })
+    await $fetch(`/api/banners/${deletingId.value}`, { method: 'DELETE' })
     toast.add({ title: 'Banner dihapus', color: 'success', icon: 'i-lucide-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()
@@ -119,7 +119,7 @@ async function doDelete() {
 async function toggleActive(banner: Banner) {
   togglingId.value = banner.id
   try {
-    await $fetch(`/api/admin/banners/${banner.id}`, {
+    await $fetch(`/api/banners/${banner.id}`, {
       method: 'PATCH',
       body: {
         text: banner.text,

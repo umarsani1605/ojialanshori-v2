@@ -22,7 +22,7 @@ const toast = useToast()
 const router = useRouter()
 
 const { data, status: fetchStatus } = useLazyFetch<{ data: Page }>(
-  `/api/admin/pages/${pageId}`,
+  `/api/pages/${pageId}`,
   { key: `admin-page-edit-${pageId}` },
 )
 
@@ -53,7 +53,7 @@ async function save() {
   }
   saving.value = true
   try {
-    await $fetch(`/api/admin/pages/${pageId}`, {
+    await $fetch(`/api/pages/${pageId}`, {
       method: 'PATCH',
       body: { title: form.title, slug: form.slug, content: form.content, status: form.status },
     })

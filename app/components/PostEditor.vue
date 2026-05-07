@@ -343,9 +343,9 @@ const backTo = computed(() => {
     </div>
 
     <!-- Main grid -->
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-stretch">
+    <div class="flex flex-col md:flex-row gap-6">
       <!-- Left column -->
-      <div class="min-w-0">
+      <div class="flex-3 min-w-0">
         <div v-if="postStatus === 'pending'" class="py-10 text-sm text-muted">
           Memuat editor...
         </div>
@@ -438,7 +438,7 @@ const backTo = computed(() => {
       </div>
 
       <!-- Right sidebar -->
-      <aside class="min-w-0 space-y-5">
+      <aside class="flex-2 min-w-0 space-y-5">
         <!-- ReviewNoteEditor: hanya untuk reviewer bukan pemilik post -->
         <ReviewNoteEditor
           v-if="showReviewActions"

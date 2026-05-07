@@ -9,7 +9,7 @@ describe('GET /api/admin/gallery', () => {
   it('rejects unauthenticated access', async () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 
-    const handler = (await import('~~/server/api/admin/gallery/index.get')).default
+    const handler = (await import('~~/server/api/gallery/index.get')).default
 
     await expect(handler({ context: {} } as never)).rejects.toMatchObject({ statusCode: 401 })
   })
@@ -17,7 +17,7 @@ describe('GET /api/admin/gallery', () => {
   it('rejects non-admin (santri)', async () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 
-    const handler = (await import('~~/server/api/admin/gallery/index.get')).default
+    const handler = (await import('~~/server/api/gallery/index.get')).default
 
     await expect(handler({ context: { user: { id: 1, name: 'S', email: 's@a.com', role: 'santri' } } } as never))
       .rejects.toMatchObject({ statusCode: 403 })

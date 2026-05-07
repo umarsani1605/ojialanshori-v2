@@ -1,11 +1,11 @@
 import * as schema from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
-import { requireRole } from '#server/utils/guard'
+import { requireAuth } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { getSantriEditorCategories } from '#server/utils/santriPostEditor'
 
 export default defineEventHandler(async (event) => {
-  requireRole(event, ['santri'])
+  requireAuth(event)
 
   if (!isMysqlConfigured(event)) {
     throw createDatabaseNotConfiguredError()

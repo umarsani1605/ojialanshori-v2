@@ -21,7 +21,7 @@ const auth = useAuth();
 const toast = useToast();
 
 const { data, refresh } = await useFetch<{ user: User }>(
-  "/api/dashboard/profile",
+  "/api/profile",
   {
     key: "profile-self",
   },
@@ -79,7 +79,7 @@ async function saveProfile() {
   profileError.value = null;
   profileSaving.value = true;
   try {
-    await $fetch("/api/dashboard/profile", {
+    await $fetch("/api/profile", {
       method: "PATCH",
       body: {
         name: profileForm.name,
@@ -132,7 +132,7 @@ async function savePassword() {
   }
   passwordSaving.value = true;
   try {
-    await $fetch("/api/dashboard/profile/password", {
+    await $fetch("/api/profile/password", {
       method: "PATCH",
       body: { ...passwordForm },
     });
@@ -190,7 +190,7 @@ async function onFileChange(e: Event) {
   try {
     const fd = new FormData();
     fd.append("file", file);
-    await $fetch("/api/dashboard/profile/avatar", { method: "POST", body: fd });
+    await $fetch("/api/profile/avatar", { method: "POST", body: fd });
     toast.add({
       title: "Avatar diperbarui",
       color: "success",
@@ -215,7 +215,7 @@ async function onFileChange(e: Event) {
 async function deleteAvatar() {
   avatarDeleting.value = true;
   try {
-    await $fetch("/api/dashboard/profile/avatar", { method: "DELETE" });
+    await $fetch("/api/profile/avatar", { method: "DELETE" });
     toast.add({
       title: "Avatar dihapus",
       color: "success",

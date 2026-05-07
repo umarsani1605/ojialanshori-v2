@@ -34,7 +34,7 @@ watch([() => filters.role, () => filters.status, () => filters.search], () => {
 });
 
 const { data, status, refresh } = useLazyFetch<{ data: User[] }>(
-  "/api/dashboard/users",
+  "/api/users",
 );
 
 const users = computed(() => data.value?.data ?? []);
@@ -121,7 +121,7 @@ async function submitForm() {
   formSubmitting.value = true;
   try {
     if (formMode.value === "create") {
-      await $fetch("/api/dashboard/users", {
+      await $fetch("/api/users", {
         method: "POST",
         body: { ...form },
       });
@@ -131,7 +131,7 @@ async function submitForm() {
         icon: "i-lucide-user-plus",
       });
     } else if (formTarget.value) {
-      await $fetch(`/api/dashboard/users/${formTarget.value.id}`, {
+      await $fetch(`/api/users/${formTarget.value.id}`, {
         method: "PATCH",
         body: {
           name: form.name,
@@ -186,7 +186,7 @@ function askToggleActive(user: User) {
   confirm.confirmLabel = willActivate ? "Aktifkan" : "Nonaktifkan";
   confirm.color = willActivate ? "primary" : "warning";
   confirm.action = async () => {
-    await $fetch(`/api/dashboard/users/${user.id}`, {
+    await $fetch(`/api/users/${user.id}`, {
       method: "PATCH",
       body: { isActive: willActivate },
     });
@@ -206,7 +206,7 @@ function askResetPassword(user: User) {
   confirm.confirmLabel = "Reset Password";
   confirm.color = "error";
   confirm.action = async () => {
-    await $fetch(`/api/dashboard/users/${user.id}/reset-password`, {
+    await $fetch(`/api/users/${user.id}/reset-password`, {
       method: "POST",
     });
     toast.add({

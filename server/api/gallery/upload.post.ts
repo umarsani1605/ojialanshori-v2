@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
   const storageKey = `gallery/${Date.now()}.${ext}`
   const publicPath = `/images/${storageKey}`
 
-  await blob.put(storageKey, file.data, { contentType: mime })
+  await blob.put(storageKey, new Blob([file.data], { type: mime }), { contentType: mime })
 
   return { path: publicPath }
 })

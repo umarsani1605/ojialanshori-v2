@@ -26,7 +26,7 @@ const {
   data: adminStats,
   status,
   refresh,
-} = useLazyFetch<AdminDashboardStats>("/api/dashboard/stats", {
+} = useLazyFetch<AdminDashboardStats>("/api/stats", {
   key: `admin-dashboard-stats-${auth.user.value?.id}`,
 });
 

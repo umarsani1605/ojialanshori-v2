@@ -23,7 +23,7 @@ const PAGE_SIZE = 10
 const page = ref(1)
 const search = ref('')
 
-const { data, refresh } = useLazyFetch<{ data: PageItem[] }>('/api/admin/pages')
+const { data, refresh } = useLazyFetch<{ data: PageItem[] }>('/api/pages')
 const pages = computed(() => data.value?.data ?? [])
 
 const filteredPages = computed(() => {
@@ -56,7 +56,7 @@ async function doDelete() {
   if (deletingId.value === null) return
   deleting.value = true
   try {
-    await $fetch(`/api/admin/pages/${deletingId.value}`, { method: 'DELETE' })
+    await $fetch(`/api/pages/${deletingId.value}`, { method: 'DELETE' })
     toast.add({ title: 'Halaman dihapus', color: 'success', icon: 'i-lucide-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()

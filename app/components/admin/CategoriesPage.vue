@@ -22,7 +22,7 @@ type CategoryForm = {
 
 const toast = useToast()
 
-const { data, refresh } = useLazyFetch<{ data: Category[] }>('/api/admin/categories')
+const { data, refresh } = useLazyFetch<{ data: Category[] }>('/api/categories')
 const categories = computed(() => data.value?.data ?? [])
 
 const typeFilter = ref<CategoryType | 'all'>('all')
@@ -110,10 +110,10 @@ async function save() {
       parentId: form.parentId,
     }
     if (editingId.value !== null) {
-      await $fetch(`/api/admin/categories/${editingId.value}`, { method: 'PATCH', body })
+      await $fetch(`/api/categories/${editingId.value}`, { method: 'PATCH', body })
       toast.add({ title: 'Kategori diperbarui', color: 'success', icon: 'i-lucide-check-circle' })
     } else {
-      await $fetch('/api/admin/categories', { method: 'POST', body })
+      await $fetch('/api/categories', { method: 'POST', body })
       toast.add({ title: 'Kategori ditambahkan', color: 'success', icon: 'i-lucide-check-circle' })
     }
     isModalOpen.value = false
@@ -135,7 +135,7 @@ async function doDelete() {
   if (deletingId.value === null) return
   deleting.value = true
   try {
-    await $fetch(`/api/admin/categories/${deletingId.value}`, { method: 'DELETE' })
+    await $fetch(`/api/categories/${deletingId.value}`, { method: 'DELETE' })
     toast.add({ title: 'Kategori dihapus', color: 'success', icon: 'i-lucide-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()
