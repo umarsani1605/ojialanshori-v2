@@ -1,12 +1,12 @@
 import { blob } from '@nuxthub/blob'
-import { eq } from 'drizzle-orm'
 
-import * as schema from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import { setProfileAvatar } from '#server/services/profile/profileService'
+import { findProfileById } from '#server/repositories/profile/profileRepository'
 
-const MAX_SIZE = 2 * 1024 * 1024 // 2MB
+const MAX_SIZE = 2 * 1024 * 1024
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp']
 const EXT_MAP: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -15,13 +15,11 @@ const EXT_MAP: Record<string, string> = {
 }
 
 export default defineEventHandler(async (event) => {
-  const currentUser = requireAuth(event)
+  const actor = requireAuth(event)
 
   const parts = await readMultipartFormData(event)
   const file = parts?.find(p => p.name === 'file' && p.filename)
-  if (!file || !file.data) {
-    throw createError({ statusCode: 400, message: 'File tidak ditemukan.' })
-  }
+  if (!file?.data) throw createError({ statusCode: 400, message: 'File tidak ditemukan.' })
 
   const mime = file.type ?? 'application/octet-stream'
   if (!ALLOWED_MIME.includes(mime)) {
@@ -31,40 +29,24 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Ukuran file maksimal 2MB.' })
   }
 
+  if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
+
+  const db = useDb(event)
+  const existing = await findProfileById(db, actor.id)
+  const oldPath = existing?.avatar
+  if (oldPath?.startsWith('/images/')) {
+    try { await blob.delete(oldPath.replace(/^\/images\//, '')) } catch {}
+  }
+
   const ext = EXT_MAP[mime]!
-  const storageKey = `avatars/${currentUser.id}/${Date.now()}.${ext}`
+  const storageKey = `avatars/${actor.id}/${Date.now()}.${ext}`
   const publicPath = `/images/${storageKey}`
 
   await blob.put(storageKey, file.data, { contentType: mime })
-
-  if (!isMysqlConfigured(event)) {
-    throw createDatabaseNotConfiguredError()
-  }
-
-  const db = useDb(event)
-  // Remove old avatar from R2 if it exists
-  const existing = await db.query.users.findFirst({
-    where: eq(schema.users.id, currentUser.id),
-    columns: { avatar: true },
-  })
-  const oldPath = existing?.avatar
-  if (oldPath && oldPath.startsWith('/images/')) {
-    const oldKey = oldPath.replace(/^\/images\//, '')
-    try { await blob.delete(oldKey) } catch {}
-  }
-
-  await db.update(schema.users)
-    .set({ avatar: publicPath })
-    .where(eq(schema.users.id, currentUser.id))
+  await setProfileAvatar(db, actor.id, publicPath)
 
   await setUserSession(event, {
-    user: {
-      id: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      role: currentUser.role,
-      avatar: publicPath,
-    },
+    user: { id: actor.id, name: actor.name, email: actor.email, role: actor.role, avatar: publicPath },
   })
 
   return { avatar: publicPath }
