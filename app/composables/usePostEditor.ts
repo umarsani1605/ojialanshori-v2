@@ -212,15 +212,25 @@ export function usePostEditor(opts: { postId?: number }) {
     if (manageLoading) loadingAction.value = "save";
     try {
       const payload = buildPayload();
-      const response = postId
-        ? await $fetch<{ id: number; status: EditorPost["status"] }>(
-            `/api/dashboard/santri/posts/${postId}`,
-            { method: "PATCH", body: payload }
-          )
-        : await $fetch<{ id: number; status: EditorPost["status"] }>(
-            "/api/dashboard/santri/posts",
-            { method: "POST", body: payload }
-          );
+      let response: { id: number; status: EditorPost["status"] };
+
+      if (auth.canReview.value && postId) {
+        // Admin/reviewer editing own post — use admin PATCH endpoint (status → draft)
+        response = await $fetch(`/api/admin/posts/${postId}`, {
+          method: "PATCH",
+          body: payload,
+        });
+      } else if (postId) {
+        response = await $fetch(`/api/dashboard/santri/posts/${postId}`, {
+          method: "PATCH",
+          body: payload,
+        });
+      } else {
+        response = await $fetch("/api/dashboard/santri/posts", {
+          method: "POST",
+          body: payload,
+        });
+      }
 
       currentStatus.value = response.status;
       existingReviewNote.value = null;
@@ -251,6 +261,19 @@ export function usePostEditor(opts: { postId?: number }) {
     loadingAction.value = "send";
     try {
       const payload = buildPayload();
+
+      if (auth.canReview.value && postId) {
+        // Admin/reviewer publishing own post directly — no review queue
+        await $fetch(`/api/admin/posts/${postId}/publish`, {
+          method: "POST",
+          body: payload,
+        });
+        toast.add({ title: "Artikel dipublish", color: "success", icon: "i-lucide-check-circle" });
+        await navigateTo("/admin/posts");
+        return;
+      }
+
+      // Santri: submit for review (pending_review)
       const resolvedId = postId
         ? postId
         : await saveDraft({ silent: true, redirectAfterCreate: false, manageLoading: false });
