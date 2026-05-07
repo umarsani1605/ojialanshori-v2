@@ -5,7 +5,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('GET /api/admin/categories', () => {
+describe('GET /api/categories', () => {
   it('rejects unauthenticated access', async () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 
@@ -24,7 +24,7 @@ describe('GET /api/admin/categories', () => {
   })
 })
 
-describe('DELETE /api/admin/categories/[id]', () => {
+describe('DELETE /api/categories/[id]', () => {
   it('rejects non-admin', async () => {
     vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 
