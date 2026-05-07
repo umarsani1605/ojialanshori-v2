@@ -2,13 +2,10 @@
 definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
+  requiredRole: 'admin',
 })
 </script>
 
 <template>
-  <DashboardClusterPlaceholderPage
-    cluster="admin"
-    title="Pengaturan"
-    description="Route pengaturan dipertahankan khusus admin dan sudah canonical ke cluster admin."
-  />
+  <AdminSettingsPage />
 </template>

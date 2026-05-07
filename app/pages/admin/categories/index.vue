@@ -7,9 +7,5 @@ definePageMeta({
 </script>
 
 <template>
-  <DashboardClusterPlaceholderPage
-    cluster="admin"
-    title="Kategori"
-    description="Manajemen kategori sekarang punya route admin canonical terpisah dari dashboard santri."
-  />
+  <AdminCategoriesPage />
 </template>

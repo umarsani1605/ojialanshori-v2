@@ -1,6 +1,6 @@
 import { createError } from 'h3'
 
-import type { CategoryType, PostStatus, Role } from '#server/db/schema'
+import type { CategoryType, PageStatus, PostStatus, Role } from '#server/db/schema'
 import { parseSantriPostPayload } from '#server/utils/santriPostEditor'
 
 const VALID_ROLES: Role[] = ['admin', 'reviewer', 'santri']
@@ -270,4 +270,138 @@ export function validateAdminPostsQuery(value: unknown) {
       ? status as PostStatus
       : undefined,
   }
+}
+
+export function validateAdminBannerBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  const text = getOptionalString(body.text)
+
+  if (!text) {
+    throw createError({ statusCode: 400, message: 'Teks banner wajib diisi.' })
+  }
+
+  if (text.length > 500) {
+    throw createError({ statusCode: 400, message: 'Teks banner maksimal 500 karakter.' })
+  }
+
+  const link = getOptionalString(body.link)
+
+  let isActive: boolean | undefined
+  if ('isActive' in body) {
+    if (typeof body.isActive !== 'boolean') {
+      throw createError({ statusCode: 400, message: 'Nilai isActive tidak valid.' })
+    }
+    isActive = body.isActive
+  }
+
+  const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
+  const startDate = getOptionalString(body.startDate)
+  const endDate = getOptionalString(body.endDate)
+
+  if (startDate && !DATE_REGEX.test(startDate)) {
+    throw createError({ statusCode: 400, message: 'Format startDate tidak valid (YYYY-MM-DD).' })
+  }
+
+  if (endDate && !DATE_REGEX.test(endDate)) {
+    throw createError({ statusCode: 400, message: 'Format endDate tidak valid (YYYY-MM-DD).' })
+  }
+
+  return { text, link, isActive, startDate: startDate ?? null, endDate: endDate ?? null }
+}
+
+export function validateAdminSettingsUpdateBody(value: unknown) {
+  const body = getRequiredRecord(value)
+
+  if (!isRecord(body.updates)) {
+    throw createError({ statusCode: 400, message: 'Field updates harus berupa objek.' })
+  }
+
+  const entries = Object.entries(body.updates)
+
+  if (entries.length > 50) {
+    throw createError({ statusCode: 400, message: 'Maksimal 50 setting sekaligus.' })
+  }
+
+  for (const [k, v] of entries) {
+    if (typeof k !== 'string' || typeof v !== 'string') {
+      throw createError({ statusCode: 400, message: 'Setiap key dan value harus berupa string.' })
+    }
+  }
+
+  return { updates: body.updates as Record<string, string> }
+}
+
+const VALID_CATEGORY_TYPES = ['berita', 'pena_santri'] as const satisfies CategoryType[]
+
+export function validateAdminCategoryBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  const name = getOptionalString(body.name)
+
+  if (!name) {
+    throw createError({ statusCode: 400, message: 'Nama kategori wajib diisi.' })
+  }
+
+  const slug = getOptionalString(body.slug)
+  const type = getOptionalString(body.type)
+
+  if (!type || !VALID_CATEGORY_TYPES.includes(type as CategoryType)) {
+    throw createError({ statusCode: 400, message: 'Tipe kategori tidak valid (berita atau pena_santri).' })
+  }
+
+  let parentId: number | null = null
+  if ('parentId' in body && body.parentId !== null && body.parentId !== undefined) {
+    const raw = getSingleValue(body.parentId)
+    const parsed = typeof raw === 'number' ? raw : Number(raw)
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      throw createError({ statusCode: 400, message: 'parentId tidak valid.' })
+    }
+    parentId = parsed
+  }
+
+  return { name, slug: slug ?? null, type: type as CategoryType, parentId }
+}
+
+export function validateAdminGalleryBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  const title = getOptionalString(body.title)
+
+  if (!title) {
+    throw createError({ statusCode: 400, message: 'Judul gambar wajib diisi.' })
+  }
+
+  const imagePath = getOptionalString(body.imagePath)
+
+  if (!imagePath) {
+    throw createError({ statusCode: 400, message: 'Path gambar wajib diisi.' })
+  }
+
+  const album = getOptionalString(body.album)
+  const order = 'order' in body ? getPositiveInteger(body.order, 0, { min: 0 }) : 0
+
+  return { title, imagePath, album: album ?? null, order }
+}
+
+const VALID_PAGE_STATUSES = ['draft', 'published'] as const satisfies PageStatus[]
+
+export function validateAdminPageBody(value: unknown) {
+  const body = getRequiredRecord(value)
+  const title = getOptionalString(body.title)
+
+  if (!title) {
+    throw createError({ statusCode: 400, message: 'Judul halaman wajib diisi.' })
+  }
+
+  const slug = getOptionalString(body.slug)
+
+  if (!slug) {
+    throw createError({ statusCode: 400, message: 'Slug halaman wajib diisi.' })
+  }
+
+  const content = typeof body.content === 'string' ? body.content : ''
+  const statusRaw = getOptionalString(body.status)
+  const status: PageStatus = statusRaw && VALID_PAGE_STATUSES.includes(statusRaw as PageStatus)
+    ? (statusRaw as PageStatus)
+    : 'draft'
+
+  return { title, slug, content, status }
 }
