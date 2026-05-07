@@ -3,7 +3,7 @@ declare module '#auth-utils' {
     id: number
     name: string
     email: string
-    role: 'superadmin' | 'pengurus' | 'reviewer' | 'santri'
+    role: 'admin' | 'reviewer' | 'santri'
     avatar: string | null
   }
 }
