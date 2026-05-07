@@ -26,8 +26,8 @@ describe('canCreatePost', () => {
     expect(canCreatePost('santri', 'pena_santri')).toBe(true)
   })
 
-  it('rejects admin creating pena_santri', () => {
-    expect(canCreatePost('admin', 'pena_santri')).toBe(false)
+  it('allows admin to create pena_santri', () => {
+    expect(canCreatePost('admin', 'pena_santri')).toBe(true)
   })
 
   it('rejects reviewer creating pena_santri', () => {
