@@ -1,30 +1,22 @@
-import { eq } from 'drizzle-orm'
+import { blob } from '@nuxthub/blob'
 
-import * as schema from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { validateRouteIdParams } from '#server/utils/validation'
+import { removeGalleryItem } from '#server/services/gallery/galleryService'
 
 export default defineEventHandler(async (event) => {
   requireAdmin(event)
 
-  if (!isMysqlConfigured(event)) {
-    throw createDatabaseNotConfiguredError()
-  }
+  if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
   const { id } = validateRouteIdParams(event.context.params)
-  const db = useDb(event)
+  const imagePath = await removeGalleryItem(useDb(event), id)
 
-  const existing = await db.query.gallery.findFirst({
-    where: (g, { eq: eqFn }) => eqFn(g.id, id),
-  })
-
-  if (!existing) {
-    throw createError({ statusCode: 404, message: 'Item galeri tidak ditemukan.' })
+  if (imagePath?.startsWith('/images/')) {
+    try { await blob.delete(imagePath.replace(/^\/images\//, '')) } catch {}
   }
-
-  await db.delete(schema.gallery).where(eq(schema.gallery.id, id))
 
   return { success: true }
 })

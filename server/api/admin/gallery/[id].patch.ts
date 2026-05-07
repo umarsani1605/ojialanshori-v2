@@ -1,10 +1,8 @@
-import { eq } from 'drizzle-orm'
-
-import * as schema from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { validateRouteIdParams } from '#server/utils/validation'
+import { patchGalleryItem } from '#server/services/gallery/galleryService'
 
 type PatchBody = {
   title?: string
@@ -37,27 +35,9 @@ function validateGalleryPatchBody(value: unknown): PatchBody {
 export default defineEventHandler(async (event) => {
   requireAdmin(event)
 
-  if (!isMysqlConfigured(event)) {
-    throw createDatabaseNotConfiguredError()
-  }
+  if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
   const { id } = validateRouteIdParams(event.context.params)
   const body = await readValidatedBody(event, validateGalleryPatchBody)
-  const db = useDb(event)
-
-  const existing = await db.query.gallery.findFirst({
-    where: (g, { eq: eqFn }) => eqFn(g.id, id),
-  })
-
-  if (!existing) {
-    throw createError({ statusCode: 404, message: 'Item galeri tidak ditemukan.' })
-  }
-
-  await db.update(schema.gallery).set(body).where(eq(schema.gallery.id, id))
-
-  const updated = await db.query.gallery.findFirst({
-    where: (g, { eq: eqFn }) => eqFn(g.id, id),
-  })
-
-  return { data: updated }
+  return { data: await patchGalleryItem(useDb(event), id, body) }
 })
