@@ -30,8 +30,8 @@ describe('canCreatePost', () => {
     expect(canCreatePost('admin', 'pena_santri')).toBe(true)
   })
 
-  it('rejects reviewer creating pena_santri', () => {
-    expect(canCreatePost('reviewer', 'pena_santri')).toBe(false)
+  it('allows reviewer to create pena_santri', () => {
+    expect(canCreatePost('reviewer', 'pena_santri')).toBe(true)
   })
 })
 
@@ -134,8 +134,9 @@ describe('canEditPost', () => {
     expect(canEditPost('santri', 'pena_santri', 5, 99)).toBe(false)
   })
 
-  it('reviewer cannot edit posts', () => {
-    expect(canEditPost('reviewer', 'pena_santri', 5, 5)).toBe(false)
+  it('reviewer can edit pena_santri posts', () => {
+    expect(canEditPost('reviewer', 'pena_santri', 5, 5)).toBe(true)
+    expect(canEditPost('reviewer', 'pena_santri', 5, 99)).toBe(true)
   })
 })
 

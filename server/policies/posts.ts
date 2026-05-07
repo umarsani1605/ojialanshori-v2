@@ -4,12 +4,12 @@ export type PostType = 'berita' | 'pena_santri'
 
 export function canCreatePost(role: Role, type: PostType): boolean {
   if (type === 'berita') return role === 'admin'
-  return role === 'admin' || role === 'santri'
+  return role === 'admin' || role === 'reviewer' || role === 'santri'
 }
 
 export function canEditPost(role: Role, type: PostType, authorId: number, actorId: number): boolean {
   if (type === 'berita') return role === 'admin'
-  if (role === 'admin') return true
+  if (role === 'admin' || role === 'reviewer') return true
   return role === 'santri' && authorId === actorId
 }
 
