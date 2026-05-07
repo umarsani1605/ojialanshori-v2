@@ -101,7 +101,7 @@ export async function createPostForActor(
 
   const categoryType = payload.categoryId
     ? await getCategoryType(db, payload.categoryId)
-    : 'pena_santri'
+    : actor.role === 'admin' ? 'berita' : 'pena_santri'
 
   if (!canCreatePost(actor.role, categoryType)) {
     throw createError({ statusCode: 403, message: 'Forbidden' })
