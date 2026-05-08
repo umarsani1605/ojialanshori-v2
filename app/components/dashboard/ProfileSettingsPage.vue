@@ -3,8 +3,9 @@ import type { TabsItem } from "@nuxt/ui";
 
 type User = {
   id: number;
-  name: string;
-  username: string;
+  fullname: string;
+  nickname: string | null;
+  bio: string | null;
   email: string;
   role: "admin" | "reviewer" | "santri";
   avatar: string | null;
@@ -13,6 +14,7 @@ type User = {
   faculty: string | null;
   major: string | null;
   yearEnrolled: number | null;
+  yearStudy: number | null;
   isActive: boolean;
   createdAt: string;
 };
@@ -35,13 +37,16 @@ const tabItems: TabsItem[] = [
 ];
 
 const profileForm = reactive({
-  name: "",
+  fullname: "",
+  nickname: "",
+  bio: "",
   email: "",
   phone: "",
   university: "",
   faculty: "",
   major: "",
   yearEnrolled: undefined as number | undefined,
+  yearStudy: undefined as number | undefined,
 });
 
 const profileSaving = ref(false);
@@ -51,26 +56,32 @@ watch(
   user,
   (val) => {
     if (!val) return;
-    profileForm.name = val.name;
+    profileForm.fullname = val.fullname;
+    profileForm.nickname = val.nickname ?? "";
+    profileForm.bio = val.bio ?? "";
     profileForm.email = val.email;
     profileForm.phone = val.phone ?? "";
     profileForm.university = val.university ?? "";
     profileForm.faculty = val.faculty ?? "";
     profileForm.major = val.major ?? "";
     profileForm.yearEnrolled = val.yearEnrolled ?? undefined;
+    profileForm.yearStudy = val.yearStudy ?? undefined;
   },
   { immediate: true },
 );
 
 function resetProfileForm() {
   if (user.value) {
-    profileForm.name = user.value.name;
+    profileForm.fullname = user.value.fullname;
+    profileForm.nickname = user.value.nickname ?? "";
+    profileForm.bio = user.value.bio ?? "";
     profileForm.email = user.value.email;
     profileForm.phone = user.value.phone ?? "";
     profileForm.university = user.value.university ?? "";
     profileForm.faculty = user.value.faculty ?? "";
     profileForm.major = user.value.major ?? "";
     profileForm.yearEnrolled = user.value.yearEnrolled ?? undefined;
+    profileForm.yearStudy = user.value.yearStudy ?? undefined;
   }
   profileError.value = null;
 }
@@ -82,13 +93,16 @@ async function saveProfile() {
     await $fetch("/api/profile", {
       method: "PATCH",
       body: {
-        name: profileForm.name,
+        fullname: profileForm.fullname,
+        nickname: profileForm.nickname || null,
+        bio: profileForm.bio || null,
         email: profileForm.email,
         phone: profileForm.phone || null,
         university: profileForm.university || null,
         faculty: profileForm.faculty || null,
         major: profileForm.major || null,
         yearEnrolled: profileForm.yearEnrolled ?? null,
+        yearStudy: profileForm.yearStudy ?? null,
       },
     });
     toast.add({
@@ -297,11 +311,28 @@ async function deleteAvatar() {
         <template #informasi>
           <form class="mt-4 max-w-2xl space-y-5" @submit.prevent="saveProfile">
             <div class="space-y-4">
-              <UFormField label="Nama Lengkap" name="name" required>
+              <UFormField label="Nama Lengkap" name="fullname" required>
                 <UInput
-                  v-model="profileForm.name"
+                  v-model="profileForm.fullname"
                   :disabled="profileSaving"
                   class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="Nama Panggilan" name="nickname">
+                <UInput
+                  v-model="profileForm.nickname"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField label="Bio" name="bio">
+                <UTextarea
+                  v-model="profileForm.bio"
+                  :disabled="profileSaving"
+                  class="w-full"
+                  placeholder="Tulis bio singkat..."
                 />
               </UFormField>
 
@@ -332,12 +363,14 @@ async function deleteAvatar() {
                 />
               </UFormField>
 
-              <UFormField
-                label="Angkatan Kuliah"
-                name="collegeYear"
-                hint="Belum tersedia di data profil saat ini."
-              >
-                <UInput model-value="Belum tersedia" disabled class="w-full" />
+              <UFormField label="Angkatan Kuliah" name="yearStudy">
+                <USelect
+                  v-model="profileForm.yearStudy"
+                  :items="yearOptions"
+                  placeholder="Pilih angkatan"
+                  :disabled="profileSaving"
+                  class="w-full"
+                />
               </UFormField>
 
               <UFormField label="Universitas / Kampus" name="university">

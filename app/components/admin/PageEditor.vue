@@ -1,90 +1,165 @@
 <script setup lang="ts">
-const props = defineProps<{ template: string }>()
-const toast = useToast()
+const props = defineProps<{ template: string }>();
+const toast = useToast();
 
-const { data, refresh } = useFetch<{ data: { meta: Record<string, any> } }>(`/api/pages/${props.template}`)
-const meta = ref<Record<string, any>>({})
-const saving = ref(false)
+const { data, refresh } = useFetch<{
+  data: { title: string; meta: Record<string, any> };
+}>(`/api/pages/${props.template}`);
+const title = ref("");
+const meta = ref<Record<string, any>>({});
+const saving = ref(false);
 
-watch(() => data.value?.data?.meta, (newMeta) => {
-  if (newMeta) {
-    // Parse if it's a string, or assign directly if JSON object
-    meta.value = typeof newMeta === 'string' ? JSON.parse(newMeta) : { ...newMeta }
-  } else {
-    // Initialize default structures based on template
-    if (props.template === 'home') {
-      meta.value = { subtitle: '', description: '', features: '', maxNews: 3, maxPena: 3 }
-    } else if (props.template === 'profile') {
-      meta.value = { overview: '', vision: '', mission: '' }
+watch(
+  () => data.value?.data,
+  (newData) => {
+    if (newData) {
+      title.value = newData.title;
+      const newMeta = newData.meta;
+      // Parse if it's a string, or assign directly if JSON object
+      meta.value =
+        typeof newMeta === "string" ? JSON.parse(newMeta) : { ...newMeta };
+    } else {
+      // Initialize default structures based on template
+      title.value = props.template;
+      if (props.template === "home") {
+        meta.value = {
+          subtitle: "",
+          description: "",
+          features: "",
+          maxNews: 3,
+          maxPena: 3,
+        };
+      } else if (props.template === "profile") {
+        meta.value = { overview: "", vision: "", mission: "" };
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+);
 
 async function save() {
-  saving.value = true
+  saving.value = true;
   try {
     await $fetch(`/api/pages/${props.template}`, {
-      method: 'PATCH',
-      body: { meta: meta.value }
-    })
-    toast.add({ title: 'Perubahan disimpan', color: 'success' })
-    await refresh()
+      method: "PATCH",
+      body: {
+        title: title.value,
+        meta: meta.value,
+      },
+    });
+    toast.add({ title: "Perubahan disimpan", color: "success" });
+    await refresh();
   } catch (e: any) {
-    toast.add({ title: 'Gagal menyimpan', description: e.message, color: 'error' })
+    toast.add({
+      title: "Gagal menyimpan",
+      description: e.message,
+      color: "error",
+    });
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 </script>
 
 <template>
   <div class="min-h-[calc(100vh-60px)] bg-slate-50 pb-8">
-    <!-- Action Bar -->
     <div class="flex items-center justify-between px-2 mb-6">
-      <UButton to="/admin/pages" variant="link" color="neutral" icon="i-ph-arrow-left" class="-ml-2">
+      <UButton
+        to="/admin/pages"
+        variant="link"
+        color="neutral"
+        icon="i-ph-arrow-left"
+        class="-ml-2"
+      >
         Kembali
-      </UButton>
-      <UButton color="primary" :loading="saving" @click="save">
-        Simpan Perubahan
       </UButton>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="max-w-3xl mx-auto px-2 sm:px-0">
-      <h2 class="text-xl font-bold mb-4 capitalize">Pengaturan: {{ template }}</h2>
+    <div class="max-w-3xl space-y-6">
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+      >
+        <div class="space-y-2">
+          <h2 class="text-lg font-semibold">Pengaturan Halaman {{ title }}</h2>
+        </div>
+        <UButton color="primary" :loading="saving" @click="save">
+          Simpan
+        </UButton>
+      </div>
 
       <!-- Home Template Form -->
-      <UCard v-if="template === 'home'" class="space-y-5">
-        <UFormField label="Subjudul (Hero)" name="subtitle">
-          <UInput v-model="meta.subtitle" class="w-full" />
-        </UFormField>
-        <UFormField label="Deskripsi (Hero)" name="description">
-          <UTextarea v-model="meta.description" class="w-full" :rows="3" />
-        </UFormField>
-        <UFormField label="Teks Features" name="features">
-          <UTextarea v-model="meta.features" class="w-full" :rows="3" placeholder="Gunakan baris baru untuk memisahkan item" />
-        </UFormField>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <UFormField label="Maks Berita Ditampilkan" name="maxNews">
-            <UInput v-model="meta.maxNews" type="number" class="w-full" />
-          </UFormField>
-          <UFormField label="Maks Pena Santri Ditampilkan" name="maxPena">
-            <UInput v-model="meta.maxPena" type="number" class="w-full" />
-          </UFormField>
+      <UCard v-if="template === 'home'">
+        <div class="space-y-6">
+          <div class="space-y-6">
+            <div class="text-lg font-semibold">Header Utama</div>
+            <UFormField label="Subjudul" name="subtitle">
+              <UInput v-model="meta.subtitle" class="w-full" />
+            </UFormField>
+            <UFormField label="Judul" name="title">
+              <UInput v-model="meta.title" class="w-full" />
+            </UFormField>
+            <UFormField label="Deskripsi" name="description">
+              <UTextarea v-model="meta.description" class="w-full" :rows="5" />
+            </UFormField>
+          </div>
+          <USeparator />
+          <div class="space-y-6">
+            <div class="text-lg font-semibold">Layanan</div>
+            <div
+              class="flex items-center justify-center text-sm text-muted h-16"
+            >
+              On Planning...
+            </div>
+          </div>
+          <USeparator />
+          <div class="space-y-6">
+            <div class="text-lg font-semibold">Konten</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <UFormField label="Maks Berita Ditampilkan" name="maxNews">
+                <UInput v-model="meta.maxNews" type="number" class="w-full" />
+              </UFormField>
+              <UFormField label="Maks Pena Santri Ditampilkan" name="maxPena">
+                <UInput v-model="meta.maxPena" type="number" class="w-full" />
+              </UFormField>
+            </div>
+          </div>
+          <USeparator />
+          <AdminTestimonialsPage />
         </div>
       </UCard>
 
       <!-- Profile Template Form -->
-      <UCard v-else-if="template === 'profile'" class="space-y-5">
-        <UFormField label="Selayang Pandang" name="overview">
-          <UTextarea v-model="meta.overview" class="w-full" :rows="5" />
-        </UFormField>
-        <UFormField label="Visi" name="vision">
-          <UTextarea v-model="meta.vision" class="w-full" :rows="3" />
-        </UFormField>
-        <UFormField label="Misi" name="mission">
-          <UTextarea v-model="meta.mission" class="w-full" :rows="5" placeholder="Gunakan baris baru untuk memisahkan poin" />
-        </UFormField>
+      <UCard v-else-if="template === 'profile'">
+        <div class="space-y-6">
+          <div class="space-y-6">
+            <UFormField label="Selayang Pandang" name="overview">
+              <UTextarea v-model="meta.overview" class="w-full" :rows="10" />
+            </UFormField>
+            <UFormField label="Visi" name="vision">
+              <UTextarea v-model="meta.vision" class="w-full" :rows="2" />
+            </UFormField>
+            <UFormField label="Misi" name="mission">
+              <UTextarea
+                v-model="meta.mission"
+                class="w-full"
+                :rows="10"
+                placeholder="Gunakan baris baru untuk memisahkan poin"
+              />
+            </UFormField>
+          </div>
+          <USeparator />
+          <AdminBoardMembersPage />
+        </div>
+      </UCard>
+
+      <!-- Activities Template Form -->
+      <UCard v-else-if="template === 'activities'">
+        <AdminActivitiesPage />
+      </UCard>
+
+      <!-- FAQ Template Form -->
+      <UCard v-else-if="template === 'faqs'">
+        <AdminFaqsPage />
       </UCard>
 
       <!-- Fallback / Empty State -->

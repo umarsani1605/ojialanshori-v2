@@ -4,14 +4,16 @@ import { roleColorMap, roleLabelMap } from "~/constants/roleDisplay";
 
 type AdminDashboardStats = {
   type: "global";
+  totalPosts: number;
   publishedPosts: number;
   pendingReviewPosts: number;
-  totalUsers: number;
+  totalSantri: number;
   totalGallery: number;
   recentPendingPosts: Array<{
     id: number;
     title: string;
     slug: string;
+    featuredImage: string | null;
     createdAt: string;
     author: {
       name: string;
@@ -44,6 +46,33 @@ if (hour < 10) greeting.value = "Selamat Pagi";
 else if (hour < 15) greeting.value = "Selamat Siang";
 else if (hour < 18) greeting.value = "Selamat Sore";
 else greeting.value = "Selamat Malam";
+
+const statItems = computed(() => [
+  {
+    label: "Total Artikel",
+    value: adminStats.value?.totalPosts ?? 0,
+    icon: "ph:article-duotone",
+    color: "blue" as const,
+  },
+  {
+    label: "Artikel Terbit",
+    value: adminStats.value?.publishedPosts ?? 0,
+    icon: "ph:check-circle-duotone",
+    color: "green" as const,
+  },
+  {
+    label: "Artikel dalam Review",
+    value: adminStats.value?.pendingReviewPosts ?? 0,
+    icon: "ph:clock-duotone",
+    color: "amber" as const,
+  },
+  {
+    label: "Total Santri",
+    value: adminStats.value?.totalSantri ?? 0,
+    icon: "ph:users-duotone",
+    color: "purple" as const,
+  },
+]);
 </script>
 
 <template>
@@ -74,92 +103,68 @@ else greeting.value = "Selamat Malam";
 
     <template v-else-if="adminStats">
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <UCard>
-          <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-green-50 p-2">
-              <UIcon
-                name="i-ph-article"
-                class="text-xl text-green-600"
-              />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-slate-800">
-                {{ adminStats.publishedPosts }}
-              </p>
-              <p class="text-xs text-slate-500">Artikel Terbit</p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-amber-50 p-2">
-              <UIcon name="i-ph-tray" class="text-xl text-amber-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-slate-800">
-                {{ adminStats.pendingReviewPosts }}
-              </p>
-              <p class="text-xs text-slate-500">Dalam Ulasan</p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-blue-50 p-2">
-              <UIcon name="i-ph-users" class="text-xl text-blue-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-slate-800">
-                {{ adminStats.totalUsers }}
-              </p>
-              <p class="text-xs text-slate-500">Total User</p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-purple-50 p-2">
-              <UIcon name="i-ph-image" class="text-xl text-purple-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-slate-800">
-                {{ adminStats.totalGallery }}
-              </p>
-              <p class="text-xs text-slate-500">Foto Galeri</p>
-            </div>
-          </div>
-        </UCard>
+        <AppStatCard
+          v-for="item in statItems"
+          :key="item.label"
+          :label="item.label"
+          :value="item.value"
+          :icon="item.icon"
+          :color="item.color"
+        />
       </div>
 
-      <UCard>
+      <UCard :ui="{ body: 'min-h-[300px] flex flex-col' }">
         <template #header>
           <div class="flex items-center justify-between gap-3">
-            <h3 class="text-sm font-semibold text-slate-700">
-              Artikel Perlu Diulas
-            </h3>
+            <h3 class="font-semibold">Artikel Menunggu Review</h3>
           </div>
         </template>
 
         <div
           v-if="adminStats.recentPendingPosts.length === 0"
-          class="py-6 text-center text-sm text-slate-400"
+          class="flex flex-1 flex-col gap-2 items-center justify-center py-12 text-center"
         >
-          Tidak ada artikel yang menunggu review.
+          <UIcon
+            name="ph:folder-open-duotone"
+            class="text-4xl text-slate-300"
+          />
+          <p class="mt-4 text-sm text-slate-400">
+            Tidak ada artikel yang menunggu review.
+          </p>
         </div>
         <ul v-else class="divide-y divide-default">
           <li
             v-for="post in adminStats.recentPendingPosts"
             :key="post.id"
-            class="flex items-center justify-between gap-4 py-3"
+            class="group py-3"
           >
-            <div class="min-w-0">
-              <p class="truncate text-sm font-medium text-slate-800">
-                {{ post.title }}
-              </p>
-              <p class="mt-0.5 text-xs text-slate-500">
-                oleh {{ post.author.name }}
-              </p>
-            </div>
+            <NuxtLink
+              :to="`/admin/pena-santri/${post.id}/edit`"
+              class="flex gap-4"
+            >
+              <div
+                class="size-16 shrink-0 overflow-hidden rounded-lg bg-slate-100"
+              >
+                <img
+                  v-if="post.featuredImage"
+                  :src="post.featuredImage"
+                  :alt="post.title"
+                  class="size-full object-cover group-hover:scale-103 transition-transform"
+                />
+                <div
+                  v-else
+                  class="flex size-full items-center justify-center text-slate-300"
+                >
+                  <UIcon name="i-ph-image" class="text-xl" />
+                </div>
+              </div>
+              <div class="min-w-0 mt-2">
+                <p class="truncate font-medium group-hover:opacity-80">
+                  {{ post.title }}
+                </p>
+                <p class="mt-0.5 text-sm">oleh {{ post.author.name }}</p>
+              </div>
+            </NuxtLink>
           </li>
         </ul>
       </UCard>

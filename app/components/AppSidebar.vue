@@ -48,16 +48,12 @@ const navLinks = computed(() => {
     { label: "Beranda", icon: "i-ph-house", to: "/admin" },
     { label: "Semua Artikel", icon: "i-ph-files", to: "/admin/posts" },
     { label: "Kategori", icon: "i-ph-tag", to: "/admin/categories" },
+    { label: "Pengguna", icon: "i-ph-users", to: "/admin/users" },
     { label: "Galeri", icon: "i-ph-image", to: "/admin/gallery" },
     { label: "Banner", icon: "i-ph-megaphone", to: "/admin/banner" },
+    { label: "Halaman Statis", icon: "i-ph-layout", to: "/admin/pages" },
+    { label: "Pengaturan", icon: "i-ph-gear", to: "/admin/settings" },
   ];
-  if (auth.isAdmin.value) {
-    items.push(
-      { label: "Halaman Statis", icon: "i-ph-layout", to: "/admin/pages" },
-      { label: "Users", icon: "i-ph-users", to: "/admin/users" },
-      { label: "Pengaturan", icon: "i-ph-gear", to: "/admin/settings" },
-    );
-  }
   return items;
 });
 

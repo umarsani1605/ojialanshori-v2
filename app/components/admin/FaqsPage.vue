@@ -2,7 +2,7 @@
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 
-type FAQ = { id: number, question: string, answer: string, isActive: boolean }
+type FAQ = { id: number, question: string, answer: string }
 
 const toast = useToast()
 const { data, refresh } = useFetch<{ data: FAQ[] }>('/api/faqs')
@@ -10,7 +10,7 @@ const faqs = computed(() => data.value?.data ?? [])
 
 const isModalOpen = ref(false)
 const editingId = ref<number | null>(null)
-const form = reactive({ question: '', answer: '', isActive: true })
+const form = reactive({ question: '', answer: '' })
 const saving = ref(false)
 
 const isDeleteModalOpen = ref(false)
@@ -19,13 +19,13 @@ const deleting = ref(false)
 
 function openCreate() {
   editingId.value = null
-  Object.assign(form, { question: '', answer: '', isActive: true })
+  Object.assign(form, { question: '', answer: '' })
   isModalOpen.value = true
 }
 
 function openEdit(faq: FAQ) {
   editingId.value = faq.id
-  Object.assign(form, { question: faq.question, answer: faq.answer, isActive: faq.isActive })
+  Object.assign(form, { question: faq.question, answer: faq.answer })
   isModalOpen.value = true
 }
 
@@ -71,7 +71,7 @@ const UBadge = resolveComponent('UBadge')
 
 const columns: TableColumn<FAQ>[] = [
   { accessorKey: 'question', header: 'Pertanyaan', cell: ({ row }) => h('span', { class: 'font-medium' }, row.original.question) },
-  { accessorKey: 'isActive', header: 'Status', cell: ({ row }) => h(UBadge, { color: row.original.isActive ? 'success' : 'neutral', variant: 'subtle' }, () => row.original.isActive ? 'Aktif' : 'Draft') },
+  { accessorKey: 'answer', header: 'Jawaban', cell: ({ row }) => h('span', { class: 'text-muted-foreground line-clamp-2' }, row.original.answer) },
   {
     accessorKey: 'actions', header: '', cell: ({ row }) => h('div', { class: 'flex justify-end gap-2' }, [
       h(UButton, { size: 'sm', variant: 'ghost', icon: 'i-ph-pencil-simple', onClick: () => openEdit(row.original) }),
@@ -97,9 +97,6 @@ const columns: TableColumn<FAQ>[] = [
           </UFormField>
           <UFormField label="Jawaban" required>
             <UTextarea v-model="form.answer" class="w-full" :rows="4" />
-          </UFormField>
-          <UFormField label="Status" name="isActive">
-            <UCheckbox v-model="form.isActive" label="Tampilkan di halaman publik" />
           </UFormField>
         </div>
       </template>

@@ -1,50 +1,54 @@
 <script setup lang="ts">
 type BannerForm = {
-  text: string
-  link: string
-  isActive: boolean
-  startDate: string
-  endDate: string
-}
+  text: string;
+  link: string;
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+};
 
 type BannerResponse = {
   data: {
-    text: string
-    link: string | null
-    isActive: boolean
-    startDate: string | null
-    endDate: string | null
-  }
-}
+    text: string;
+    link: string | null;
+    isActive: boolean;
+    startDate: string | null;
+    endDate: string | null;
+  };
+};
 
-const toast = useToast()
-const saving = ref(false)
+const toast = useToast();
+const saving = ref(false);
 
 const form = reactive<BannerForm>({
-  text: '',
-  link: '',
+  text: "",
+  link: "",
   isActive: false,
-  startDate: '',
-  endDate: '',
-})
+  startDate: "",
+  endDate: "",
+});
 
-const { data, status, refresh } = useLazyFetch<BannerResponse>('/api/banners')
+const { data, status, refresh } = useLazyFetch<BannerResponse>("/api/banners");
 
-watch(() => data.value?.data, (banner) => {
-  form.text = banner?.text ?? ''
-  form.link = banner?.link ?? ''
-  form.isActive = banner?.isActive ?? false
-  form.startDate = banner?.startDate ?? ''
-  form.endDate = banner?.endDate ?? ''
-}, { immediate: true })
+watch(
+  () => data.value?.data,
+  (banner) => {
+    form.text = banner?.text ?? "";
+    form.link = banner?.link ?? "";
+    form.isActive = banner?.isActive ?? false;
+    form.startDate = banner?.startDate ?? "";
+    form.endDate = banner?.endDate ?? "";
+  },
+  { immediate: true },
+);
 
-const isLoading = computed(() => status.value === 'pending')
+const isLoading = computed(() => status.value === "pending");
 
 async function save() {
-  saving.value = true
+  saving.value = true;
   try {
-    await $fetch('/api/banners', {
-      method: 'POST',
+    await $fetch("/api/banners", {
+      method: "POST",
       body: {
         text: form.text,
         link: form.link || undefined,
@@ -52,104 +56,88 @@ async function save() {
         startDate: form.startDate || undefined,
         endDate: form.endDate || undefined,
       },
-    })
+    });
 
     toast.add({
-      title: 'Banner disimpan',
-      color: 'success',
-      icon: 'i-ph-check-circle',
-    })
+      title: "Banner disimpan",
+      color: "success",
+      icon: "i-ph-check-circle",
+    });
 
-    await refresh()
+    await refresh();
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Terjadi kesalahan.'
+    const message =
+      error instanceof Error ? error.message : "Terjadi kesalahan.";
     toast.add({
-      title: 'Gagal menyimpan banner',
+      title: "Gagal menyimpan banner",
       description: message,
-      color: 'error',
-      icon: 'i-ph-x-circle',
-    })
+      color: "error",
+      icon: "i-ph-x-circle",
+    });
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 </script>
 
 <template>
   <div class="max-w-3xl space-y-6">
-    <div class="space-y-1">
-      <h2 class="text-lg font-semibold">
-        Banner Atas Website
-      </h2>
-      <p class="text-sm text-muted">
-        Banner ini disimpan sebagai satu konfigurasi dan ditampilkan di bagian atas website jika sedang aktif.
-      </p>
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+      <div class="space-y-2">
+        <h2 class="text-lg font-semibold">Pengumuman</h2>
+        <p class="text-sm text-muted">
+          Pengumuman ini tampil di halaman publik website.
+        </p>
+      </div>
+      <UButton label="Simpan" :loading="saving" @click="save" />
     </div>
 
     <UCard>
-      <template #content>
-        <div v-if="isLoading" class="space-y-4">
-          <USkeleton class="h-5 w-40" />
-          <USkeleton class="h-24 w-full" />
+      <div v-if="isLoading" class="space-y-4">
+        <USkeleton class="h-5 w-40" />
+        <USkeleton class="h-24 w-full" />
+        <USkeleton class="h-10 w-full" />
+        <div class="grid gap-4 md:grid-cols-2">
           <USkeleton class="h-10 w-full" />
-          <div class="grid gap-4 md:grid-cols-2">
-            <USkeleton class="h-10 w-full" />
-            <USkeleton class="h-10 w-full" />
-          </div>
-          <USkeleton class="h-10 w-32" />
+          <USkeleton class="h-10 w-full" />
         </div>
+        <USkeleton class="h-10 w-32" />
+      </div>
 
-        <div v-else class="space-y-5">
-          <UFormField label="Teks" required>
-            <UTextarea
-              v-model="form.text"
-              :rows="4"
-              class="w-full"
-              placeholder="Contoh: Pendaftaran santri baru sudah dibuka."
-            />
-          </UFormField>
-
-          <UFormField label="Link">
-            <UInput
-              v-model="form.link"
-              class="w-full"
-              placeholder="https://..."
-            />
-          </UFormField>
-
-          <div class="grid gap-4 md:grid-cols-2">
-            <UFormField label="Tanggal Mulai">
-              <UInput
-                v-model="form.startDate"
-                type="date"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField label="Tanggal Selesai">
-              <UInput
-                v-model="form.endDate"
-                type="date"
-                class="w-full"
-              />
-            </UFormField>
-          </div>
-
-          <UFormField label="Status">
-            <USwitch v-model="form.isActive" label="Aktif" />
-          </UFormField>
-        </div>
-      </template>
-
-      <template #footer>
-        <div class="flex justify-end">
-          <UButton
-            label="Simpan Banner"
-            :loading="saving"
-            @click="save"
+      <div v-else class="space-y-5">
+        <UFormField label="Teks" required>
+          <UTextarea
+            v-model="form.text"
+            :rows="4"
+            class="w-full"
+            placeholder="Contoh: Pendaftaran santri baru sudah dibuka."
           />
+        </UFormField>
+
+        <UFormField label="Link">
+          <UInput
+            v-model="form.link"
+            class="w-full"
+            placeholder="https://..."
+          />
+        </UFormField>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <UFormField label="Tanggal Mulai">
+            <UInput v-model="form.startDate" type="date" class="w-full" />
+          </UFormField>
+
+          <UFormField label="Tanggal Selesai">
+            <UInput v-model="form.endDate" type="date" class="w-full" />
+          </UFormField>
         </div>
-      </template>
+
+        <UFormField label="Status">
+          <USwitch v-model="form.isActive" label="Aktif" />
+        </UFormField>
+      </div>
     </UCard>
   </div>
 </template>

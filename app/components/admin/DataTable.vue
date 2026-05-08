@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T">
-import { getPaginationRowModel } from "@tanstack/table-core";
+import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { PaginationState } from "@tanstack/table-core";
 
@@ -10,11 +10,17 @@ const props = withDefaults(
     search?: string;
     searchPlaceholder?: string;
     loading?: boolean;
+    showIndex?: boolean;
+    indexColumnSize?: number;
+    defaultPageSize?: number;
   }>(),
   {
     search: undefined,
     searchPlaceholder: "Cari...",
     loading: false,
+    showIndex: true,
+    indexColumnSize: 56,
+    defaultPageSize: 10,
   },
 );
 
@@ -26,9 +32,42 @@ defineOptions({ inheritAttrs: false });
 
 const table = useTemplateRef("table");
 
-const pagination = ref<PaginationState>({ pageIndex: 0, pageSize: 10 });
+const pagination = ref<PaginationState>({
+  pageIndex: 0,
+  pageSize: props.defaultPageSize,
+});
 
-const paginationRowModel = getPaginationRowModel();
+const paginatedData = computed(() => {
+  const start = pagination.value.pageIndex * pagination.value.pageSize;
+  return props.data.slice(start, start + pagination.value.pageSize);
+});
+
+const displayColumns = computed<TableColumn<T>[]>(() => {
+  if (!props.showIndex) {
+    return props.columns;
+  }
+
+  return [
+    {
+      id: "index",
+      header: "No",
+      size: props.indexColumnSize,
+      minSize: props.indexColumnSize,
+      maxSize: props.indexColumnSize,
+      cell: ({ row }) =>
+        h(
+          "span",
+          { class: "text-sm tabular-nums text-muted" },
+          String(
+            pagination.value.pageIndex * pagination.value.pageSize +
+              row.index +
+              1,
+          ),
+        ),
+    } as TableColumn<T>,
+    ...props.columns,
+  ];
+});
 
 const slots = useSlots();
 const forwardedSlots = computed(() =>
@@ -67,12 +106,8 @@ defineExpose({
 
 <template>
   <UCard
-    class="shadow-none!"
-    :ui="{
-      root: 'ring-transparent divide-y divide-default overflow-hidden',
-      header: 'px-4 py-3 pb-0',
-      footer: 'px-4 py-3',
-    }"
+    class="flex flex-col min-h-[850px]"
+    :ui="{ body: 'flex-1', footer: 'mt-auto' }"
   >
     <template
       v-if="
@@ -103,10 +138,8 @@ defineExpose({
     <div class="overflow-x-auto">
       <UTable
         ref="table"
-        v-model:pagination="pagination"
-        :pagination-options="{ getPaginationRowModel: paginationRowModel }"
-        :data="data"
-        :columns="columns"
+        :data="paginatedData"
+        :columns="displayColumns"
         :loading="loading"
         :ui="{ tbody: '[&>tr]:hover:bg-elevated/50 [&>tr]:transition-colors' }"
         v-bind="$attrs"

@@ -298,7 +298,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
         </UAlert>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <DashboardStatCard
+          <AppStatCard
             v-for="item in statItems"
             :key="item.label"
             :label="item.label"
@@ -438,31 +438,31 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
 
         <template v-else-if="reviewerStats">
           <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <DashboardStatCard
+            <AppStatCard
               label="Total Artikel"
               :value="reviewerStats.totalPosts"
               icon="ph:note-pencil"
               color="blue"
             />
-            <DashboardStatCard
+            <AppStatCard
               label="Terbit"
               :value="reviewerStats.publishedPosts"
               icon="ph:check-circle"
               color="green"
             />
-            <DashboardStatCard
+            <AppStatCard
               label="Dalam Ulasan"
               :value="reviewerStats.pendingPosts"
               icon="ph:clock"
               color="amber"
             />
-            <DashboardStatCard
+            <AppStatCard
               label="Ditolak"
               :value="reviewerStats.rejectedPosts"
               icon="ph:x-circle"
               color="red"
             />
-            <DashboardStatCard
+            <AppStatCard
               label="Draft"
               :value="reviewerStats.draftPosts"
               icon="ph:file-dashed"
