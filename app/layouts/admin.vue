@@ -247,7 +247,6 @@ watch(
       id="main"
       :ui="{
         body: 'p-2 sm:p-6',
-        footer: 'relative',
       }"
     >
       <template #header>
