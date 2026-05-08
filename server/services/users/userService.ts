@@ -2,8 +2,8 @@ import type { Role } from '#server/db/schema'
 import { canManageUsers } from '#server/policies/users'
 import {
   findUserById,
-  findUserByEmailOrUsername,
-  findUserByEmailOrUsernameExcluding,
+  findUserByEmail,
+  findUserByEmailExcluding,
   insertUser,
   listUsers,
   updateUser,

@@ -1,12 +1,11 @@
 import {
   findUserForAuth,
-  updateUserPasswordHash,
+  updateUserPassword,
   type Database,
 } from '#server/repositories/auth/authRepository'
 import {
-  findUserByEmailOrUsername,
   findUserById,
-  findUserByUsername,
+  findUserByEmail,
   insertUser,
 } from '#server/repositories/users/userRepository'
 import { hashUserPassword, verifyUserPassword } from '#server/utils/password'
@@ -21,7 +20,7 @@ type LoginInput = {
 }
 
 type RegisterInput = {
-  name: string
+  fullname: string
   email: string
   password: string
 }
@@ -116,7 +115,7 @@ export async function registerSantri(
   const hashedPassword = await hashUserPassword(input.password)
 
   const newUserId = await insertUser(db, {
-    fullname: input.name,
+    fullname: input.fullname,
     email: input.email,
     password: hashedPassword,
     passwordType: 'bcrypt',
