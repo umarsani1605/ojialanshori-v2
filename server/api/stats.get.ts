@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
         orderBy: [desc(schema.posts.createdAt)],
         limit: 5,
         columns: { id: true, title: true, slug: true, createdAt: true, featuredImage: true },
-        with: { author: { columns: { name: true } } },
+        with: { author: { columns: { fullname: true } } },
       }),
     ])
 
