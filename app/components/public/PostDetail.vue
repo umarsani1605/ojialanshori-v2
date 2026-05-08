@@ -67,7 +67,7 @@ const shareButtons = computed(() => [
           :to="backPath"
           class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-slate-900 transition-colors mb-8"
         >
-          <UIcon name="i-lucide-arrow-left" class="size-4 shrink-0" />
+          <UIcon name="i-ph-arrow-left" class="size-4 shrink-0" />
           {{ backLabel }}
         </NuxtLink>
 
@@ -98,7 +98,7 @@ const shareButtons = computed(() => [
             v-else
             class="flex h-full w-full items-center justify-center text-slate-300"
           >
-            <UIcon name="i-lucide-image" class="size-14" />
+            <UIcon name="i-ph-image" class="size-14" />
           </div>
         </div>
 

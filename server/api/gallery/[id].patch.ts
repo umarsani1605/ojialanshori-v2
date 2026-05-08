@@ -6,7 +6,6 @@ import { patchGalleryItem } from '#server/services/gallery/galleryService'
 
 type PatchBody = {
   title?: string
-  album?: string | null
   order?: number
 }
 
@@ -22,12 +21,9 @@ function validateGalleryPatchBody(value: unknown): PatchBody {
     if (!t) throw createError({ statusCode: 400, message: 'Judul tidak boleh kosong.' })
     result.title = t
   }
-  if ('album' in body) {
-    result.album = typeof body.album === 'string' && body.album.trim() ? body.album.trim() : null
-  }
   if ('order' in body) {
     const o = Number(body.order)
-    result.order = Number.isFinite(o) ? Math.max(0, Math.trunc(o)) : 0
+    result.order = Number.isFinite(o) ? Math.max(1, Math.trunc(o)) : 1
   }
   return result
 }

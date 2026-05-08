@@ -94,7 +94,7 @@ async function saveProfile() {
     toast.add({
       title: "Profil diperbarui",
       color: "success",
-      icon: "i-lucide-check",
+      icon: "i-ph-check",
     });
     await Promise.all([refresh(), auth.fetch()]);
   } catch (err) {
@@ -139,7 +139,7 @@ async function savePassword() {
     toast.add({
       title: "Password diperbarui",
       color: "success",
-      icon: "i-lucide-key-round",
+      icon: "i-ph-key",
     });
     passwordForm.oldPassword = "";
     passwordForm.newPassword = "";
@@ -194,7 +194,7 @@ async function onFileChange(e: Event) {
     toast.add({
       title: "Avatar diperbarui",
       color: "success",
-      icon: "i-lucide-check",
+      icon: "i-ph-check",
     });
     await Promise.all([refresh(), auth.fetch()]);
   } catch (err) {
@@ -219,7 +219,7 @@ async function deleteAvatar() {
     toast.add({
       title: "Avatar dihapus",
       color: "success",
-      icon: "i-lucide-check",
+      icon: "i-ph-check",
     });
     await Promise.all([refresh(), auth.fetch()]);
   } catch (err) {
@@ -245,15 +245,15 @@ async function deleteAvatar() {
         <div class="flex items-start justify-between gap-4">
           <div class="flex min-w-0 items-center gap-4">
             <div class="relative shrink-0">
-              <AppAvatar
-                :name="user?.name"
-                :src="user?.avatar"
+              <UAvatar
+                :src="user?.avatar ?? undefined"
+                :alt="user?.name ?? ''"
+                :text="getInitials(user?.name)"
                 size="3xl"
-                fallback-color="primary"
               />
               <UButton
                 type="button"
-                icon="i-lucide-camera"
+                icon="i-ph-camera"
                 color="neutral"
                 variant="outline"
                 size="xs"
@@ -274,7 +274,7 @@ async function deleteAvatar() {
 
           <UButton
             v-if="user?.avatar"
-            icon="i-lucide-trash-2"
+            icon="i-ph-trash"
             color="error"
             variant="ghost"
             size="xs"

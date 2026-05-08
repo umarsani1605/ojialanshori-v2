@@ -20,7 +20,7 @@ const headline = computed(() =>
       variant="subtle"
       highlight
       highlight-color="primary"
-      icon="i-lucide-construction"
+      icon="i-ph-hammer"
       title="Belum diimplementasikan"
       description="Struktur route, layout, akses role, dan navigasi canonical sudah final. Isi halaman menyusul di task berikutnya."
     />

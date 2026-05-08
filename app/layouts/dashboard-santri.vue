@@ -23,15 +23,22 @@ const navLinks = computed(() => {
 const dropdownItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: "Profil Saya",
-      icon: "i-lucide-user-circle",
+      label: "Kembali ke Beranda",
+      icon: "i-ph-house",
+      to: "/",
+    },
+  ],
+  [
+    {
+      label: "Profil",
+      icon: "i-ph-user-circle",
       to: "/dashboard/profile",
     },
   ],
   [
     {
       label: "Keluar",
-      icon: "i-lucide-log-out",
+      icon: "i-ph-sign-out",
       color: "error",
       onSelect: () => auth.logout(),
     },
@@ -56,7 +63,7 @@ function isActive(to: string) {
 <template>
   <div class="min-h-screen bg-slate-50">
     <header class="border-b border-default bg-white">
-      <UContainer class="flex h-16 items-center justify-between gap-8">
+      <UContainer class="flex h-20 items-center justify-between gap-8">
         <NuxtLink :to="auth.homePath.value" class="shrink-0 mr-4">
           <img
             src="/images/logo/logo_santri.png"
@@ -80,22 +87,23 @@ function isActive(to: string) {
           </li>
         </ul>
 
-        <div class="hidden md:flex items-center gap-4">
+        <div class="hidden md:flex items-center gap-6">
           <NuxtLink
             v-if="auth.canWritePenaSantri.value"
             :to="writePath"
             class="hidden shrink-0 md:block"
           >
-            <UButton variant="ghost">
-              <UIcon name="i-lucide-pen-line" size="16" class="mr-1" />
+            <UButton variant="light">
+              <UIcon name="i-ph-pen-nib" size="16" class="mr-1" />
               Tulis Artikel
             </UButton>
           </NuxtLink>
           <UDropdownMenu :items="dropdownItems" :ui="{ content: 'min-w-52' }">
-            <UButton variant="ghost" trailing-icon="i-lucide-chevron-down">
-              <AppAvatar
-                :name="auth.user.value?.name"
-                :src="auth.user.value?.avatar"
+            <UButton variant="ghost" trailing-icon="i-ph-caret-down">
+              <UAvatar
+                :src="auth.user.value?.avatar ?? undefined"
+                :alt="auth.user.value?.name ?? ''"
+                :text="getInitials(auth.user.value?.name)"
                 size="xs"
               />
               <span class="text-sm font-medium">{{
@@ -109,7 +117,7 @@ function isActive(to: string) {
           class="ml-auto md:hidden"
           color="neutral"
           variant="ghost"
-          icon="i-lucide-menu"
+          icon="i-ph-list"
           aria-label="Buka navigasi dashboard"
           @click="mobileOpen = true"
         />
@@ -137,7 +145,7 @@ function isActive(to: string) {
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-lucide-x"
+              icon="i-ph-x"
               aria-label="Tutup navigasi dashboard"
               @click="mobileOpen = false"
             />
@@ -154,7 +162,7 @@ function isActive(to: string) {
                   size="sm"
                   color="primary"
                   variant="solid"
-                  icon="i-lucide-pen-line"
+                  icon="i-ph-pen-nib"
                   class="w-full justify-center"
                 >
                   Tulis Artikel
@@ -179,9 +187,10 @@ function isActive(to: string) {
               <div
                 class="flex items-center gap-3 rounded-xl bg-slate-100/70 p-3"
               >
-                <AppAvatar
-                  :name="auth.user.value?.name"
-                  :src="auth.user.value?.avatar"
+                <UAvatar
+                  :src="auth.user.value?.avatar ?? undefined"
+                  :alt="auth.user.value?.name ?? ''"
+                  :text="getInitials(auth.user.value?.name)"
                   size="sm"
                 />
                 <div class="min-w-0 flex-1">
@@ -197,7 +206,7 @@ function isActive(to: string) {
               <UButton
                 color="error"
                 variant="ghost"
-                icon="i-lucide-log-out"
+                icon="i-ph-sign-out"
                 class="mt-3 w-full justify-center"
                 @click="auth.logout()"
               >

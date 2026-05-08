@@ -18,7 +18,14 @@ const roleColor = computed<RoleColor>(
 const dropdownItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: auth.user.value?.name || "Profil",
+      label: "Kembali ke Beranda",
+      icon: "i-ph-house-duotone",
+      to: "/",
+    },
+  ],
+  [
+    {
+      label: "Profil",
       icon: "i-ph-user-circle-duotone",
       slot: "profile" as const,
       onSelect: () => navigateTo(auth.profilePath.value),
@@ -26,7 +33,7 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => [
   ],
   [
     {
-      label: "Logout",
+      label: "Keluar",
       icon: "i-ph-sign-out-duotone",
       color: "error" as const,
       onSelect: () => auth.logout(),

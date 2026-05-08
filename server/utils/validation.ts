@@ -12,8 +12,23 @@ type UserUpdateInput = {
   email?: string
   isActive?: boolean
   name?: string
+  avatar?: string | null
+  faculty?: string | null
+  major?: string | null
+  phone?: string | null
   role?: Role
+  university?: string | null
   username?: string
+  yearEnrolled?: number | null
+}
+
+type UserFiltersInput = {
+  role?: Role
+  status?: 'active' | 'inactive'
+  search?: string
+  phone?: string
+  university?: string
+  yearEnrolled?: number
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -106,6 +121,12 @@ export function validateDashboardUserCreateBody(value: unknown) {
   const email = getOptionalString(body.email)?.toLowerCase()
   const role = getOptionalString(body.role)
   const password = getOptionalString(body.password)
+  const avatar = getOptionalString(body.avatar) ?? null
+  const phone = getOptionalString(body.phone) ?? null
+  const university = getOptionalString(body.university) ?? null
+  const faculty = getOptionalString(body.faculty) ?? null
+  const major = getOptionalString(body.major) ?? null
+  const isActive = 'isActive' in body ? body.isActive === true : true
 
   if (!name || !username || !email || !role || !password) {
     throw createError({ statusCode: 400, message: 'Semua field wajib diisi.' })
@@ -123,12 +144,29 @@ export function validateDashboardUserCreateBody(value: unknown) {
     throw createError({ statusCode: 400, message: 'Password minimal 8 karakter.' })
   }
 
+  let yearEnrolled: number | null = null
+  if ('yearEnrolled' in body && body.yearEnrolled !== null && body.yearEnrolled !== undefined && body.yearEnrolled !== '') {
+    const raw = getSingleValue(body.yearEnrolled)
+    const parsed = typeof raw === 'number' ? raw : Number(raw)
+    if (!Number.isInteger(parsed) || parsed < 1901 || parsed > 2155) {
+      throw createError({ statusCode: 400, message: 'Angkatan OJI tidak valid.' })
+    }
+    yearEnrolled = parsed
+  }
+
   return {
     name,
     username,
     email,
     role: role as Role,
     password,
+    avatar,
+    phone,
+    university,
+    faculty,
+    major,
+    yearEnrolled,
+    isActive,
   }
 }
 
@@ -184,7 +222,56 @@ export function validateDashboardUserUpdateBody(value: unknown): UserUpdateInput
     updates.isActive = body.isActive
   }
 
+  if ('avatar' in body) {
+    updates.avatar = getOptionalString(body.avatar) ?? null
+  }
+
+  if ('phone' in body) {
+    updates.phone = getOptionalString(body.phone) ?? null
+  }
+
+  if ('university' in body) {
+    updates.university = getOptionalString(body.university) ?? null
+  }
+
+  if ('faculty' in body) {
+    updates.faculty = getOptionalString(body.faculty) ?? null
+  }
+
+  if ('major' in body) {
+    updates.major = getOptionalString(body.major) ?? null
+  }
+
+  if ('yearEnrolled' in body) {
+    if (body.yearEnrolled === null || body.yearEnrolled === undefined || body.yearEnrolled === '') {
+      updates.yearEnrolled = null
+    } else {
+      const raw = getSingleValue(body.yearEnrolled)
+      const parsed = typeof raw === 'number' ? raw : Number(raw)
+      if (!Number.isInteger(parsed) || parsed < 1901 || parsed > 2155) {
+        throw createError({ statusCode: 400, message: 'Angkatan OJI tidak valid.' })
+      }
+      updates.yearEnrolled = parsed
+    }
+  }
+
   return updates
+}
+
+export function validateAdminUsersQuery(value: unknown): UserFiltersInput {
+  const query = getRequiredRecord(value, 'Query tidak valid.')
+  const role = getOptionalString(query.role)
+  const status = getOptionalString(query.status)
+  const yearEnrolled = getOptionalString(query.yearEnrolled)
+
+  return {
+    role: role && VALID_ROLES.includes(role as Role) ? role as Role : undefined,
+    status: status === 'active' || status === 'inactive' ? status : undefined,
+    search: getOptionalString(query.search),
+    phone: getOptionalString(query.phone),
+    university: getOptionalString(query.university),
+    yearEnrolled: yearEnrolled ? getPositiveInteger(yearEnrolled, 0, { min: 1901, max: 2155 }) : undefined,
+  }
 }
 
 export function validateLoginBody(value: unknown) {
@@ -283,8 +370,6 @@ export function validateAdminSettingsUpdateBody(value: unknown) {
   return { updates: body.updates as Record<string, string> }
 }
 
-const VALID_CATEGORY_TYPES = ['berita', 'pena_santri'] as const satisfies CategoryType[]
-
 export function validateAdminCategoryBody(value: unknown) {
   const body = getRequiredRecord(value)
   const name = getOptionalString(body.name)
@@ -293,24 +378,7 @@ export function validateAdminCategoryBody(value: unknown) {
     throw createError({ statusCode: 400, message: 'Nama kategori wajib diisi.' })
   }
 
-  const slug = getOptionalString(body.slug)
-  const type = getOptionalString(body.type)
-
-  if (!type || !VALID_CATEGORY_TYPES.includes(type as CategoryType)) {
-    throw createError({ statusCode: 400, message: 'Tipe kategori tidak valid (berita atau pena_santri).' })
-  }
-
-  let parentId: number | null = null
-  if ('parentId' in body && body.parentId !== null && body.parentId !== undefined) {
-    const raw = getSingleValue(body.parentId)
-    const parsed = typeof raw === 'number' ? raw : Number(raw)
-    if (!Number.isInteger(parsed) || parsed <= 0) {
-      throw createError({ statusCode: 400, message: 'parentId tidak valid.' })
-    }
-    parentId = parsed
-  }
-
-  return { name, slug: slug ?? null, type: type as CategoryType, parentId }
+  return { name }
 }
 
 export function validateReviewActionBody(value: unknown) {
@@ -356,10 +424,9 @@ export function validateAdminGalleryBody(value: unknown) {
     throw createError({ statusCode: 400, message: 'Path gambar wajib diisi.' })
   }
 
-  const album = getOptionalString(body.album)
-  const order = 'order' in body ? getPositiveInteger(body.order, 0, { min: 0 }) : 0
+  const order = 'order' in body ? getPositiveInteger(body.order, 1, { min: 1 }) : undefined
 
-  return { title, imagePath, album: album ?? null, order }
+  return { title, imagePath, order }
 }
 
 const VALID_PAGE_STATUSES = ['draft', 'published'] as const satisfies PageStatus[]

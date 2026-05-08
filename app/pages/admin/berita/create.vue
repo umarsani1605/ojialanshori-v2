@@ -1,5 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
+  title: 'Tulis Berita',
   layout: 'admin',
   middleware: ['auth', 'role'],
   requiredRole: 'admin',

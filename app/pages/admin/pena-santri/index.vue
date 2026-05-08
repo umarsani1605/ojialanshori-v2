@@ -144,7 +144,7 @@ async function doDelete() {
 
   try {
     await $fetch(`/api/posts/${deletingId.value}`, { method: 'DELETE' })
-    toast.add({ title: 'Artikel dihapus', color: 'success', icon: 'i-lucide-check-circle' })
+    toast.add({ title: 'Artikel dihapus', color: 'success', icon: 'i-ph-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()
   }
@@ -158,7 +158,7 @@ async function doDelete() {
       title: 'Gagal menghapus artikel',
       description: message,
       color: 'error',
-      icon: 'i-lucide-x-circle',
+      icon: 'i-ph-x-circle',
     })
   }
   finally {
@@ -222,14 +222,14 @@ const columns: TableColumn<AdminPost>[] = [
         h(UButton, {
           size: 'sm',
           variant: 'ghost',
-          icon: 'i-lucide-pencil',
+          icon: 'i-ph-pencil-simple',
           to: `/admin/pena-santri/${row.original.id}/edit`,
         }),
         h(UButton, {
           size: 'sm',
           variant: 'ghost',
           color: 'error',
-          icon: 'i-lucide-trash-2',
+          icon: 'i-ph-trash',
           onClick: () => confirmDelete(row.original.id),
         }),
       ]),

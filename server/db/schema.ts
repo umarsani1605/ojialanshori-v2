@@ -81,8 +81,7 @@ export const gallery = mysqlTable('gallery', {
   id: int().primaryKey().autoincrement(),
   title: varchar({ length: 255 }).notNull(),
   imagePath: varchar({ length: 500 }).notNull(),
-  album: varchar({ length: 100 }),
-  order: int().notNull().default(0),
+  order: int().notNull().default(1),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 

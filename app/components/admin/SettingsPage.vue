@@ -26,11 +26,11 @@ async function save() {
       method: 'PATCH',
       body: { updates: { ...form } },
     })
-    toast.add({ title: 'Pengaturan disimpan', color: 'success', icon: 'i-lucide-check-circle' })
+    toast.add({ title: 'Pengaturan disimpan', color: 'success', icon: 'i-ph-check-circle' })
     await refresh()
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Terjadi kesalahan.'
-    toast.add({ title: 'Gagal menyimpan', description: msg, color: 'error', icon: 'i-lucide-x-circle' })
+    toast.add({ title: 'Gagal menyimpan', description: msg, color: 'error', icon: 'i-ph-x-circle' })
   } finally {
     saving.value = false
   }

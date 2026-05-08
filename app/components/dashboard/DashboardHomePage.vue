@@ -205,7 +205,6 @@ function getApprovedAlertStorageKey(
   return `dashboard-approved-alert:${post.id}:${String(post.publishedAt)}`;
 }
 
-
 function getPostStatusTone(status: SantriMyPost["status"]) {
   return {
     draft: "neutral",
@@ -237,18 +236,13 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
             Pantau status tulisanmu dan lanjutkan proses menulis dari sini.
           </p>
         </div>
-        <div class="mt-4">
-          <UButton to="/dashboard/posts/create" icon="i-lucide-pen-line">
-            Tulis Artikel
-          </UButton>
-        </div>
       </UCard>
 
       <template v-if="santriLoading">
         <UCard>
           <div class="flex items-center justify-center py-10">
             <UIcon
-              name="i-lucide-loader-circle"
+              name="i-ph-spinner-gap"
               class="animate-spin text-2xl text-dimmed"
             />
           </div>
@@ -412,7 +406,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
                 {{ greeting }}, {{ auth.user.value?.name?.split(" ")[0] }}
               </h1>
             </div>
-            <UButton to="/dashboard/review" icon="i-lucide-arrow-right">
+            <UButton to="/dashboard/review" icon="i-ph-arrow-right">
               Buka Antrian
             </UButton>
           </div>
@@ -421,7 +415,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
         <template v-if="reviewerStatus === 'pending'">
           <div class="flex items-center justify-center py-10">
             <UIcon
-              name="i-lucide-loader-circle"
+              name="i-ph-spinner-gap"
               class="animate-spin text-2xl text-dimmed"
             />
           </div>

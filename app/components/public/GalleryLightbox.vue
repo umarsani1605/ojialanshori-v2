@@ -1,6 +1,5 @@
 <script setup lang="ts">
 type GalleryItem = {
-  album: string | null
   id: number
   imagePath: string
   order: number
@@ -57,7 +56,7 @@ function handleOpenChange(value: boolean) {
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-lucide-x"
+            icon="i-ph-x"
             class="text-white hover:bg-white/10"
             aria-label="Tutup lightbox"
             @click="emit('close')"
@@ -69,7 +68,7 @@ function handleOpenChange(value: boolean) {
             v-if="hasMultipleItems"
             color="neutral"
             variant="ghost"
-            icon="i-lucide-chevron-left"
+            icon="i-ph-caret-left"
             class="hidden md:inline-flex text-white hover:bg-white/10"
             aria-label="Foto sebelumnya"
             @click="emit('prev')"
@@ -85,16 +84,11 @@ function handleOpenChange(value: boolean) {
                 loading="eager"
               />
             </div>
-
-            <p v-if="activeItem?.album" class="text-sm text-white/70">
-              {{ activeItem.album }}
-            </p>
-
             <div v-if="hasMultipleItems" class="flex items-center gap-3 md:hidden">
               <UButton
                 color="neutral"
                 variant="ghost"
-                icon="i-lucide-chevron-left"
+                icon="i-ph-caret-left"
                 class="text-white hover:bg-white/10"
                 aria-label="Foto sebelumnya"
                 @click="emit('prev')"
@@ -102,7 +96,7 @@ function handleOpenChange(value: boolean) {
               <UButton
                 color="neutral"
                 variant="ghost"
-                icon="i-lucide-chevron-right"
+                icon="i-ph-caret-right"
                 class="text-white hover:bg-white/10"
                 aria-label="Foto berikutnya"
                 @click="emit('next')"
@@ -114,7 +108,7 @@ function handleOpenChange(value: boolean) {
             v-if="hasMultipleItems"
             color="neutral"
             variant="ghost"
-            icon="i-lucide-chevron-right"
+            icon="i-ph-caret-right"
             class="hidden md:inline-flex text-white hover:bg-white/10"
             aria-label="Foto berikutnya"
             @click="emit('next')"

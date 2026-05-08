@@ -6,7 +6,7 @@
         <UButton
           v-if="to"
           :to="to"
-          icon="i-lucide-arrow-left"
+          icon="i-ph-arrow-left"
           variant="ghost"
           color="neutral"
           class="text-gray-600"
@@ -23,7 +23,7 @@
     <!-- Loading State -->
     <UCard v-if="loading">
       <div class="flex items-center justify-center py-12">
-        <UIcon name="i-lucide-loader-2" class="w-7 h-7 animate-spin text-primary" />
+        <UIcon name="i-ph-spinner" class="w-7 h-7 animate-spin text-primary" />
       </div>
     </UCard>
 

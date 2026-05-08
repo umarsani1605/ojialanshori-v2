@@ -52,7 +52,7 @@ useSeoMeta({
           v-else
           title="Belum ada FAQ"
           description="Pertanyaan yang sering diajukan akan tampil di sini."
-          icon="i-lucide-circle-help"
+          icon="i-ph-question"
         />
       </div>
     </UContainer>

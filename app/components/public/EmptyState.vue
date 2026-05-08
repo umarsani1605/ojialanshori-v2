@@ -7,7 +7,7 @@ withDefaults(
   }>(),
   {
     title: 'Belum ada data',
-    icon: 'i-lucide-inbox',
+    icon: 'i-ph-tray',
   },
 );
 </script>

@@ -10,6 +10,9 @@ type UserFilters = {
   role?: Role
   status?: 'active' | 'inactive'
   search?: string
+  phone?: string
+  university?: string
+  yearEnrolled?: number
 }
 
 export async function listUsers(db: Database, filters: UserFilters = {}) {
@@ -23,9 +26,13 @@ export async function listUsers(db: Database, filters: UserFilters = {}) {
     const searchCondition = or(
       like(schema.users.name, pattern),
       like(schema.users.email, pattern),
+      like(schema.users.username, pattern),
     )
     if (searchCondition) conditions.push(searchCondition)
   }
+  if (filters.phone) conditions.push(like(schema.users.phone, `%${filters.phone}%`))
+  if (filters.university) conditions.push(like(schema.users.university, `%${filters.university}%`))
+  if (filters.yearEnrolled) conditions.push(eq(schema.users.yearEnrolled, filters.yearEnrolled))
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
@@ -37,6 +44,11 @@ export async function listUsers(db: Database, filters: UserFilters = {}) {
       email: schema.users.email,
       role: schema.users.role,
       avatar: schema.users.avatar,
+      phone: schema.users.phone,
+      university: schema.users.university,
+      faculty: schema.users.faculty,
+      major: schema.users.major,
+      yearEnrolled: schema.users.yearEnrolled,
       isActive: schema.users.isActive,
       createdAt: schema.users.createdAt,
     })
@@ -59,6 +71,21 @@ export async function findUserByEmailOrUsername(
 ) {
   return db.query.users.findFirst({
     where: or(eq(schema.users.email, email), eq(schema.users.username, username)),
+  })
+}
+
+export async function findUserByEmailOrUsernameExcluding(
+  db: Database,
+  email: string,
+  username: string,
+  excludeId: number,
+) {
+  return db.query.users.findFirst({
+    where: (user, { and, eq: eqFn, ne, or: orFn }) =>
+      and(
+        ne(user.id, excludeId),
+        orFn(eqFn(user.email, email), eqFn(user.username, username)),
+      ),
   })
 }
 

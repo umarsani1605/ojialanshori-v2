@@ -15,35 +15,25 @@ import {
 } from '#server/repositories/categories/categoryRepository'
 
 type Database = MySql2Database<typeof schema>
-type CategoryType = typeof schema.categories.$inferInsert['type']
 
 type CategoryBody = {
   name: string
-  slug?: string | null
-  type: CategoryType
-  parentId: number | null
 }
 
 export async function listCategoriesForAdmin(db: Database) {
-  return listCategories(db)
+  const categories = await listCategories(db)
+  return categories.filter(category => category.type === 'pena_santri')
 }
 
 export async function createCategory(db: Database, body: CategoryBody) {
-  const slug = body.slug?.trim() || slugify(body.name)
+  const slug = slugify(body.name)
 
   const existing = await findCategoryBySlug(db, slug)
   if (existing) {
     throw createError({ statusCode: 409, message: 'Slug kategori sudah digunakan.' })
   }
 
-  if (body.parentId !== null) {
-    const parent = await findCategoryById(db, body.parentId)
-    if (!parent) {
-      throw createError({ statusCode: 400, message: 'Kategori parent tidak ditemukan.' })
-    }
-  }
-
-  const insertId = await insertCategory(db, { name: body.name, slug, type: body.type, parentId: body.parentId })
+  const insertId = await insertCategory(db, { name: body.name, slug, type: 'pena_santri', parentId: null })
   return findCategoryById(db, insertId)
 }
 
@@ -53,21 +43,14 @@ export async function patchCategory(db: Database, id: number, body: CategoryBody
     throw createError({ statusCode: 404, message: 'Kategori tidak ditemukan.' })
   }
 
-  const slug = body.slug?.trim() || slugify(body.name)
+  const slug = slugify(body.name)
 
   const slugConflict = await findCategoryBySlugExcluding(db, slug, id)
   if (slugConflict) {
     throw createError({ statusCode: 409, message: 'Slug kategori sudah digunakan.' })
   }
 
-  if (body.parentId !== null && body.parentId !== id) {
-    const parent = await findCategoryById(db, body.parentId)
-    if (!parent) {
-      throw createError({ statusCode: 400, message: 'Kategori parent tidak ditemukan.' })
-    }
-  }
-
-  await updateCategory(db, id, { name: body.name, slug, type: body.type, parentId: body.parentId })
+  await updateCategory(db, id, { name: body.name, slug, type: 'pena_santri', parentId: null })
   return findCategoryById(db, id)
 }
 

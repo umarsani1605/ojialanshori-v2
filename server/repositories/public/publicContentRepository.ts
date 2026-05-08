@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, inArray, isNull, lte, or, type SQL } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, type SQL } from 'drizzle-orm'
 import type { MySql2Database } from 'drizzle-orm/mysql2'
 
 import * as schema from '#server/db/schema'
@@ -28,25 +28,11 @@ export type NormalizedListOptions = {
   limit: number
 }
 
-export async function getActiveBanner(db: Database) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  return db.query.banners.findFirst({
-    where: and(
-      eq(schema.banners.isActive, true),
-      or(isNull(schema.banners.startDate), lte(schema.banners.startDate, today)) as SQL,
-      or(isNull(schema.banners.endDate), gte(schema.banners.endDate, today)) as SQL,
-    ),
-  })
-}
-
 export async function getPublicGallery(db: Database) {
   return db.select({
     id: schema.gallery.id,
     title: schema.gallery.title,
     imagePath: schema.gallery.imagePath,
-    album: schema.gallery.album,
     order: schema.gallery.order,
   })
     .from(schema.gallery)

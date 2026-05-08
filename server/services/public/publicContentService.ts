@@ -2,8 +2,8 @@ import type { MySql2Database } from 'drizzle-orm/mysql2'
 
 import type * as schema from '#server/db/schema'
 import type { CategoryType } from '#server/db/schema'
+import { getBannerConfig, type BannerConfig } from '#server/services/banners/bannerService'
 import {
-  getActiveBanner,
   getPublicFaqs,
   getPublicGallery,
   getPublicPostBySlug,
@@ -23,8 +23,26 @@ export type PublicPostListQuery = {
   limit?: number
 }
 
-export function getPublicActiveBanner(db: Database) {
-  return getActiveBanner(db)
+function isBannerVisibleToday(banner: BannerConfig, today: string) {
+  if (!banner.isActive || !banner.text) {
+    return false
+  }
+
+  if (banner.startDate && banner.startDate > today) {
+    return false
+  }
+
+  if (banner.endDate && banner.endDate < today) {
+    return false
+  }
+
+  return true
+}
+
+export async function getPublicActiveBanner(db: Database) {
+  const banner = await getBannerConfig(db)
+  const today = new Date().toISOString().slice(0, 10)
+  return isBannerVisibleToday(banner, today) ? banner : null
 }
 
 export function getPublicGalleryItems(db: Database) {

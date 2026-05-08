@@ -57,123 +57,112 @@ else greeting.value = "Selamat Malam";
       </p>
     </div>
 
-      <template v-if="status === 'error'">
-        <div class="flex flex-col items-center gap-3 py-12 text-center">
-          <p class="text-sm text-slate-500">Gagal memuat statistik.</p>
-          <UButton
-            size="sm"
-            color="neutral"
-            variant="outline"
-            icon="i-lucide-refresh-cw"
-            @click="refresh()"
-          >
-            Coba lagi
-          </UButton>
-        </div>
-      </template>
+    <template v-if="status === 'error'">
+      <div class="flex flex-col items-center gap-3 py-12 text-center">
+        <p class="text-sm text-slate-500">Gagal memuat statistik.</p>
+        <UButton
+          size="sm"
+          color="neutral"
+          variant="outline"
+          icon="i-ph-arrows-clockwise"
+          @click="refresh()"
+        >
+          Coba lagi
+        </UButton>
+      </div>
+    </template>
 
-      <template v-else-if="adminStats">
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <UCard>
-            <div class="flex items-center gap-3">
-              <div class="rounded-lg bg-green-50 p-2">
-                <UIcon
-                  name="i-lucide-file-check"
-                  class="text-xl text-green-600"
-                />
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-slate-800">
-                  {{ adminStats.publishedPosts }}
-                </p>
-                <p class="text-xs text-slate-500">Artikel Terbit</p>
-              </div>
-            </div>
-          </UCard>
-          <UCard>
-            <div class="flex items-center gap-3">
-              <div class="rounded-lg bg-amber-50 p-2">
-                <UIcon name="i-lucide-inbox" class="text-xl text-amber-600" />
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-slate-800">
-                  {{ adminStats.pendingReviewPosts }}
-                </p>
-                <p class="text-xs text-slate-500">Dalam Ulasan</p>
-              </div>
-            </div>
-          </UCard>
-          <UCard>
-            <div class="flex items-center gap-3">
-              <div class="rounded-lg bg-blue-50 p-2">
-                <UIcon name="i-lucide-users" class="text-xl text-blue-600" />
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-slate-800">
-                  {{ adminStats.totalUsers }}
-                </p>
-                <p class="text-xs text-slate-500">Total User</p>
-              </div>
-            </div>
-          </UCard>
-          <UCard>
-            <div class="flex items-center gap-3">
-              <div class="rounded-lg bg-purple-50 p-2">
-                <UIcon name="i-lucide-image" class="text-xl text-purple-600" />
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-slate-800">
-                  {{ adminStats.totalGallery }}
-                </p>
-                <p class="text-xs text-slate-500">Foto Galeri</p>
-              </div>
-            </div>
-          </UCard>
-        </div>
-
+    <template v-else-if="adminStats">
+      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <UCard>
-          <template #header>
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="text-sm font-semibold text-slate-700">
-                Artikel Dalam Ulasan
-              </h3>
-              <UBadge :color="roleColor" variant="subtle" size="xs">
-                {{ roleLabel }}
-              </UBadge>
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-green-50 p-2">
+              <UIcon
+                name="i-ph-article"
+                class="text-xl text-green-600"
+              />
             </div>
-          </template>
-
-          <div
-            v-if="adminStats.recentPendingPosts.length === 0"
-            class="py-6 text-center text-sm text-slate-400"
-          >
-            Tidak ada artikel yang menunggu review.
+            <div>
+              <p class="text-2xl font-bold text-slate-800">
+                {{ adminStats.publishedPosts }}
+              </p>
+              <p class="text-xs text-slate-500">Artikel Terbit</p>
+            </div>
           </div>
-          <ul v-else class="divide-y divide-default">
-            <li
-              v-for="post in adminStats.recentPendingPosts"
-              :key="post.id"
-              class="flex items-center justify-between gap-4 py-3"
-            >
-              <div class="min-w-0">
-                <p class="truncate text-sm font-medium text-slate-800">
-                  {{ post.title }}
-                </p>
-                <p class="mt-0.5 text-xs text-slate-500">
-                  oleh {{ post.author.name }}
-                </p>
-              </div>
-              <UBadge
-                color="warning"
-                variant="subtle"
-                size="xs"
-                class="shrink-0"
-              >
-                Dalam Ulasan
-              </UBadge>
-            </li>
-          </ul>
         </UCard>
-      </template>
+        <UCard>
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-amber-50 p-2">
+              <UIcon name="i-ph-tray" class="text-xl text-amber-600" />
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-800">
+                {{ adminStats.pendingReviewPosts }}
+              </p>
+              <p class="text-xs text-slate-500">Dalam Ulasan</p>
+            </div>
+          </div>
+        </UCard>
+        <UCard>
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-blue-50 p-2">
+              <UIcon name="i-ph-users" class="text-xl text-blue-600" />
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-800">
+                {{ adminStats.totalUsers }}
+              </p>
+              <p class="text-xs text-slate-500">Total User</p>
+            </div>
+          </div>
+        </UCard>
+        <UCard>
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-purple-50 p-2">
+              <UIcon name="i-ph-image" class="text-xl text-purple-600" />
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-800">
+                {{ adminStats.totalGallery }}
+              </p>
+              <p class="text-xs text-slate-500">Foto Galeri</p>
+            </div>
+          </div>
+        </UCard>
+      </div>
+
+      <UCard>
+        <template #header>
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-slate-700">
+              Artikel Perlu Diulas
+            </h3>
+          </div>
+        </template>
+
+        <div
+          v-if="adminStats.recentPendingPosts.length === 0"
+          class="py-6 text-center text-sm text-slate-400"
+        >
+          Tidak ada artikel yang menunggu review.
+        </div>
+        <ul v-else class="divide-y divide-default">
+          <li
+            v-for="post in adminStats.recentPendingPosts"
+            :key="post.id"
+            class="flex items-center justify-between gap-4 py-3"
+          >
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-slate-800">
+                {{ post.title }}
+              </p>
+              <p class="mt-0.5 text-xs text-slate-500">
+                oleh {{ post.author.name }}
+              </p>
+            </div>
+          </li>
+        </ul>
+      </UCard>
+    </template>
   </div>
 </template>

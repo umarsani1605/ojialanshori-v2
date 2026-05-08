@@ -129,7 +129,7 @@ async function confirmDelete() {
     toast.add({
       title: "Artikel dihapus",
       color: "success",
-      icon: "i-lucide-check",
+      icon: "i-ph-check",
     });
     deleteTarget.value = null;
     deleteModalOpen.value = false;
@@ -143,7 +143,7 @@ async function confirmDelete() {
         (error as Error).message ??
         "Terjadi kesalahan.",
       color: "error",
-      icon: "i-lucide-alert-circle",
+      icon: "i-ph-warning-circle",
     });
   } finally {
     deleting.value = false;
@@ -235,7 +235,7 @@ const columns: TableColumn<PostRow>[] = [
       <template #header>
         <div class="flex items-center justify-between gap-3">
           <h1 class="text-xl font-semibold">Artikel Saya</h1>
-          <UButton to="/dashboard/posts/create" icon="i-lucide-plus" size="sm">
+          <UButton to="/dashboard/posts/create" icon="i-ph-plus" size="sm">
             Tulis Artikel
           </UButton>
         </div>
@@ -248,7 +248,7 @@ const columns: TableColumn<PostRow>[] = [
             class="flex items-center justify-center py-16"
           >
             <UIcon
-              name="i-lucide-loader-circle"
+              name="i-ph-spinner-gap"
               class="text-2xl text-dimmed animate-spin"
             />
           </div>

@@ -32,7 +32,7 @@ function isActive(to: string) {
 
 <template>
   <header
-    class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-default shadow-xs"
+    class="bg-white/95 backdrop-blur-md border-b border-default shadow-xs"
   >
     <nav
       class="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-6 md:px-8 lg:px-10"
@@ -68,7 +68,7 @@ function isActive(to: string) {
               size="md"
               color="primary"
               variant="solid"
-              icon="i-lucide-layout-dashboard"
+              icon="i-ph-squares-four"
             >
               Dashboard
             </UButton>
@@ -79,7 +79,7 @@ function isActive(to: string) {
             size="md"
             color="primary"
             variant="solid"
-            icon="i-lucide-user"
+            icon="i-ph-user"
           >
             Masuk
           </UButton>
@@ -92,7 +92,7 @@ function isActive(to: string) {
           @click="mobileOpen = !mobileOpen"
         >
           <UIcon
-            :name="mobileOpen ? 'i-lucide-x' : 'i-lucide-menu'"
+            :name="mobileOpen ? 'i-ph-x' : 'i-ph-list'"
             class="size-6"
           />
         </button>

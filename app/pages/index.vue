@@ -28,7 +28,6 @@ type GalleryItem = {
   id: number;
   title: string;
   imagePath: string;
-  album: string | null;
   order: number;
 };
 
@@ -235,7 +234,7 @@ useSeoMeta({
         <template #links>
           <UButton
             variant="ghost"
-            icon="i-lucide-arrow-down"
+            icon="i-ph-arrow-down"
             class="px-3 py-2 rounded-xl text-white border border-white hover:text-primary hover:bg-white"
             @click="scrollToFeatures"
           >
@@ -293,8 +292,8 @@ useSeoMeta({
           loop
           arrows
           dots
-          prev-icon="i-lucide-chevron-left"
-          next-icon="i-lucide-chevron-right"
+          prev-icon="i-ph-caret-left"
+          next-icon="i-ph-caret-right"
           :prev="{ variant: 'ghost', color: 'neutral' }"
           :next="{ variant: 'ghost', color: 'neutral' }"
           :ui="{
@@ -334,7 +333,7 @@ useSeoMeta({
               class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
             >
               Lainnya
-              <UIcon name="i-lucide-chevron-right" class="size-4" />
+              <UIcon name="i-ph-caret-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
@@ -353,7 +352,7 @@ useSeoMeta({
         <PublicEmptyState
           v-else
           title="Belum ada berita"
-          icon="i-lucide-newspaper"
+          icon="i-ph-newspaper"
         />
       </UContainer>
     </section>
@@ -368,7 +367,7 @@ useSeoMeta({
               class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
             >
               Lainnya
-              <UIcon name="i-lucide-chevron-right" class="size-4" />
+              <UIcon name="i-ph-caret-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
@@ -387,7 +386,7 @@ useSeoMeta({
         <PublicEmptyState
           v-else
           title="Belum ada karya"
-          icon="i-lucide-pen-line"
+          icon="i-ph-pen-nib"
         />
       </UContainer>
     </section>
@@ -402,7 +401,7 @@ useSeoMeta({
               class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
             >
               Lainnya
-              <UIcon name="i-lucide-chevron-right" class="size-4" />
+              <UIcon name="i-ph-caret-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
@@ -436,7 +435,7 @@ useSeoMeta({
           v-else
           title="Belum ada foto"
           description="Galeri foto kegiatan akan tampil di sini."
-          icon="i-lucide-image"
+          icon="i-ph-image"
         />
       </UContainer>
     </section>
@@ -464,7 +463,7 @@ useSeoMeta({
             <div
               class="size-14 rounded-2xl border border-default flex items-center justify-center shrink-0 text-slate-700"
             >
-              <UIcon name="i-lucide-instagram" class="size-8" />
+              <UIcon name="i-ph-instagram-logo" class="size-8" />
             </div>
             <div class="text-left">
               <h4 class="font-bold text-lg md:text-xl mb-0.5">@omahngaji_</h4>

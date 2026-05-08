@@ -3,6 +3,7 @@ import { canManageUsers } from '#server/policies/users'
 import {
   findUserById,
   findUserByEmailOrUsername,
+  findUserByEmailOrUsernameExcluding,
   insertUser,
   listUsers,
   updateUser,
@@ -10,12 +11,20 @@ import {
 } from '#server/repositories/users/userRepository'
 
 type Actor = { id: number; role: Role }
+type UserFilters = {
+  role?: Role
+  status?: 'active' | 'inactive'
+  search?: string
+  phone?: string
+  university?: string
+  yearEnrolled?: number
+}
 
-export async function listUsersForAdmin(db: Database, actor: Actor) {
+export async function listUsersForAdmin(db: Database, actor: Actor, filters: UserFilters = {}) {
   if (!canManageUsers(actor.role)) {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
-  return listUsers(db)
+  return listUsers(db, filters)
 }
 
 export async function createUser(
@@ -27,6 +36,13 @@ export async function createUser(
     email: string
     role: Role
     password: string
+    avatar: string | null
+    phone: string | null
+    university: string | null
+    faculty: string | null
+    major: string | null
+    yearEnrolled: number | null
+    isActive: boolean
   },
 ) {
   if (!canManageUsers(actor.role)) {
@@ -49,8 +65,13 @@ export async function createUser(
     passwordHash,
     passwordType: 'bcrypt',
     role: input.role,
-    avatar: null,
-    isActive: true,
+    avatar: input.avatar,
+    phone: input.phone,
+    university: input.university,
+    faculty: input.faculty,
+    major: input.major,
+    yearEnrolled: input.yearEnrolled,
+    isActive: input.isActive,
   })
 
   return findUserById(db, newId)
@@ -66,6 +87,12 @@ export async function patchUser(
     email?: string
     role?: Role
     isActive?: boolean
+    avatar?: string | null
+    phone?: string | null
+    university?: string | null
+    faculty?: string | null
+    major?: string | null
+    yearEnrolled?: number | null
   },
 ) {
   if (!canManageUsers(actor.role)) {
@@ -74,6 +101,22 @@ export async function patchUser(
 
   const user = await findUserById(db, userId)
   if (!user) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
+
+  if (updates.email || updates.username) {
+    const existing = await findUserByEmailOrUsernameExcluding(
+      db,
+      updates.email ?? user.email,
+      updates.username ?? user.username,
+      userId,
+    )
+
+    if (existing) {
+      if (existing.email === (updates.email ?? user.email)) {
+        throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
+      }
+      throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
+    }
+  }
 
   await updateUser(db, userId, updates)
   return findUserById(db, userId)

@@ -33,6 +33,7 @@ const {
   categories,
   effectivePostType,
   canSubmit,
+  backTo,
   titleCount,
   wordCount,
   readingTime,
@@ -49,95 +50,95 @@ const {
 
 const toolbarItems: EditorToolbarItem[][] = [
   [
-    { kind: "undo", icon: "i-lucide-undo", tooltip: { text: "Undo" } },
-    { kind: "redo", icon: "i-lucide-redo", tooltip: { text: "Redo" } },
+    { kind: "undo", icon: "i-ph-arrow-counter-clockwise", tooltip: { text: "Undo" } },
+    { kind: "redo", icon: "i-ph-arrow-clockwise", tooltip: { text: "Redo" } },
   ],
   [
     {
-      icon: "i-lucide-heading",
+      icon: "i-ph-text-h",
       tooltip: { text: "Headings" },
       content: { align: "start" },
       items: [
         {
           kind: "heading",
           level: 1,
-          icon: "i-lucide-heading-1",
+          icon: "i-ph-text-h-one",
           label: "Heading 1",
         },
         {
           kind: "heading",
           level: 2,
-          icon: "i-lucide-heading-2",
+          icon: "i-ph-text-h-two",
           label: "Heading 2",
         },
         {
           kind: "heading",
           level: 3,
-          icon: "i-lucide-heading-3",
+          icon: "i-ph-text-h-three",
           label: "Heading 3",
         },
         {
           kind: "heading",
           level: 4,
-          icon: "i-lucide-heading-4",
+          icon: "i-ph-text-h-four",
           label: "Heading 4",
         },
       ],
     },
     {
-      icon: "i-lucide-align-justify",
+      icon: "i-ph-text-align-justify",
       tooltip: { text: "Text Align" },
       content: { align: "end" },
       items: [
         {
           kind: "textAlign",
           align: "left",
-          icon: "i-lucide-align-left",
+          icon: "i-ph-text-align-left",
           label: "Align Left",
         },
         {
           kind: "textAlign",
           align: "center",
-          icon: "i-lucide-align-center",
+          icon: "i-ph-text-align-center",
           label: "Align Center",
         },
         {
           kind: "textAlign",
           align: "right",
-          icon: "i-lucide-align-right",
+          icon: "i-ph-text-align-right",
           label: "Align Right",
         },
         {
           kind: "textAlign",
           align: "justify",
-          icon: "i-lucide-align-justify",
+          icon: "i-ph-text-align-justify",
           label: "Align Justify",
         },
       ],
     },
     {
       kind: "bulletList",
-      icon: "i-lucide-list",
+      icon: "i-ph-list-bullets",
       tooltip: { text: "Bullet List" },
     },
     {
       kind: "orderedList",
-      icon: "i-lucide-list-ordered",
+      icon: "i-ph-list-numbers",
       tooltip: { text: "Ordered List" },
     },
     {
       kind: "blockquote",
-      icon: "i-lucide-square-code",
+      icon: "i-ph-code-block",
       tooltip: { text: "Blockquote" },
     },
     {
       kind: "codeBlock",
-      icon: "i-lucide-square-code",
+      icon: "i-ph-code-block",
       tooltip: { text: "Code Block" },
     },
     {
       kind: "horizontalRule",
-      icon: "i-lucide-separator-horizontal",
+      icon: "i-ph-minus",
       tooltip: { text: "Horizontal Rule" },
     },
   ],
@@ -145,39 +146,39 @@ const toolbarItems: EditorToolbarItem[][] = [
     {
       kind: "mark",
       mark: "bold",
-      icon: "i-lucide-bold",
+      icon: "i-ph-text-b",
       tooltip: { text: "Bold" },
     },
     {
       kind: "mark",
       mark: "italic",
-      icon: "i-lucide-italic",
+      icon: "i-ph-text-italic",
       tooltip: { text: "Italic" },
     },
     {
       kind: "mark",
       mark: "underline",
-      icon: "i-lucide-underline",
+      icon: "i-ph-text-underline",
       tooltip: { text: "Underline" },
     },
     {
       kind: "mark",
       mark: "strike",
-      icon: "i-lucide-strikethrough",
+      icon: "i-ph-text-strikethrough",
       tooltip: { text: "Strikethrough" },
     },
     {
       kind: "mark",
       mark: "code",
-      icon: "i-lucide-code",
+      icon: "i-ph-code",
       tooltip: { text: "Code" },
     },
   ],
   [
-    { kind: "link", icon: "i-lucide-link", tooltip: { text: "Link" } },
+    { kind: "link", icon: "i-ph-link", tooltip: { text: "Link" } },
     {
       kind: "image",
-      icon: "i-lucide-image-up",
+      icon: "i-ph-image-square",
       tooltip: { text: "Upload Image" },
     },
   ],
@@ -191,20 +192,20 @@ const suggestionItems = [
       level: 2,
       label: "Heading besar",
       description: "Buat subjudul utama",
-      icon: "i-lucide-heading-2",
+      icon: "i-ph-text-h-two",
     },
     {
       kind: "heading" as const,
       level: 3,
       label: "Heading kecil",
       description: "Buat subjudul lanjutan",
-      icon: "i-lucide-heading-3",
+      icon: "i-ph-text-h-three",
     },
     {
       kind: "paragraph" as const,
       label: "Paragraf",
       description: "Kembali ke teks biasa",
-      icon: "i-lucide-pilcrow",
+      icon: "i-ph-paragraph",
     },
   ],
   [
@@ -213,31 +214,31 @@ const suggestionItems = [
       kind: "bulletList" as const,
       label: "Daftar poin",
       description: "Tampilkan list berpoin",
-      icon: "i-lucide-list",
+      icon: "i-ph-list-bullets",
     },
     {
       kind: "orderedList" as const,
       label: "Daftar nomor",
       description: "Tampilkan list bernomor",
-      icon: "i-lucide-list-ordered",
+      icon: "i-ph-list-numbers",
     },
     {
       kind: "blockquote" as const,
       label: "Kutipan",
       description: "Sorot kutipan penting",
-      icon: "i-lucide-quote",
+      icon: "i-ph-quotes",
     },
     {
       kind: "image" as const,
       label: "Gambar",
       description: "Unggah gambar ke isi artikel",
-      icon: "i-lucide-image-up",
+      icon: "i-ph-image-square",
     },
     {
       kind: "emoji" as const,
       label: "Emoji",
       description: "Cari emoji dengan cepat",
-      icon: "i-lucide-smile",
+      icon: "i-ph-smiley",
     },
   ],
 ];
@@ -253,14 +254,6 @@ const editorHandlers = {
     isDisabled: () => uploadingEditorImage.value,
   },
 };
-
-const backTo = computed(() => {
-  if (showReviewActions.value || effectivePostType.value === "pena_santri")
-    return "/admin/pena-santri";
-  if (showBeritaActions.value || effectivePostType.value === "berita")
-    return "/admin/berita";
-  return "/dashboard/posts";
-});
 </script>
 
 <template>
@@ -272,7 +265,7 @@ const backTo = computed(() => {
         :to="backTo"
         variant="link"
         color="neutral"
-        icon="i-lucide-arrow-left"
+        icon="i-ph-arrow-left"
         class="justify-start"
       >
         Kembali
@@ -283,12 +276,12 @@ const backTo = computed(() => {
         <template v-if="showReviewActions">
           <UButton
             color="error"
-            variant="subtle"
+            variant="light"
             :loading="loadingAction === 'reject'"
             :disabled="!!loadingAction"
             @click="reject()"
           >
-            Tolak
+            Tolak Artikel
           </UButton>
           <UButton
             color="success"
@@ -296,7 +289,7 @@ const backTo = computed(() => {
             :disabled="!!loadingAction"
             @click="approve()"
           >
-            Publish
+            Publish Artikel
           </UButton>
         </template>
 
@@ -360,7 +353,7 @@ const backTo = computed(() => {
             "
             color="error"
             variant="subtle"
-            icon="i-lucide-triangle-alert"
+            icon="i-ph-warning"
             title="Catatan Penolakan"
           >
             <template #description>
@@ -457,7 +450,7 @@ const backTo = computed(() => {
                   accept="image/jpeg,image/png,image/webp"
                   variant="area"
                   size="md"
-                  icon="i-lucide-image-up"
+                  icon="i-ph-image-square"
                   label="Pilih gambar atau jatuhkan"
                   :highlight="!form.featuredImage"
                   class="min-h-40 w-full"

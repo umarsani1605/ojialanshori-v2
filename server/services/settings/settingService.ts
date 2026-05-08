@@ -4,9 +4,11 @@ import type * as schema from '#server/db/schema'
 import { listSettings, upsertSetting } from '#server/repositories/settings/settingRepository'
 
 type Database = MySql2Database<typeof schema>
+const HIDDEN_SETTINGS_KEYS = new Set(['top_banner'])
 
 export async function getSettingsForAdmin(db: Database) {
-  return listSettings(db)
+  const settings = await listSettings(db)
+  return settings.filter(setting => !HIDDEN_SETTINGS_KEYS.has(setting.key))
 }
 
 export async function updateSettings(db: Database, updates: Record<string, string>) {

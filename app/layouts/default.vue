@@ -10,8 +10,10 @@ const { data: settings } = await useFetch<Record<string, string>>(
 
 <template>
   <div class="min-h-screen flex flex-col bg-white">
-    <PublicTopBanner />
-    <PublicNavbar />
+    <div class="sticky top-0 z-40">
+      <PublicTopBanner />
+      <PublicNavbar />
+    </div>
     <main class="flex-1">
       <slot />
     </main>

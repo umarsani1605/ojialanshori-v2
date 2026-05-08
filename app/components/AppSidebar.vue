@@ -45,17 +45,17 @@ const auth = useAuth();
 
 const navLinks = computed(() => {
   const items = [
-    { label: "Beranda", icon: "i-lucide-home", to: "/admin" },
-    { label: "Semua Artikel", icon: "i-lucide-files", to: "/admin/posts" },
-    { label: "Kategori", icon: "i-lucide-tag", to: "/admin/categories" },
-    { label: "Galeri", icon: "i-lucide-image", to: "/admin/gallery" },
-    { label: "Banner", icon: "i-lucide-megaphone", to: "/admin/banner" },
+    { label: "Beranda", icon: "i-ph-house", to: "/admin" },
+    { label: "Semua Artikel", icon: "i-ph-files", to: "/admin/posts" },
+    { label: "Kategori", icon: "i-ph-tag", to: "/admin/categories" },
+    { label: "Galeri", icon: "i-ph-image", to: "/admin/gallery" },
+    { label: "Banner", icon: "i-ph-megaphone", to: "/admin/banner" },
   ];
   if (auth.isAdmin.value) {
     items.push(
-      { label: "Halaman Statis", icon: "i-lucide-layout", to: "/admin/pages" },
-      { label: "Users", icon: "i-lucide-users", to: "/admin/users" },
-      { label: "Pengaturan", icon: "i-lucide-settings", to: "/admin/settings" },
+      { label: "Halaman Statis", icon: "i-ph-layout", to: "/admin/pages" },
+      { label: "Users", icon: "i-ph-users", to: "/admin/users" },
+      { label: "Pengaturan", icon: "i-ph-gear", to: "/admin/settings" },
     );
   }
   return items;
@@ -63,7 +63,7 @@ const navLinks = computed(() => {
 
 const profileLink = {
   label: "Profil Saya",
-  icon: "i-lucide-user-circle",
+  icon: "i-ph-user-circle",
   to: "/admin/profile",
 };
 

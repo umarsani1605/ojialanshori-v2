@@ -45,7 +45,7 @@ const pages = computed(() => {
       class="px-3 py-2 text-sm rounded-md border border-default hover:bg-slate-50"
       aria-label="Halaman sebelumnya"
     >
-      <UIcon name="i-lucide-chevron-left" class="size-4" />
+      <UIcon name="i-ph-caret-left" class="size-4" />
     </NuxtLink>
 
     <template v-for="(p, i) in pages" :key="i">
@@ -70,7 +70,7 @@ const pages = computed(() => {
       class="px-3 py-2 text-sm rounded-md border border-default hover:bg-slate-50"
       aria-label="Halaman selanjutnya"
     >
-      <UIcon name="i-lucide-chevron-right" class="size-4" />
+      <UIcon name="i-ph-caret-right" class="size-4" />
     </NuxtLink>
   </nav>
 </template>

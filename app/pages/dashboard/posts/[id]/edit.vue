@@ -1,14 +1,16 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'dashboard-santri',
-  middleware: ['auth', 'role'],
-  requiredRole: 'santri',
-})
+  layout: "dashboard-santri",
+  middleware: ["auth", "role"],
+  requiredRole: "santri",
+});
 
-const route = useRoute()
-const postId = computed(() => Number(route.params.id))
+const route = useRoute();
+const postId = computed(() => Number(route.params.id));
 </script>
 
 <template>
-  <DashboardSantriPostEditor :post-id="postId" />
+  <UContainer>
+    <PostEditor :post-id="postId" />
+  </UContainer>
 </template>

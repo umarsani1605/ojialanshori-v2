@@ -52,7 +52,7 @@ useSeoMeta({
               <div
                 class="mt-1 flex size-10 w-10 max-w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-500"
               >
-                <UIcon name="i-lucide-map-pin" class="size-5" />
+                <UIcon name="i-ph-map-pin" class="size-5" />
               </div>
               <div class="min-w-0">
                 <h3 class="text-xl font-bold">Alamat</h3>

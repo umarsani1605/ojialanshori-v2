@@ -120,7 +120,7 @@ async function onSubmit() {
                   color="neutral"
                   variant="link"
                   size="sm"
-                  :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
                   :aria-label="
                     showPassword
                       ? 'Sembunyikan kata sandi'

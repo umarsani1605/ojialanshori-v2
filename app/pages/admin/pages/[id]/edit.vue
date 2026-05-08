@@ -48,7 +48,7 @@ const saving = ref(false)
 
 async function save() {
   if (!form.title.trim() || !form.slug.trim()) {
-    toast.add({ title: 'Judul dan slug wajib diisi', color: 'warning', icon: 'i-lucide-alert-triangle' })
+    toast.add({ title: 'Judul dan slug wajib diisi', color: 'warning', icon: 'i-ph-warning' })
     return
   }
   saving.value = true
@@ -57,10 +57,10 @@ async function save() {
       method: 'PATCH',
       body: { title: form.title, slug: form.slug, content: form.content, status: form.status },
     })
-    toast.add({ title: 'Halaman disimpan', color: 'success', icon: 'i-lucide-check-circle' })
+    toast.add({ title: 'Halaman disimpan', color: 'success', icon: 'i-ph-check-circle' })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Terjadi kesalahan.'
-    toast.add({ title: 'Gagal menyimpan', description: msg, color: 'error', icon: 'i-lucide-x-circle' })
+    toast.add({ title: 'Gagal menyimpan', description: msg, color: 'error', icon: 'i-ph-x-circle' })
   } finally {
     saving.value = false
   }
@@ -73,22 +73,22 @@ const statusOptions = [
 
 const toolbarItems: EditorToolbarItem[][] = [
   [
-    { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
-    { kind: 'mark', mark: 'italic', icon: 'i-lucide-italic', tooltip: { text: 'Italic' } },
-    { kind: 'mark', mark: 'underline', icon: 'i-lucide-underline', tooltip: { text: 'Underline' } },
-    { kind: 'mark', mark: 'strike', icon: 'i-lucide-strikethrough', tooltip: { text: 'Strikethrough' } },
+    { kind: 'mark', mark: 'bold', icon: 'i-ph-text-b', tooltip: { text: 'Bold' } },
+    { kind: 'mark', mark: 'italic', icon: 'i-ph-text-italic', tooltip: { text: 'Italic' } },
+    { kind: 'mark', mark: 'underline', icon: 'i-ph-text-underline', tooltip: { text: 'Underline' } },
+    { kind: 'mark', mark: 'strike', icon: 'i-ph-text-strikethrough', tooltip: { text: 'Strikethrough' } },
   ],
   [
-    { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', tooltip: { text: 'Heading 2' } },
-    { kind: 'heading', level: 3, icon: 'i-lucide-heading-3', tooltip: { text: 'Heading 3' } },
+    { kind: 'heading', level: 2, icon: 'i-ph-text-h-two', tooltip: { text: 'Heading 2' } },
+    { kind: 'heading', level: 3, icon: 'i-ph-text-h-three', tooltip: { text: 'Heading 3' } },
   ],
   [
-    { kind: 'bulletList', icon: 'i-lucide-list', tooltip: { text: 'Bullet List' } },
-    { kind: 'orderedList', icon: 'i-lucide-list-ordered', tooltip: { text: 'Numbered List' } },
+    { kind: 'bulletList', icon: 'i-ph-list-bullets', tooltip: { text: 'Bullet List' } },
+    { kind: 'orderedList', icon: 'i-ph-list-numbers', tooltip: { text: 'Numbered List' } },
   ],
   [
-    { kind: 'link', icon: 'i-lucide-link', tooltip: { text: 'Link' } },
-    { kind: 'blockquote', icon: 'i-lucide-quote', tooltip: { text: 'Blockquote' } },
+    { kind: 'link', icon: 'i-ph-link', tooltip: { text: 'Link' } },
+    { kind: 'blockquote', icon: 'i-ph-quotes', tooltip: { text: 'Blockquote' } },
   ],
 ]
 </script>
@@ -102,7 +102,7 @@ const toolbarItems: EditorToolbarItem[][] = [
   <div v-else-if="!page" class="p-6">
     <UAlert
       color="error"
-      icon="i-lucide-alert-circle"
+      icon="i-ph-warning-circle"
       title="Halaman tidak ditemukan"
     />
   </div>
@@ -112,7 +112,7 @@ const toolbarItems: EditorToolbarItem[][] = [
       <UButton
         to="/admin/pages"
         variant="ghost"
-        icon="i-lucide-arrow-left"
+        icon="i-ph-arrow-left"
         label="Kembali"
         class="-ml-2"
       />

@@ -12,17 +12,17 @@ defineEmits<{
 
 const toolbarItems: EditorToolbarItem[][] = [
   [
-    { kind: "mark", mark: "bold", icon: "i-lucide-bold", tooltip: { text: "Bold" } },
-    { kind: "mark", mark: "italic", icon: "i-lucide-italic", tooltip: { text: "Italic" } },
-    { kind: "mark", mark: "underline", icon: "i-lucide-underline", tooltip: { text: "Underline" } },
-    { kind: "mark", mark: "strike", icon: "i-lucide-strikethrough", tooltip: { text: "Strikethrough" } },
+    { kind: "mark", mark: "bold", icon: "i-ph-text-b", tooltip: { text: "Bold" } },
+    { kind: "mark", mark: "italic", icon: "i-ph-text-italic", tooltip: { text: "Italic" } },
+    { kind: "mark", mark: "underline", icon: "i-ph-text-underline", tooltip: { text: "Underline" } },
+    { kind: "mark", mark: "strike", icon: "i-ph-text-strikethrough", tooltip: { text: "Strikethrough" } },
   ],
   [
-    { kind: "bulletList", icon: "i-lucide-list", tooltip: { text: "Bullet List" } },
-    { kind: "orderedList", icon: "i-lucide-list-ordered", tooltip: { text: "Numbered List" } },
+    { kind: "bulletList", icon: "i-ph-list-bullets", tooltip: { text: "Bullet List" } },
+    { kind: "orderedList", icon: "i-ph-list-numbers", tooltip: { text: "Numbered List" } },
   ],
   [
-    { kind: "link", icon: "i-lucide-link", tooltip: { text: "Link" } },
+    { kind: "link", icon: "i-ph-link", tooltip: { text: "Link" } },
   ],
 ];
 </script>

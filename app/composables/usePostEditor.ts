@@ -1,534 +1,102 @@
+import { reactive, ref, watch } from "vue";
 import Emoji from "@tiptap/extension-emoji";
 import TextAlign from "@tiptap/extension-text-align";
 
 import { editorEmojiItems } from "~/utils/editorEmoji";
 
-type RichTextEditor = {
-  chain: () => {
-    focus: () => {
-      run?: () => boolean;
-      setImage: (attrs: { alt?: string; src: string }) => {
-        run: () => boolean;
-      };
-    };
-  };
-  isActive: (name: string) => boolean;
-  isEditable: boolean;
-};
-
-type EditorPost = {
-  id: number;
-  title: string;
-  content: string;
-  excerpt: string | null;
-  featuredImage: string | null;
-  categoryId: number | null;
-  status: "draft" | "pending_review" | "published" | "rejected";
-  reviewNote: string | null;
-  author?: { id: number; name: string; email: string };
-  reviewer?: { id: number; name: string } | null;
-  category?: {
-    id: number;
-    name: string;
-    type: "berita" | "pena_santri";
-  } | null;
-};
-
-type CategoryItem = { id: number; name: string; type: string };
+import { usePostEditorActions } from "./post-editor/usePostEditorActions";
+import { usePostEditorContext } from "./post-editor/usePostEditorContext";
+import { usePostEditorMetrics } from "./post-editor/usePostEditorMetrics";
+import { usePostEditorPresentation } from "./post-editor/usePostEditorPresentation";
+import type {
+  LoadingAction,
+  PostEditorForm,
+  PostStatus,
+  PostType,
+} from "./post-editor/types";
+import { usePostEditorUploads } from "./post-editor/usePostEditorUploads";
 
 export function usePostEditor(opts: {
   postId?: number;
-  postType?: "berita" | "pena_santri";
+  postType?: PostType;
 }) {
-  const auth = useAuth();
   const toast = useToast();
   const router = useRouter();
-  const { postId } = opts;
 
-  // --- Form state ---
-  const form = reactive({
+  const form = reactive<PostEditorForm>({
     title: "",
     content: "",
     excerpt: "",
-    categoryId: undefined as number | undefined,
-    featuredImage: null as string | null,
+    categoryId: undefined,
+    featuredImage: null,
   });
 
-  const currentStatus = ref<EditorPost["status"]>("draft");
+  const currentStatus = ref<PostStatus>("draft");
   const existingReviewNote = ref<string | null>(null);
   const reviewerName = ref<string | null>(null);
-  const reviewNote = ref(""); // reviewer's input for rejection
-  const loadingAction = ref<"save" | "send" | "approve" | "reject" | null>(
-    null,
-  );
+  const reviewNote = ref("");
+  const loadingAction = ref<LoadingAction>(null);
   const uploadingEditorImage = ref(false);
   const coverInputKey = ref(0);
   const coverFile = ref<File | null>(null);
 
-  // --- Categories ---
-  const { data: categoriesRaw } = useAsyncData<CategoryItem[]>(
-    "post-editor-categories",
-    async () => {
-      if (auth.canReview.value) {
-        const res = await $fetch<{ data: CategoryItem[] }>("/api/categories");
-        return res.data;
-      }
-      const res = await $fetch<{ categories: CategoryItem[] }>(
-        "/api/posts/meta",
-      );
-      return res.categories;
+  const context = usePostEditorContext({
+    postId: opts.postId,
+    postType: opts.postType,
+    form,
+    state: {
+      currentStatus,
+      existingReviewNote,
+      reviewerName,
     },
-    { default: () => [] as CategoryItem[] },
-  );
-
-  // --- Post fetch ---
-  const { data: postData, status: postStatus } =
-    useAsyncData<EditorPost | null>(
-      `post-editor-${postId ?? "new"}`,
-      () => {
-        if (!postId) return Promise.resolve(null);
-        return $fetch<{ data: EditorPost }>(`/api/posts/${postId}`).then(
-          (r) => r.data,
-        );
-      },
-      { lazy: true, immediate: !!postId, default: () => null },
-    );
-
-  // --- effectivePostType: prop takes priority, falls back to post's category type ---
-  const effectivePostType = computed<"berita" | "pena_santri" | undefined>(
-    () => opts.postType ?? postData.value?.category?.type ?? undefined,
-  );
-
-  // --- isOwnPost ---
-  const isOwnPost = computed(() => {
-    if (!auth.canReview.value) return true; // santri API filters by authorId
-    return auth.user.value?.id === postData.value?.author?.id;
+    toast,
   });
 
-  // --- showBeritaActions: admin writing/editing berita (direct publish, no review) ---
-  const showBeritaActions = computed(
-    () => auth.canReview.value && effectivePostType.value === "berita",
-  );
-
-  // --- showReviewActions: reviewer reviewing someone else's pena_santri post ---
-  const showReviewActions = computed(
-    () =>
-      auth.canReview.value &&
-      !!postId &&
-      !isOwnPost.value &&
-      effectivePostType.value === "pena_santri",
-  );
-
-  // --- Filtered categories by effectivePostType ---
-  const categories = computed(() => {
-    const all = categoriesRaw.value ?? [];
-    const filtered = effectivePostType.value
-      ? all.filter((c) => c.type === effectivePostType.value)
-      : all;
-    return filtered.map((c) => ({
-      label:
-        c.type === "berita" ? `Berita · ${c.name}` : `Pena Santri · ${c.name}`,
-      value: c.id,
-    }));
+  const presentation = usePostEditorPresentation({
+    categoriesRaw: context.categoriesRaw,
+    effectivePostType: context.effectivePostType,
+    currentStatus,
+    form,
+    showBeritaActions: context.showBeritaActions,
+    showReviewActions: context.showReviewActions,
   });
 
-  // --- Auto-assign berita category (single category, hidden selector) ---
-  watch(
-    [categoriesRaw, effectivePostType],
-    ([cats, type]) => {
-      if (type !== "berita" || !cats?.length) return;
-      const beritaCat = cats.find((c) => c.type === "berita");
-      if (beritaCat && !form.categoryId) {
-        form.categoryId = beritaCat.id;
-      }
-    },
-    { immediate: true },
-  );
+  const metrics = usePostEditorMetrics(form);
 
-  // --- Populate form when post loads ---
-  watch(
-    postData,
-    (post) => {
-      if (!post) return;
-      form.title = post.title;
-      form.content = post.content;
-      form.excerpt = post.excerpt ?? "";
-      form.categoryId = post.categoryId ?? undefined;
-      form.featuredImage = post.featuredImage;
-      currentStatus.value = post.status;
-      existingReviewNote.value = post.reviewNote;
-      reviewerName.value = post.reviewer?.name ?? null;
-
-      // Santri: redirect if pending_review (cannot edit while in review)
-      if (
-        !auth.canReview.value &&
-        post.status === "pending_review" &&
-        import.meta.client
-      ) {
-        toast.add({
-          title: "Artikel sedang direview",
-          description:
-            "Artikel yang berstatus menunggu review tidak bisa diedit.",
-          color: "warning",
-          icon: "i-lucide-clock-3",
-        });
-        void navigateTo("/dashboard/posts?status=pending_review", {
-          replace: true,
-        });
-      }
-    },
-    { immediate: true },
-  );
+  const uploads = usePostEditorUploads({
+    form,
+    coverInputKey,
+    coverFile,
+    uploadingEditorImage,
+    toast,
+  });
 
   watch(coverFile, (file) => {
-    void handleCoverChange(file);
+    void uploads.handleCoverChange(file);
   });
 
-  // --- Computed ---
-  const canSubmit = computed(() => {
-    if (effectivePostType.value === "berita") {
-      // Category is auto-assigned for berita; only cover required
-      return Boolean(form.featuredImage);
-    }
-    return Boolean(form.featuredImage && form.categoryId !== undefined);
+  const actions = usePostEditorActions({
+    authCanReview: context.auth.canReview,
+    effectivePostType: context.effectivePostType,
+    postId: opts.postId,
+    form,
+    reviewNote,
+    loadingAction,
+    currentStatus,
+    existingReviewNote,
+    toast,
+    router,
   });
 
-  const titleCount = computed(() => form.title.length);
-
-  const plainTextContent = computed(() =>
-    form.content
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/\s+/g, " ")
-      .trim(),
-  );
-
-  const wordCount = computed(() =>
-    plainTextContent.value ? plainTextContent.value.split(" ").length : 0,
-  );
-
-  const readingTime = computed(() =>
-    wordCount.value > 0 ? Math.ceil(wordCount.value / 200) : 0,
-  );
-
-  const statusLabel = computed(
-    () =>
-      ({
-        draft: "Draft",
-        pending_review: "Dalam Ulasan",
-        rejected: "Ditolak",
-        published: "Terbit",
-      })[currentStatus.value],
-  );
-
-  const statusColor = computed(
-    () =>
-      ({
-        draft: "neutral",
-        pending_review: "warning",
-        rejected: "error",
-        published: "success",
-      })[currentStatus.value] as "neutral" | "warning" | "error" | "success",
-  );
-
-  // --- Editor config exposed for template ---
   const editorExtensions = [
     Emoji,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
   ];
 
-  // --- Helpers ---
-  function buildPayload() {
-    return {
-      title: form.title.trim(),
-      content: form.content,
-      excerpt: form.excerpt.trim() || null,
-      categoryId: form.categoryId ?? null,
-      featuredImage: form.featuredImage,
-    };
-  }
-
-  function errorMessage(e: unknown) {
-    return (
-      (e as { data?: { message?: string } }).data?.message ??
-      (e as Error).message ??
-      "Terjadi kesalahan."
-    );
-  }
-
-  // --- Actions ---
-  async function saveDraft({
-    silent = false,
-    redirectAfterCreate = true,
-    manageLoading = true,
-  } = {}) {
-    if (manageLoading) loadingAction.value = "save";
-    try {
-      const payload = buildPayload();
-      let response: { id: number; status: EditorPost["status"] };
-
-      if (postId) {
-        response = await $fetch(`/api/posts/${postId}`, {
-          method: "PATCH",
-          body: payload,
-        });
-      } else {
-        response = await $fetch("/api/posts", {
-          method: "POST",
-          body: payload,
-        });
-      }
-
-      currentStatus.value = response.status;
-      existingReviewNote.value = null;
-
-      if (!postId && redirectAfterCreate) {
-        const editPath =
-          effectivePostType.value === "berita"
-            ? `/admin/berita/${response.id}/edit`
-            : effectivePostType.value === "pena_santri"
-              ? `/admin/pena-santri/${response.id}/edit`
-              : `/dashboard/posts/${response.id}/edit`;
-        await router.replace(editPath);
-      }
-      if (!silent) {
-        toast.add({
-          title: "Draft disimpan",
-          color: "success",
-          icon: "i-lucide-check",
-        });
-      }
-      return response.id;
-    } catch (e) {
-      if (!silent) {
-        toast.add({
-          title: "Gagal menyimpan draft",
-          description: errorMessage(e),
-          color: "error",
-          icon: "i-lucide-alert-circle",
-        });
-      }
-      return null;
-    } finally {
-      if (manageLoading) loadingAction.value = null;
-    }
-  }
-
-  async function sendPost() {
-    loadingAction.value = "send";
-    try {
-      const payload = buildPayload();
-
-      if (auth.canReview.value) {
-        // Admin/reviewer publishes directly — no review queue
-        // If no postId yet (new berita), create draft first then publish
-        const resolvedId = postId
-          ? postId
-          : await saveDraft({
-              silent: true,
-              redirectAfterCreate: false,
-              manageLoading: false,
-            });
-
-        if (!resolvedId) return;
-
-        await $fetch(`/api/posts/${resolvedId}/publish`, {
-          method: "POST",
-          body: payload,
-        });
-        const backPath =
-          effectivePostType.value === "berita"
-            ? "/admin/berita"
-            : "/admin/pena-santri";
-        toast.add({
-          title: "Artikel dipublish",
-          color: "success",
-          icon: "i-lucide-check-circle",
-        });
-        await navigateTo(backPath);
-        return;
-      }
-
-      // Santri: submit for review (pending_review)
-      const resolvedId = postId
-        ? postId
-        : await saveDraft({
-            silent: true,
-            redirectAfterCreate: false,
-            manageLoading: false,
-          });
-
-      if (!resolvedId) return;
-
-      const response = await $fetch<{ status: EditorPost["status"] }>(
-        `/api/posts/${resolvedId}/submit`,
-        { method: "POST", body: payload },
-      );
-
-      currentStatus.value = response.status;
-      existingReviewNote.value = null;
-
-      toast.add({
-        title: "Artikel dikirim untuk review",
-        color: "success",
-        icon: "i-lucide-send",
-      });
-      await navigateTo("/dashboard/posts?status=pending_review");
-    } catch (e) {
-      toast.add({
-        title: "Gagal mengirim artikel",
-        description: errorMessage(e),
-        color: "error",
-        icon: "i-lucide-alert-circle",
-      });
-    } finally {
-      loadingAction.value = null;
-    }
-  }
-
-  async function approve() {
-    if (!postId) return;
-    loadingAction.value = "approve";
-    try {
-      await $fetch(`/api/posts/${postId}/approve`, {
-        method: "POST",
-        body: buildPayload(),
-      });
-      toast.add({
-        title: "Artikel dipublish",
-        color: "success",
-        icon: "i-lucide-check-circle",
-      });
-      await navigateTo("/admin/pena-santri");
-    } catch (e) {
-      toast.add({
-        title: "Gagal publish",
-        description: errorMessage(e),
-        color: "error",
-        icon: "i-lucide-x-circle",
-      });
-    } finally {
-      loadingAction.value = null;
-    }
-  }
-
-  async function reject() {
-    if (!postId) return;
-    if (!reviewNote.value.trim()) {
-      toast.add({
-        title: "Catatan review wajib diisi",
-        color: "warning",
-        icon: "i-lucide-alert-triangle",
-      });
-      return;
-    }
-    loadingAction.value = "reject";
-    try {
-      await $fetch(`/api/posts/${postId}/reject`, {
-        method: "POST",
-        body: { reviewNote: reviewNote.value, ...buildPayload() },
-      });
-      toast.add({
-        title: "Artikel ditolak",
-        color: "warning",
-        icon: "i-lucide-x-circle",
-      });
-      await navigateTo("/admin/pena-santri");
-    } catch (e) {
-      toast.add({
-        title: "Gagal menolak",
-        description: errorMessage(e),
-        color: "error",
-        icon: "i-lucide-x-circle",
-      });
-    } finally {
-      loadingAction.value = null;
-    }
-  }
-
-  async function handleCoverChange(file: File | null | undefined) {
-    if (!file) return;
-    try {
-      if (file.size > 2 * 1024 * 1024)
-        throw new Error("Ukuran cover maksimal 2MB.");
-      const formData = new FormData();
-      formData.append("cover", file);
-      const response = await $fetch<{ path: string }>(
-        "/api/posts/upload/cover",
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-      form.featuredImage = response.path;
-      coverInputKey.value += 1;
-      coverFile.value = null;
-      toast.add({
-        title: "Cover berhasil diunggah",
-        color: "success",
-        icon: "i-lucide-check",
-      });
-    } catch (e) {
-      toast.add({
-        title: "Gagal mengunggah cover",
-        description: errorMessage(e),
-        color: "error",
-        icon: "i-lucide-alert-circle",
-      });
-    }
-  }
-
-  async function promptEditorImageUpload(editor: RichTextEditor) {
-    if (!import.meta.client || uploadingEditorImage.value) return;
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/jpeg,image/png,image/webp";
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      input.remove();
-      if (!file) return;
-      try {
-        uploadingEditorImage.value = true;
-        if (file.size > 2 * 1024 * 1024)
-          throw new Error("Ukuran gambar maksimal 2MB.");
-        const formData = new FormData();
-        formData.append("image", file);
-        const response = await $fetch<{ url: string }>(
-          "/api/posts/upload/editor-image",
-          { method: "POST", body: formData },
-        );
-        editor
-          .chain()
-          .focus()
-          .setImage({
-            src: response.url,
-            alt: file.name.replace(/\.[^/.]+$/, ""),
-          })
-          .run();
-        toast.add({
-          title: "Gambar berhasil diunggah",
-          color: "success",
-          icon: "i-lucide-check",
-        });
-      } catch (e) {
-        toast.add({
-          title: "Gagal mengunggah gambar",
-          description: errorMessage(e),
-          color: "error",
-          icon: "i-lucide-alert-circle",
-        });
-      } finally {
-        uploadingEditorImage.value = false;
-      }
-    };
-    input.click();
-  }
-
   return {
-    // Form
     form,
     currentStatus,
-    postStatus,
+    postStatus: context.postStatus,
     existingReviewNote,
     reviewerName,
     reviewNote,
@@ -536,28 +104,25 @@ export function usePostEditor(opts: {
     uploadingEditorImage,
     coverFile,
     coverInputKey,
-    // Computed
-    categories,
-    effectivePostType,
-    canSubmit,
-    titleCount,
-    wordCount,
-    readingTime,
-    statusLabel,
-    statusColor,
-    showBeritaActions,
-    showReviewActions,
-    isOwnPost,
-    // Editor config
+    categories: presentation.categories,
+    effectivePostType: context.effectivePostType,
+    canSubmit: presentation.canSubmit,
+    titleCount: metrics.titleCount,
+    wordCount: metrics.wordCount,
+    readingTime: metrics.readingTime,
+    statusLabel: presentation.statusLabel,
+    statusColor: presentation.statusColor,
+    showBeritaActions: context.showBeritaActions,
+    showReviewActions: context.showReviewActions,
+    isOwnPost: context.isOwnPost,
+    backTo: presentation.backTo,
     editorExtensions,
     editorEmojiItems,
-    // Handlers
-    handleCoverChange,
-    promptEditorImageUpload,
-    // Actions
-    saveDraft,
-    sendPost,
-    approve,
-    reject,
+    handleCoverChange: uploads.handleCoverChange,
+    promptEditorImageUpload: uploads.promptEditorImageUpload,
+    saveDraft: actions.saveDraft,
+    sendPost: actions.sendPost,
+    approve: actions.approve,
+    reject: actions.reject,
   };
 }

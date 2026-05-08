@@ -86,7 +86,7 @@ async function doDelete() {
   deleting.value = true;
   try {
     await $fetch(`/api/posts/${deletingId.value}`, { method: "DELETE" });
-    toast.add({ title: "Artikel dihapus", color: "success", icon: "i-lucide-check-circle" });
+    toast.add({ title: "Artikel dihapus", color: "success", icon: "i-ph-check-circle" });
     isDeleteModalOpen.value = false;
     await refresh();
   } catch (e: unknown) {
@@ -94,7 +94,7 @@ async function doDelete() {
       (e as { data?: { message?: string } }).data?.message ??
       (e as Error).message ??
       "Terjadi kesalahan.";
-    toast.add({ title: "Gagal menghapus", description: msg, color: "error", icon: "i-lucide-x-circle" });
+    toast.add({ title: "Gagal menghapus", description: msg, color: "error", icon: "i-ph-x-circle" });
   } finally {
     deleting.value = false;
     deletingId.value = null;
@@ -156,7 +156,7 @@ const columns: TableColumn<AdminPost>[] = [
         h(UButton, {
           size: "sm",
           variant: "ghost",
-          icon: "i-lucide-pencil",
+          icon: "i-ph-pencil-simple",
           to:
             row.original.category?.type === "berita"
               ? `/admin/berita/${row.original.id}/edit`
@@ -166,7 +166,7 @@ const columns: TableColumn<AdminPost>[] = [
           size: "sm",
           variant: "ghost",
           color: "error",
-          icon: "i-lucide-trash-2",
+          icon: "i-ph-trash",
           onClick: () => confirmDelete(row.original.id),
         }),
       ]),

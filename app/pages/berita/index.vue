@@ -78,7 +78,7 @@ useSeoMeta({
           v-else
           title="Belum ada berita"
           description="Konten berita akan tampil di sini ketika sudah tersedia."
-          icon="i-lucide-newspaper"
+          icon="i-ph-newspaper"
         />
 
         <div class="mt-14 flex justify-center">

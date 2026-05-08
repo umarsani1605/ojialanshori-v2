@@ -4,6 +4,14 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-04-12",
   devtools: { enabled: true },
 
+  site: {
+    url:
+      process.env.NUXT_PUBLIC_SITE_URL ||
+      process.env.SITE_URL ||
+      "http://localhost:3000",
+    name: "Omah Ngaji Al-Anshori",
+  },
+
   css: ["~/assets/css/main.css"],
 
   modules: [

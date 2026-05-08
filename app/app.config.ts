@@ -172,6 +172,9 @@ export default defineAppConfig({
       },
     },
     modal: {
+      slots: {
+        footer: "justify-end",
+      },
       variants: {
         overlay: {
           true: {

@@ -78,7 +78,7 @@ useSeoMeta({
           v-else
           title="Belum ada tulisan"
           description="Tulisan santri akan tampil di sini ketika sudah tersedia."
-          icon="i-lucide-book-open-text"
+          icon="i-ph-book-open-text"
         />
 
         <div class="mt-14 flex justify-center">

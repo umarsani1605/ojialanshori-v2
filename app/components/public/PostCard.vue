@@ -39,7 +39,7 @@ const dateFormatted = computed(() =>
         v-else
         class="w-full h-full flex items-center justify-center text-slate-400"
       >
-        <UIcon name="i-lucide-image" class="size-10" />
+        <UIcon name="i-ph-image" class="size-10" />
       </div>
     </div>
     <h3

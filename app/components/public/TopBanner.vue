@@ -1,39 +1,30 @@
 <script setup lang="ts">
 type Banner = {
-  id: number
-  text: string
-  link: string | null
-}
+  text: string;
+  link: string | null;
+};
 
-const dismissed = ref(false)
+const dismissed = ref(false);
 
 onMounted(() => {
-  if (typeof sessionStorage !== 'undefined') {
-    dismissed.value = sessionStorage.getItem('topBannerDismissed') === '1'
+  if (typeof sessionStorage !== "undefined") {
+    dismissed.value = sessionStorage.getItem("topBannerDismissed") === "1";
   }
-})
+});
 
-const { data: banner } = await useFetch<Banner | null>('/api/public/banner', {
-  key: 'public-banner',
-})
+const { data: banner } = await useFetch<Banner | null>("/api/public/banner", {
+  key: "public-banner",
+});
 
-const visible = computed(() => !!banner.value && !dismissed.value)
-
-function dismiss() {
-  dismissed.value = true
-  if (typeof sessionStorage !== 'undefined') {
-    sessionStorage.setItem('topBannerDismissed', '1')
-  }
-}
+const visible = computed(() => !!banner.value && !dismissed.value);
 </script>
 
 <template>
-  <div
-    v-if="visible && banner"
-    class="bg-brand-300 text-white text-sm font-ui"
-  >
-    <div class="mx-auto flex max-w-7xl items-center justify-center gap-3 px-6 py-2.5 md:px-8 lg:px-10 relative">
-      <p class="text-center italic">
+  <div v-if="visible && banner" class="bg-slate-800 text-white text-sm font-ui">
+    <div
+      class="mx-auto flex max-w-7xl items-center justify-center gap-3 px-6 py-2.5 md:px-8 lg:px-10 relative"
+    >
+      <p class="text-center">
         {{ banner.text }}
         <NuxtLink
           v-if="banner.link"
@@ -43,14 +34,6 @@ function dismiss() {
           Selengkapnya
         </NuxtLink>
       </p>
-      <button
-        type="button"
-        class="absolute right-3 p-1 rounded-full opacity-80 hover:opacity-100 hover:bg-white/15 transition cursor-pointer"
-        aria-label="Tutup banner"
-        @click="dismiss"
-      >
-        <UIcon name="i-lucide-x" class="size-4" />
-      </button>
     </div>
   </div>
 </template>
