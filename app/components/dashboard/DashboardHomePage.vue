@@ -230,7 +230,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
       <UCard>
         <div class="space-y-2">
           <h1 class="text-2xl font-semibold">
-            {{ greeting }}, {{ auth.user.value?.name?.split(" ")[0] }}! 👋🏻
+            {{ greeting }}, {{ auth.user.value?.fullname?.split(" ")[0] }}! 👋🏻
           </h1>
           <p class="text-muted">
             Pantau status tulisanmu dan lanjutkan proses menulis dari sini.
@@ -403,7 +403,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
             <div>
               <p class="text-sm text-dimmed">Dashboard Reviewer</p>
               <h1 class="text-2xl font-semibold">
-                {{ greeting }}, {{ auth.user.value?.name?.split(" ")[0] }}
+                {{ greeting }}, {{ auth.user.value?.fullname?.split(" ")[0] }}
               </h1>
             </div>
             <UButton to="/dashboard/review" icon="i-ph-arrow-right">
