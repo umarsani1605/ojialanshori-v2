@@ -25,10 +25,10 @@ export default defineEventHandler(async (event) => {
 
   await sendEmail(event, {
     to: target.email,
-    toName: target.name,
+    toName: target.fullname,
     subject: 'Reset Password Akun Omah Ngaji Al-Anshori',
-    textContent: `Halo ${target.name},\n\nPassword akun kamu telah direset oleh administrator.\nPassword baru kamu: ${newPassword}\n\nSilakan login dengan password baru dan segera ganti password di halaman Profil.\n\nOmah Ngaji Al-Anshori`,
-    htmlContent: `<p>Halo <b>${target.name}</b>,</p><p>Password akun kamu telah direset oleh administrator.<br>Password baru kamu: <code>${newPassword}</code></p><p>Silakan login dengan password baru dan segera ganti password di halaman Profil.</p><p>Omah Ngaji Al-Anshori</p>`,
+    textContent: `Halo ${target.fullname},\n\nPassword akun kamu telah direset oleh administrator.\nPassword baru kamu: ${newPassword}\n\nSilakan login dengan password baru dan segera ganti password di halaman Profil.\n\nOmah Ngaji Al-Anshori`,
+    htmlContent: `<p>Halo <b>${target.fullname}</b>,</p><p>Password akun kamu telah direset oleh administrator.<br>Password baru kamu: <code>${newPassword}</code></p><p>Silakan login dengan password baru dan segera ganti password di halaman Profil.</p><p>Omah Ngaji Al-Anshori</p>`,
   })
 
   return { success: true, email: target.email }
