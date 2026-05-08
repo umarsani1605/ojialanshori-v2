@@ -102,12 +102,12 @@ function isActive(to: string) {
             <UButton variant="ghost" trailing-icon="i-ph-caret-down">
               <UAvatar
                 :src="auth.user.value?.avatar ?? undefined"
-                :alt="auth.user.value?.name ?? ''"
-                :text="getInitials(auth.user.value?.name)"
+                :alt="auth.user.value?.fullname ?? ''"
+                :text="getInitials(auth.user.value?.fullname)"
                 size="xs"
               />
               <span class="text-sm font-medium">{{
-                auth.user.value?.name
+                auth.user.value?.fullname
               }}</span>
             </UButton>
           </UDropdownMenu>
@@ -189,19 +189,18 @@ function isActive(to: string) {
               >
                 <UAvatar
                   :src="auth.user.value?.avatar ?? undefined"
-                  :alt="auth.user.value?.name ?? ''"
-                  :text="getInitials(auth.user.value?.name)"
+                  :alt="auth.user.value?.fullname ?? ''"
+                  :text="getInitials(auth.user.value?.fullname)"
                   size="sm"
                 />
                 <div class="min-w-0 flex-1">
                   <p class="truncate text-sm font-medium">
-                    {{ auth.user.value?.name }}
+                    {{ auth.user.value?.fullname }}
                   </p>
                   <p class="truncate text-xs text-dimmed">
                     {{ auth.user.value?.email }}
                   </p>
-                </div>
-              </div>
+                </div>              </div>
 
               <UButton
                 color="error"
