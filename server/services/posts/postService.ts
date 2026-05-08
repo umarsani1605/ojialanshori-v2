@@ -35,7 +35,7 @@ import type { Role } from '#server/utils/guard'
 
 export type Actor = {
   id: number
-  name: string
+  fullname: string
   email: string
   role: Role
 }
@@ -60,7 +60,7 @@ export async function listPostsForActor(db: Database, actor: Actor, status?: Pos
       orderBy: (posts, { desc }) => [desc(posts.updatedAt)],
       columns: { id: true, title: true, slug: true, status: true, updatedAt: true, publishedAt: true },
       with: {
-        author: { columns: { id: true, name: true } },
+        author: { columns: { id: true, fullname: true } },
         category: { columns: { id: true, name: true, type: true } },
       },
     })

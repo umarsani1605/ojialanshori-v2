@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { EditorToolbarItem } from "@nuxt/ui";
+import { toRef } from "vue";
+import type { EditorPost } from "~/composables/post-editor/types";
 
 const props = defineProps<{
   postId?: number;
   postType?: "berita" | "pena_santri";
+  initialPost?: EditorPost | null;
 }>();
 
 type RichTextEditor = {
@@ -40,18 +43,90 @@ const {
   showBeritaActions,
   showReviewActions,
   editorExtensions,
-  editorEmojiItems,
   promptEditorImageUpload,
   saveDraft,
   sendPost,
   approve,
   reject,
-} = usePostEditor({ postId: props.postId, postType: props.postType });
+} = usePostEditor({
+  postId: toRef(props, "postId"),
+  postType: props.postType,
+  initialPost: props.initialPost,
+});
+
+const toast = useToast();
+
+function handleEditorImagePrompt(editor: RichTextEditor) {
+  if (!import.meta.client || uploadingEditorImage.value) return;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/jpeg,image/png,image/webp";
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    input.remove();
+    if (!file) return;
+
+    try {
+      uploadingEditorImage.value = true;
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error("Ukuran gambar maksimal 2MB.");
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+      const response = await $fetch<{ url: string }>(
+        "/api/posts/upload/editor-image",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      editor
+        .chain()
+        .focus()
+        .setImage({
+          src: response.url,
+          alt: file.name.replace(/\.[^/.]+$/, ""),
+        })
+        .run();
+
+      toast.add({
+        title: "Gambar berhasil diunggah",
+        color: "success",
+        icon: "i-ph-check",
+      });
+    } catch (error) {
+      const msg =
+        (error as { data?: { message?: string } }).data?.message ??
+        (error as Error).message ??
+        "Terjadi kesalahan.";
+      toast.add({
+        title: "Gagal mengunggah gambar",
+        description: msg,
+        color: "error",
+        icon: "i-ph-warning-circle",
+      });
+    } finally {
+      uploadingEditorImage.value = false;
+    }
+  };
+  input.click();
+}
 
 const toolbarItems: EditorToolbarItem[][] = [
   [
-    { kind: "undo", icon: "i-ph-arrow-counter-clockwise", tooltip: { text: "Undo" } },
-    { kind: "redo", icon: "i-ph-arrow-clockwise", tooltip: { text: "Redo" } },
+    {
+      kind: "undo",
+      icon: "i-ph-arrow-bend-up-left",
+      tooltip: { text: "Undo" },
+    },
+    {
+      kind: "redo",
+      icon: "i-ph-arrow-bend-up-right",
+      tooltip: { text: "Redo" },
+    },
   ],
   [
     {
@@ -128,13 +203,8 @@ const toolbarItems: EditorToolbarItem[][] = [
     },
     {
       kind: "blockquote",
-      icon: "i-ph-code-block",
+      icon: "i-ph-quotes",
       tooltip: { text: "Blockquote" },
-    },
-    {
-      kind: "codeBlock",
-      icon: "i-ph-code-block",
-      tooltip: { text: "Code Block" },
     },
     {
       kind: "horizontalRule",
@@ -344,29 +414,6 @@ const editorHandlers = {
         </div>
 
         <div v-else class="flex h-full flex-col gap-5">
-          <!-- Rejection notice for santri viewing a rejected post -->
-          <UAlert
-            v-if="
-              !showReviewActions &&
-              currentStatus === 'rejected' &&
-              existingReviewNote
-            "
-            color="error"
-            variant="subtle"
-            icon="i-ph-warning"
-            title="Catatan Penolakan"
-          >
-            <template #description>
-              <p v-if="reviewerName" class="text-xs text-muted mb-2">
-                Direview oleh: <strong>{{ reviewerName }}</strong>
-              </p>
-              <div
-                class="prose prose-sm max-w-none"
-                v-html="existingReviewNote"
-              />
-            </template>
-          </UAlert>
-
           <!-- Title card -->
           <UCard :ui="{ body: 'p-5 md:p-6' }">
             <UFormField label="Judul" name="title" required>
@@ -384,7 +431,7 @@ const editorHandlers = {
           </UCard>
 
           <!-- Content card -->
-          <UCard class="flex-1" :ui="{ root: 'h-full', body: 'pt-2!' }">
+          <UCard class="flex-1" :ui="{ root: 'h-full' }">
             <template #header>
               <h2 class="text-sm font-semibold">Konten</h2>
             </template>
@@ -412,12 +459,6 @@ const editorHandlers = {
                   :items="toolbarItems"
                   size="md"
                 />
-                <UEditorEmojiMenu
-                  :editor="editor"
-                  :items="editorEmojiItems"
-                  :limit="48"
-                  :suggestion="{ allowedPrefixes: null }"
-                />
               </template>
             </UEditor>
 
@@ -438,52 +479,48 @@ const editorHandlers = {
           v-model="reviewNote"
           :disabled="!!loadingAction"
         />
+        <UCard
+          v-if="
+            !showReviewActions &&
+            currentStatus === 'rejected' &&
+            existingReviewNote
+          "
+        >
+          <template #header>
+            <div class="flex flex-col gap-2">
+              <p class="font-semibold">Catatan Penolakan</p>
+              <p class="text-sm text-muted">
+                Direview oleh: <strong>{{ reviewerName }}</strong>
+              </p>
+            </div>
+          </template>
+
+          <div class="space-y-3">
+            <div class="prose-rejection-note" v-html="existingReviewNote" />
+          </div>
+        </UCard>
 
         <!-- Fields card -->
         <UCard :ui="{ body: 'p-5' }">
-          <div class="space-y-5">
+          <div class="space-y-6">
             <UFormField label="Gambar Sampul" name="featuredImage" required>
               <div class="space-y-3">
                 <UFileUpload
                   :key="coverInputKey"
                   v-model="coverFile"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png"
                   variant="area"
+                  layout="grid"
                   size="md"
                   icon="i-ph-image-square"
                   label="Pilih gambar atau jatuhkan"
                   :highlight="!form.featuredImage"
-                  class="min-h-40 w-full"
+                  class="min-h-40 rounded-xl aspect-3/2"
                 />
-                <div
-                  v-if="form.featuredImage"
-                  class="overflow-hidden rounded-xl border border-default"
-                >
-                  <img
-                    :src="form.featuredImage"
-                    alt="Preview cover artikel"
-                    class="h-40 w-full object-cover"
-                  />
-                </div>
                 <div class="text-sm text-muted">
-                  Maksimal ukuran file 2MB. Direkomendasikan aspek rasio 3:2.
+                  JPG/PNG, maksimal ukuran file 2MB, direkomendasikan aspek
+                  rasio 3:2.
                 </div>
-              </div>
-            </UFormField>
-
-            <UFormField label="Ringkasan" name="excerpt">
-              <UTextarea
-                v-model="form.excerpt"
-                class="w-full"
-                :rows="4"
-                maxlength="200"
-                autoresize
-                placeholder="Tulis ringkasan singkat artikel..."
-              />
-              <div class="mt-2 flex justify-end">
-                <span class="text-sm text-muted"
-                  >{{ form.excerpt.length }}/200</span
-                >
               </div>
             </UFormField>
 

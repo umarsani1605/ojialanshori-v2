@@ -16,7 +16,7 @@ type AdminDashboardStats = {
     featuredImage: string | null;
     createdAt: string;
     author: {
-      name: string;
+      fullname: string;
     };
   }>;
 };
@@ -162,7 +162,7 @@ const statItems = computed(() => [
                 <p class="truncate font-medium group-hover:opacity-80">
                   {{ post.title }}
                 </p>
-                <p class="mt-0.5 text-sm">oleh {{ post.author.name }}</p>
+                <p class="mt-0.5 text-sm">oleh {{ post.author.fullname }}</p>
               </div>
             </NuxtLink>
           </li>

@@ -53,10 +53,12 @@ pnpm db:migrate    # jalankan migration
 
 ## Deployment
 
-Deploy ke Cloudflare Workers via NuxtHub:
+Untuk VPS biasa, pakai `node-server` + `nginx` reverse proxy. Lihat panduan di [deploy/vps-nginx.md](./deploy/vps-nginx.md).
+
+Build produksi:
 
 ```bash
-pnpm build
+NODE_OPTIONS=--max-old-space-size=4096 pnpm build
 ```
 
 ## Migration dari WordPress
@@ -64,9 +66,10 @@ pnpm build
 Script migrasi tersedia di folder `scripts/`:
 
 ```bash
-npx tsx scripts/migrate-content.ts   # Posts, Pages, Categories
-npx tsx scripts/migrate-users.ts     # Users & Password Hash
+npx tsx scripts/migrate-content.ts   # Public posts, pages, categories
+npx tsx scripts/migrate-users.ts     # Users & profile fields
 npx tsx scripts/migrate-media.ts     # Media ke Cloudflare R2
+pnpm seed:demo                      # Demo user reviewer + post semua status
 ```
 
 ## Struktur Folder

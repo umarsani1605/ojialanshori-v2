@@ -10,15 +10,18 @@ import { usePostEditorMetrics } from "./post-editor/usePostEditorMetrics";
 import { usePostEditorPresentation } from "./post-editor/usePostEditorPresentation";
 import type {
   LoadingAction,
+  PostDataSource,
   PostEditorForm,
   PostStatus,
+  ReactiveValue,
   PostType,
 } from "./post-editor/types";
 import { usePostEditorUploads } from "./post-editor/usePostEditorUploads";
 
 export function usePostEditor(opts: {
-  postId?: number;
+  postId?: ReactiveValue<number | undefined>;
   postType?: PostType;
+  initialPost?: PostDataSource;
 }) {
   const toast = useToast();
   const router = useRouter();
@@ -40,9 +43,23 @@ export function usePostEditor(opts: {
   const coverInputKey = ref(0);
   const coverFile = ref<File | null>(null);
 
+  async function initCoverFile(imageUrl: string | null) {
+    if (!imageUrl) return;
+    if (import.meta.server) return;
+    try {
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      const filename = imageUrl.split("/").pop()?.split("?")[0] ?? "cover.jpg";
+      coverFile.value = new File([blob], filename, { type: blob.type });
+    } catch {
+      // ignore
+    }
+  }
+
   const context = usePostEditorContext({
     postId: opts.postId,
     postType: opts.postType,
+    initialPost: opts.initialPost,
     form,
     state: {
       currentStatus,
@@ -51,6 +68,13 @@ export function usePostEditor(opts: {
     },
     toast,
   });
+
+  watch(
+    () => context.postData.value?.featuredImage,
+    (url) => {
+      void initCoverFile(url ?? null);
+    },
+  );
 
   const presentation = usePostEditorPresentation({
     categoriesRaw: context.categoriesRaw,

@@ -110,7 +110,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: "cloudflare-pages",
+    preset: "node-server",
   },
 
   vite: {

@@ -94,7 +94,11 @@ function isActive(to: string) {
             class="hidden shrink-0 md:block"
           >
             <UButton variant="light">
-              <UIcon name="i-ph-pen-nib" size="16" class="mr-1" />
+              <UIcon
+                name="i-ph-pencil-simple-line-duotone"
+                size="16"
+                class="mr-1"
+              />
               Tulis Artikel
             </UButton>
           </NuxtLink>
@@ -200,7 +204,8 @@ function isActive(to: string) {
                   <p class="truncate text-xs text-dimmed">
                     {{ auth.user.value?.email }}
                   </p>
-                </div>              </div>
+                </div>
+              </div>
 
               <UButton
                 color="error"

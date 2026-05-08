@@ -65,7 +65,7 @@ export async function listOwnPenaSantriPosts(
   const baseWhere = eq(schema.posts.authorId, authorId)
   const listWhere = status ? and(baseWhere, eq(schema.posts.status, status)) : baseWhere
 
-  const [rows, totalResult] = await Promise.all([
+  const [rows, statusCounts] = await Promise.all([
     db
       .select({
         id: schema.posts.id,
@@ -73,8 +73,10 @@ export async function listOwnPenaSantriPosts(
         slug: schema.posts.slug,
         excerpt: schema.posts.excerpt,
         featuredImage: schema.posts.featuredImage,
+        status: schema.posts.status,
         publishedAt: schema.posts.publishedAt,
         createdAt: schema.posts.createdAt,
+        updatedAt: schema.posts.updatedAt,
         categoryId: schema.posts.categoryId,
         categoryName: schema.categories.name,
         categorySlug: schema.categories.slug,

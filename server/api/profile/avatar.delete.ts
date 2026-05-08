@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   await removeProfileAvatar(db, actor.id)
 
   await setUserSession(event, {
-    user: { id: actor.id, name: actor.name, email: actor.email, role: actor.role, avatar: null },
+    user: { id: actor.id, fullname: actor.fullname, email: actor.email, role: actor.role, avatar: null },
   })
 
   return { success: true }

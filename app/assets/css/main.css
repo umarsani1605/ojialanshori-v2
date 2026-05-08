@@ -69,3 +69,29 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Prose styles for review notes */
+.prose-rejection-note {
+  @apply text-base text-muted max-w-none;
+}
+.prose-rejection-note p {
+  @apply my-1;
+}
+.prose-rejection-note ol li p {
+  display: inline;
+}
+.prose-rejection-note ol {
+  list-style-type: decimal;
+  list-style-position: inside;
+  margin: 0.25rem 0;
+  padding-left: 0.25rem;
+}
+.prose-rejection-note ol li {
+  padding-left: 0.25rem;
+}
+.prose-rejection-note ul {
+  @apply list-disc list-inside my-2 space-y-1;
+}
+.prose-rejection-note strong {
+  @apply font-semibold text-default;
+}

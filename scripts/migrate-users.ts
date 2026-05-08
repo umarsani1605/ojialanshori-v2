@@ -1,5 +1,5 @@
 /**
- * Migration script: Users & Password Hash
+ * Migration script: Users & Profile Fields
  * Source: WordPress MySQL database (via WP_MYSQL_URL)
  *
  * Usage:
@@ -25,8 +25,8 @@ import type { Role } from '../server/db/schema.js'
 const WP_TABLE_PREFIX = process.env.WP_TABLE_PREFIX ?? 'wp_'
 
 const ROLE_MAPPING: Record<string, Role> = {
-  administrator: 'superadmin',
-  editor: 'pengurus',
+  administrator: 'admin',
+  editor: 'admin',
   author: 'reviewer',
   contributor: 'santri',
   subscriber: 'santri',
@@ -59,11 +59,17 @@ function parseWpCapabilities(serialized: string | null): Role {
 interface WpUser {
   ID: number
   user_login: string
+  user_nicename: string
   user_email: string
   display_name: string
   user_pass: string
   user_registered: Date
-  capabilities: string | null
+}
+
+interface WpUserMetaRow {
+  user_id: number
+  meta_key: string
+  meta_value: string | null
 }
 
 interface WpPost {
@@ -90,37 +96,79 @@ async function main() {
   // ── 1. Fetch users from WP database ─────────────────────────────────────────
 
   console.log('\n👤 Fetching users from WordPress database...')
-  const [rows] = await wpConn.execute<mysql.RowDataPacket[]>(`
+  const [userRows] = await wpConn.execute<mysql.RowDataPacket[]>(`
     SELECT
       u.ID,
       u.user_login,
+      u.user_nicename,
       u.user_email,
       u.display_name,
       u.user_pass,
-      u.user_registered,
-      um.meta_value AS capabilities
+      u.user_registered
     FROM ${WP_TABLE_PREFIX}users u
-    LEFT JOIN ${WP_TABLE_PREFIX}usermeta um
-      ON u.ID = um.user_id AND um.meta_key = '${WP_TABLE_PREFIX}capabilities'
     ORDER BY u.ID
   `)
+  const [metaRows] = await wpConn.execute<mysql.RowDataPacket[]>(`
+    SELECT
+      user_id,
+      meta_key,
+      meta_value
+    FROM ${WP_TABLE_PREFIX}usermeta
+    ORDER BY user_id, umeta_id
+  `)
 
-  const wpUsers = rows as WpUser[]
+  const wpUsers = userRows as WpUser[]
+  const wpUserMetaRows = metaRows as WpUserMetaRow[]
+  const metaByUserId = new Map<number, Record<string, string | null>>()
+
+  for (const row of wpUserMetaRows) {
+    const meta = metaByUserId.get(row.user_id) ?? {}
+    meta[row.meta_key] = row.meta_value
+    metaByUserId.set(row.user_id, meta)
+  }
+
   console.log(`  Found ${wpUsers.length} users`)
 
   // ── 2. Insert users into new database ──────────────────────────────────────
 
   console.log('\n📥 Migrating users...')
   const roleCounts: Record<Role, number> = {
-    superadmin: 0,
-    pengurus: 0,
+    admin: 0,
     reviewer: 0,
     santri: 0,
   }
-  let ok = 0, err = 0, skipped = 0
+  let inserted = 0, updated = 0, err = 0, skipped = 0
+
+  function pickMeta(meta: Record<string, string | null>, keys: string[]): string | null {
+    for (const key of keys) {
+      const value = meta[key]
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim()
+      }
+    }
+    return null
+  }
+
+  function parseYear(value: string | null): number | null {
+    if (!value) return null
+    const parsed = Number(value)
+    if (!Number.isInteger(parsed) || parsed < 1901 || parsed > 2155) return null
+    return parsed
+  }
 
   for (const wpUser of wpUsers) {
-    const role = parseWpCapabilities(wpUser.capabilities)
+    const meta = metaByUserId.get(wpUser.ID) ?? {}
+    const capabilitiesKey = `${WP_TABLE_PREFIX}capabilities`
+    const role = parseWpCapabilities(meta[capabilitiesKey] ?? null)
+    const fullname = wpUser.display_name.trim() || wpUser.user_nicename.trim() || wpUser.user_login.trim()
+    const nickname = pickMeta(meta, ['nickname']) ?? (wpUser.user_nicename.trim() || null)
+    const bio = pickMeta(meta, ['description'])
+    const phone = pickMeta(meta, ['phone', 'phone_number', 'mobile', 'mobile_phone', 'whatsapp', 'whatsapp_number'])
+    const university = pickMeta(meta, ['university', 'kampus', 'asal_kampus'])
+    const faculty = pickMeta(meta, ['faculty', 'fakultas'])
+    const major = pickMeta(meta, ['major', 'jurusan', 'prodi', 'program_studi'])
+    const yearEnrolled = parseYear(pickMeta(meta, ['year_enrolled', 'angkatan_oji', 'angkatan_masuk_oji', 'angkatan']))
+    const yearStudy = parseYear(pickMeta(meta, ['year_study', 'angkatan_kuliah']))
 
     try {
       // Check if email already exists (idempotent)
@@ -129,19 +177,42 @@ async function main() {
       })
 
       if (existing) {
+        if (existing.passwordType === 'phpass') {
+          await db.update(schema.users).set({
+            fullname,
+            nickname,
+            bio,
+            role,
+            phone,
+            university,
+            faculty,
+            major,
+            yearEnrolled,
+            yearStudy,
+            isActive: true,
+          }).where(eq(schema.users.id, existing.id))
+          updated++
+        }
         mapping[wpUser.ID] = existing.id
         skipped++
         continue
       }
 
       const result = await db.insert(schema.users).values({
-        name: wpUser.display_name || wpUser.user_login,
-        username: wpUser.user_login,
+        fullname,
+        nickname,
+        bio,
         email: wpUser.user_email,
-        passwordHash: wpUser.user_pass,
+        password: wpUser.user_pass,
         passwordType: 'phpass',
         role,
-        avatar: null,
+        avatar: null, // avatar migration intentionally deferred
+        phone,
+        university,
+        faculty,
+        major,
+        yearEnrolled,
+        yearStudy,
         isActive: true,
         createdAt: new Date(wpUser.user_registered),
         updatedAt: new Date(wpUser.user_registered),
@@ -149,45 +220,15 @@ async function main() {
 
       mapping[wpUser.ID] = result[0].insertId
       roleCounts[role]++
-      ok++
+      inserted++
     }
     catch (e) {
-      // Handle duplicate username (user_login must be unique)
-      const error = e as NodeJS.ErrnoException & { code?: string }
-      if (error.code === 'ER_DUP_ENTRY' && error.message.includes('username')) {
-        // Append numeric suffix to make username unique
-        const uniqueUsername = `${wpUser.user_login}_${wpUser.ID}`
-        try {
-          const result = await db.insert(schema.users).values({
-            name: wpUser.display_name || wpUser.user_login,
-            username: uniqueUsername,
-            email: wpUser.user_email,
-            passwordHash: wpUser.user_pass,
-            passwordType: 'phpass',
-            role,
-            avatar: null,
-            isActive: true,
-            createdAt: new Date(wpUser.user_registered),
-            updatedAt: new Date(wpUser.user_registered),
-          })
-          mapping[wpUser.ID] = result[0].insertId
-          console.warn(`  ⚠️  Duplicate username "${wpUser.user_login}" → renamed to "${uniqueUsername}"`)
-          roleCounts[role]++
-          ok++
-        }
-        catch (e2) {
-          console.error(`  ❌ User "${wpUser.user_login}" (${wpUser.user_email}):`, (e2 as Error).message)
-          err++
-        }
-      }
-      else {
-        console.error(`  ❌ User "${wpUser.user_login}" (${wpUser.user_email}):`, error.message)
-        err++
-      }
+      console.error(`  ❌ User "${wpUser.user_login}" (${wpUser.user_email}):`, (e as Error).message)
+      err++
     }
   }
 
-  console.log(`  ✅ ${ok} inserted  ⏭️  ${skipped} skipped  ❌ ${err} errors`)
+  console.log(`  ✅ ${inserted} inserted  🔄 ${updated} updated  ⏭️  ${skipped} skipped  ❌ ${err} errors`)
   console.log('  Role breakdown:')
   for (const [role, count] of Object.entries(roleCounts)) {
     if (count > 0) console.log(`    ${role}: ${count}`)
@@ -251,7 +292,7 @@ async function main() {
   // ── Summary ─────────────────────────────────────────────────────────────────
 
   console.log('\n🎉 User migration complete!')
-  console.log(`   Users migrated : ${ok}`)
+  console.log(`   Users migrated : ${inserted + updated}`)
   console.log(`   Posts remapped : ${remapped}`)
 
   await wpConn.end()

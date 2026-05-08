@@ -13,7 +13,7 @@ type QueuePost = {
   title: string;
   slug: string;
   updatedAt: string;
-  author: { id: number; name: string };
+  author: { id: number; fullname: string };
   category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
 };
 
@@ -46,7 +46,7 @@ const columns: TableColumn<QueuePost>[] = [
   {
     accessorKey: "author",
     header: "Penulis",
-    cell: ({ row }) => h("span", {}, row.original.author.name),
+    cell: ({ row }) => h("span", {}, row.original.author.fullname),
   },
   {
     accessorKey: "category",

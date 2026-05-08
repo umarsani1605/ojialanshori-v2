@@ -227,16 +227,30 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
 <template>
   <UContainer class="space-y-6">
     <template v-if="auth.isSantri.value">
-      <UCard>
-        <div class="space-y-2">
-          <h1 class="text-2xl font-semibold">
+      <div
+        class="relative overflow-hidden rounded-xl bg-linear-to-r from-[#5DDB71] to-[#8BEC9B] p-8 text-white"
+      >
+        <img
+          src="/images/greetings-left.png"
+          class="absolute top-0 left-0 h-full object-contain pointer-events-none"
+          alt=""
+        />
+        <img
+          src="/images/greetings-right.png"
+          class="absolute top-0 right-0 h-full object-contain pointer-events-none"
+          alt=""
+        />
+
+        <div class="relative z-10 space-y-2">
+          <h1 class="text-2xl font-bold">
             {{ greeting }}, {{ auth.user.value?.fullname?.split(" ")[0] }}! 👋🏻
           </h1>
-          <p class="text-muted">
-            Pantau status tulisanmu dan lanjutkan proses menulis dari sini.
+          <p class="text-white/90">
+            Langkah kecil menuju karya besar. Tuliskan ide-idemu dan pantau
+            progress artikelmu!
           </p>
         </div>
-      </UCard>
+      </div>
 
       <template v-if="santriLoading">
         <UCard>
@@ -265,38 +279,6 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
       </template>
 
       <template v-else>
-        <UAlert
-          v-if="showApprovedAlert"
-          color="success"
-          variant="subtle"
-          :title="`Artikel '${latestApprovedPost?.title}' sudah disetujui`"
-          description="Artikel tersebut sudah masuk ke listing publik."
-        >
-          <template #actions>
-            <UButton color="success" variant="link" @click="openApprovedPost()">
-              Lihat
-            </UButton>
-          </template>
-        </UAlert>
-
-        <UAlert
-          v-else-if="(santriStats?.rejected ?? 0) > 0"
-          color="warning"
-          variant="subtle"
-          :title="`${santriStats?.rejected} artikel perlu diperbaiki`"
-          description="Buka daftar artikel untuk melihat catatan reviewer."
-        >
-          <template #actions>
-            <UButton
-              to="/dashboard/posts?status=rejected"
-              color="warning"
-              variant="link"
-            >
-              Buka daftar
-            </UButton>
-          </template>
-        </UAlert>
-
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <AppStatCard
             v-for="item in statItems"
@@ -307,6 +289,25 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
             :color="item.color"
           />
         </div>
+
+        <UAlert
+          v-if="(santriStats?.rejected ?? 0) > 0"
+          color="warning"
+          variant="subtle"
+          :title="`${santriStats?.rejected} Artikel Perlu Diperbaiki!`"
+          description="Cek halaman detail artikel untuk melihat catatan dari reviewer."
+        >
+          <template #actions>
+            <UButton
+              to="/dashboard/posts?status=rejected"
+              size="md"
+              color="warning"
+              variant="outline"
+            >
+              Buka daftar
+            </UButton>
+          </template>
+        </UAlert>
 
         <div
           class="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
@@ -337,7 +338,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
               <DashboardFeedPostCard
                 v-for="post in recentMyPosts"
                 :key="post.id"
-                :to="`/dashboard/posts/${post.id}`"
+                :to="`/dashboard/posts/${post.id}/edit`"
                 :title="post.title"
                 :category="post.categoryName ?? 'Belum pilih kategori'"
                 :date="post.publishedAt ?? post.createdAt"

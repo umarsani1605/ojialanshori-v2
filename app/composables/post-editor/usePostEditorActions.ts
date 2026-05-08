@@ -1,8 +1,11 @@
+import { computed, toValue } from "vue";
+
 import type {
   LoadingAction,
   PostEditorForm,
   PostStatus,
   PostType,
+  ReactiveValue,
   RouterApi,
   ToastApi,
 } from "./types";
@@ -12,7 +15,7 @@ type MaybeRef<T> = { value: T };
 type UsePostEditorActionsOptions = {
   authCanReview: MaybeRef<boolean>;
   effectivePostType: MaybeRef<PostType | undefined>;
-  postId?: number;
+  postId?: ReactiveValue<number | undefined>;
   form: PostEditorForm;
   reviewNote: MaybeRef<string>;
   loadingAction: MaybeRef<LoadingAction>;
@@ -34,6 +37,8 @@ type DraftResponse = {
 };
 
 export function usePostEditorActions(options: UsePostEditorActionsOptions) {
+  const resolvedPostId = computed(() => toValue(options.postId));
+
   async function saveDraft({
     silent = false,
     redirectAfterCreate = true,
@@ -43,8 +48,9 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
 
     try {
       const payload = buildPayload(options.form);
-      const response = options.postId
-        ? await $fetch<DraftResponse>(`/api/posts/${options.postId}`, {
+      const postId = resolvedPostId.value;
+      const response = postId
+        ? await $fetch<DraftResponse>(`/api/posts/${postId}`, {
             method: "PATCH",
             body: payload,
           })
@@ -56,7 +62,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
       options.currentStatus.value = response.status;
       options.existingReviewNote.value = null;
 
-      if (!options.postId && redirectAfterCreate) {
+      if (!postId && redirectAfterCreate) {
         await options.router.replace(getEditPath(options.effectivePostType.value, response.id));
       }
 
@@ -136,12 +142,13 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
   }
 
   async function approve() {
-    if (!options.postId) return;
+    const postId = resolvedPostId.value;
+    if (!postId) return;
 
     options.loadingAction.value = "approve";
 
     try {
-      await $fetch(`/api/posts/${options.postId}/approve`, {
+      await $fetch(`/api/posts/${postId}/approve`, {
         method: "POST",
         body: buildPayload(options.form),
       });
@@ -165,7 +172,8 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
   }
 
   async function reject() {
-    if (!options.postId) return;
+    const postId = resolvedPostId.value;
+    if (!postId) return;
 
     if (!options.reviewNote.value.trim()) {
       options.toast.add({
@@ -179,7 +187,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
     options.loadingAction.value = "reject";
 
     try {
-      await $fetch(`/api/posts/${options.postId}/reject`, {
+      await $fetch(`/api/posts/${postId}/reject`, {
         method: "POST",
         body: {
           reviewNote: options.reviewNote.value,
@@ -206,7 +214,8 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
   }
 
   async function resolveDraftId(payload: ReturnType<typeof buildPayload>) {
-    if (options.postId) return options.postId;
+    const postId = resolvedPostId.value;
+    if (postId) return postId;
 
     return saveDraft({
       silent: true,

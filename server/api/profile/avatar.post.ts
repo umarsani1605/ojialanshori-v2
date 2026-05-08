@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
   await setProfileAvatar(db, actor.id, publicPath)
 
   await setUserSession(event, {
-    user: { id: actor.id, name: actor.name, email: actor.email, role: actor.role, avatar: publicPath },
+    user: { id: actor.id, fullname: actor.fullname, email: actor.email, role: actor.role, avatar: publicPath },
   })
 
   return { avatar: publicPath }

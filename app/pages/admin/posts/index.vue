@@ -16,7 +16,7 @@ type AdminPost = {
   status: "draft" | "pending_review" | "published" | "rejected";
   updatedAt: string;
   publishedAt: string | null;
-  author: { id: number; name: string };
+  author: { id: number; fullname: string };
   category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
 };
 
@@ -125,7 +125,7 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "author",
     header: "Penulis",
-    cell: ({ row }) => h("span", {}, row.original.author.name),
+    cell: ({ row }) => h("span", {}, row.original.author.fullname),
   },
   {
     accessorKey: "status",

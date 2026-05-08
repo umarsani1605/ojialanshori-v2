@@ -20,11 +20,11 @@ export default defineEventHandler(async (event) => {
     subject: `Artikel kamu telah dipublish — ${result.postTitle}`,
     htmlContent: `
       <p>Halo ${result.authorName},</p>
-      <p>Artikel kamu <strong>${result.postTitle}</strong> telah disetujui dan dipublish oleh <strong>${actor.name}</strong>.</p>
+      <p>Artikel kamu <strong>${result.postTitle}</strong> telah disetujui dan dipublish oleh <strong>${actor.fullname}</strong>.</p>
       <p>Baca di: <a href="https://ojialanshori.com/post/${result.postSlug}">ojialanshori.com/post/${result.postSlug}</a></p>
       <p>Terimakasih sudah berkontribusi!</p>
     `,
-    textContent: `Halo ${result.authorName},\n\nArtikel "${result.postTitle}" telah dipublish oleh ${actor.name}.\n\nhttps://ojialanshori.com/post/${result.postSlug}`,
+    textContent: `Halo ${result.authorName},\n\nArtikel "${result.postTitle}" telah dipublish oleh ${actor.fullname}.\n\nhttps://ojialanshori.com/post/${result.postSlug}`,
   })
 
   return { id: result.id, status: result.status, publishedAt: result.publishedAt }

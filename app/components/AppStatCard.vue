@@ -30,12 +30,16 @@ const iconClass: Record<Color, string> = {
 </script>
 
 <template>
-  <UCard>
-    <div class="flex items-center gap-4">
+  <UCard
+    :ui="{
+      body: 'p-4!',
+    }"
+  >
+    <div class="flex items-center gap-6">
       <div
         :class="[
           bgClass[color],
-          'size-12 rounded-xl flex items-center justify-center shrink-0',
+          'size-12 rounded-lg flex items-center justify-center shrink-0',
         ]"
       >
         <UIcon :name="icon" :class="['size-6', iconClass[color]]" />

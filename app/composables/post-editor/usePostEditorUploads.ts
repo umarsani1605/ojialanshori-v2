@@ -32,8 +32,6 @@ export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
       });
 
       options.form.featuredImage = response.path;
-      options.coverInputKey.value += 1;
-      options.coverFile.value = null;
       options.toast.add({
         title: "Cover berhasil diunggah",
         color: "success",

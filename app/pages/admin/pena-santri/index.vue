@@ -69,7 +69,7 @@ const authorOptions = computed<SelectItem[]>(() => {
   const authors = new Map<number, string>();
 
   for (const post of posts.value) {
-    authors.set(post.author.id, post.author.name);
+    authors.set(post.author.id, post.author.fullname);
   }
 
   return [

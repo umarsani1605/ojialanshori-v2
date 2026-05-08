@@ -20,9 +20,12 @@ export function usePostEditorMetrics(form: MetricsForm) {
     plainTextContent.value ? plainTextContent.value.split(" ").length : 0,
   );
 
-  const readingTime = computed(() =>
-    wordCount.value > 0 ? Math.ceil(wordCount.value / 200) : 0,
-  );
+  const readingTime = computed(() => {
+    const wordsPerMinute = 225;
+    const noOfWords = plainTextContent.value.split(/\s+/g).length;
+    const minutes = Math.ceil(noOfWords / wordsPerMinute);
+    return minutes;
+  });
 
   return {
     titleCount,

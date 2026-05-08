@@ -4,7 +4,7 @@ export type Role = 'admin' | 'reviewer' | 'santri'
 
 type SessionUser = {
   id: number
-  name: string
+  fullname: string
   email: string
   role: Role
   avatar?: string | null

@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from "vue";
+import type { ComputedRef, MaybeRefOrGetter, Ref } from "vue";
 
 export type PostType = "berita" | "pena_santri";
 export type PostStatus =
@@ -30,14 +30,16 @@ export type EditorPost = {
   categoryId: number | null;
   status: PostStatus;
   reviewNote: string | null;
-  author?: { id: number; name: string; email: string };
-  reviewer?: { id: number; name: string } | null;
+  author?: { id: number; fullname: string; email: string };
+  reviewer?: { id: number; fullname: string } | null;
   category?: {
     id: number;
     name: string;
     type: PostType;
   } | null;
 };
+
+export type PostDataSource = EditorPost | null | undefined;
 
 export type CategoryItem = {
   id: number;
@@ -49,6 +51,8 @@ export type CategoryOption = {
   label: string;
   value: number;
 };
+
+export type ReactiveValue<T> = MaybeRefOrGetter<T>;
 
 export type PostEditorForm = {
   title: string;

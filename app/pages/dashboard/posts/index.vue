@@ -36,10 +36,9 @@ watch(activeStatus, () => {
   page.value = 1;
 });
 
-const { data, status, refresh } = await useFetch<ListResponse>(
-  "/api/posts",
-  { key: "dashboard-santri-posts" },
-);
+const { data, status, refresh } = await useFetch<ListResponse>("/api/posts", {
+  key: "dashboard-santri-posts",
+});
 
 const allPosts = computed(() => data.value?.data ?? []);
 
@@ -84,7 +83,7 @@ const tabs = computed(() => [
     slot: "pending_review",
   },
   {
-    label: "Rejected",
+    label: "Ditolak",
     value: "rejected",
     slot: "rejected",
   },
@@ -104,7 +103,7 @@ function getStatusLabel(status: PostRow["status"]) {
   return {
     published: "Terbit",
     pending_review: "Dalam Ulasan",
-    rejected: "Rejected",
+    rejected: "Ditolak",
     draft: "Draft",
   }[status];
 }
@@ -231,7 +230,10 @@ const columns: TableColumn<PostRow>[] = [
 
 <template>
   <UContainer>
-    <UCard class="flex flex-col min-h-[800px]" :ui="{ body: 'pt-4! flex-1 flex flex-col' }">
+    <UCard
+      class="flex flex-col min-h-[800px]"
+      :ui="{ body: 'pt-4! flex-1 flex flex-col' }"
+    >
       <template #header>
         <div class="flex items-center justify-between gap-3">
           <h1 class="text-xl font-semibold">Artikel Saya</h1>
@@ -279,7 +281,10 @@ const columns: TableColumn<PostRow>[] = [
 
   <UModal v-model:open="deleteModalOpen" title="Hapus Artikel?">
     <template #body>
-      <p class="text-sm text-slate-600">Tindakan ini tidak bisa dibatalkan.</p>
+      <p class="text-sm">
+        Apakah kamu yakin ingin menghapus artikel ini? Tindakan ini tidak bisa
+        dibatalkan.
+      </p>
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">

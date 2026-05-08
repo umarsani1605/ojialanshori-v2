@@ -75,7 +75,7 @@ async function save() {
       </UButton>
     </div>
 
-    <div class="max-w-3xl space-y-6">
+    <div class="space-y-6">
       <div
         class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
@@ -88,7 +88,7 @@ async function save() {
       </div>
 
       <!-- Home Template Form -->
-      <UCard v-if="template === 'home'">
+      <UCard v-if="template === 'home'" :ui="{ body: 'max-w-3xl ' }">
         <div class="space-y-6">
           <div class="space-y-6">
             <div class="text-lg font-semibold">Header Utama</div>
