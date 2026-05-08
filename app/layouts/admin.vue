@@ -106,7 +106,7 @@ const navLinks = computed<NavigationMenuItem[]>(() => {
   if (auth.isAdmin.value) {
     items.push(
       {
-        label: "Halaman Statis",
+        label: "Halaman Publik",
         icon: "i-ph-article-duotone",
         to: "/admin/pages",
         active: isActive("/admin/pages"),
