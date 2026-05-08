@@ -64,6 +64,27 @@
       "when": 1778204895163,
       "tag": "0008_lonely_kinsey_walden",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1778221654744,
+      "tag": "0009_worried_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1778230205748,
+      "tag": "0010_faithful_rachel_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1778237158296,
+      "tag": "0011_tense_dagger",
+      "breakpoints": true
     }
   ]
 }

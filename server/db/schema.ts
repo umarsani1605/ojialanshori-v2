@@ -27,17 +27,19 @@ export type CategoryType = 'berita' | 'pena_santri'
 
 export const users = mysqlTable('users', {
   id: int().primaryKey().autoincrement(),
-  name: varchar({ length: 255 }).notNull(),
-  username: varchar({ length: 100 }).notNull().unique(),
+  fullname: varchar({ length: 255 }).notNull(),
+  nickname: varchar({ length: 100 }),
   email: varchar({ length: 255 }).notNull().unique(),
-  passwordHash: varchar({ length: 255 }).notNull(),
+  password: varchar({ length: 255 }).notNull(),
   passwordType: mysqlEnum(['phpass', 'bcrypt']).notNull().default('phpass'),
   role: mysqlEnum(['admin', 'reviewer', 'santri']).notNull().default('santri'),
   avatar: varchar({ length: 500 }),
+  bio: text(),
   phone: varchar({ length: 20 }),
   university: varchar({ length: 255 }),
   faculty: varchar({ length: 255 }),
   major: varchar({ length: 255 }),
+  yearStudy: year('year_study'),
   yearEnrolled: year('year_enrolled'),
   isActive: boolean().notNull().default(true),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -123,10 +125,9 @@ export const testimonials = mysqlTable('testimonials', {
   name: varchar({ length: 255 }).notNull(),
   title: varchar({ length: 255 }).notNull(),
   content: text().notNull(),
-  avatar: varchar({ length: 500 }),
+  avatarPath: varchar('avatar_path', { length: 500 }),
   order: int().notNull().default(0),
-  isActive: boolean().notNull().default(true),
-  createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const faqs = mysqlTable('faqs', {
@@ -134,9 +135,8 @@ export const faqs = mysqlTable('faqs', {
   question: varchar({ length: 500 }).notNull(),
   answer: text().notNull(),
   order: int().notNull().default(0),
-  isActive: boolean().notNull().default(true),
-  createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+  createdAt: timestamp('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
 })
 
 export const tags = mysqlTable('tags', {
