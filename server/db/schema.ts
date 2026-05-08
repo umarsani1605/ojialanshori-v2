@@ -10,6 +10,7 @@ import {
   year,
   mysqlEnum,
   primaryKey,
+  json,
   type AnyMySqlColumn,
 } from 'drizzle-orm/mysql-core'
 import { relations, sql } from 'drizzle-orm'
@@ -71,10 +72,27 @@ export const posts = mysqlTable('posts', {
 export const pages = mysqlTable('pages', {
   id: int().primaryKey().autoincrement(),
   title: varchar({ length: 255 }).notNull(),
-  slug: varchar({ length: 255 }).notNull().unique(),
-  content: longtext().notNull(),
-  status: mysqlEnum(['draft', 'published']).notNull().default('draft'),
+  template: varchar({ length: 100 }).notNull().unique(), // e.g., 'home', 'profile'
+  meta: json().notNull().default('{}'), // JSON storage for page-specific content
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+})
+
+export const activities = mysqlTable('activities', {
+  id: int().primaryKey().autoincrement(),
+  title: varchar({ length: 255 }).notNull(),
+  description: text(),
+  imagePath: varchar({ length: 500 }).notNull(),
+  order: int().notNull().default(0),
+  createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const boardMembers = mysqlTable('board_members', {
+  id: int().primaryKey().autoincrement(),
+  name: varchar({ length: 255 }).notNull(),
+  role: varchar({ length: 100 }).notNull(), // e.g., 'Penasehat', 'Pengajar'
+  avatarPath: varchar({ length: 500 }),
+  order: int().notNull().default(0),
+  createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const gallery = mysqlTable('gallery', {
@@ -118,12 +136,6 @@ export const faqs = mysqlTable('faqs', {
   order: int().notNull().default(0),
   isActive: boolean().notNull().default(true),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
-})
-
-export const contacts = mysqlTable('contacts', {
-  key: varchar({ length: 100 }).primaryKey(),
-  value: text().notNull(),
   updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
 })
 
