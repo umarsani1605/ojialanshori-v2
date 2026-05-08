@@ -104,21 +104,58 @@ const navLinks = computed<NavigationMenuItem[]>(() => {
     },
   ];
   if (auth.isAdmin.value) {
+    items.splice(4, 0, {
+      label: "Users",
+      icon: "i-ph-users-duotone",
+      to: "/admin/users",
+      active: isActive("/admin/users"),
+      onSelect: () => {
+        open.value = false;
+      },
+    });
+
     items.push(
       {
-        label: "Halaman Publik",
-        icon: "i-ph-article-duotone",
-        to: "/admin/pages",
-        active: isActive("/admin/pages"),
+        label: "Kegiatan",
+        icon: "i-ph-calendar-check-duotone",
+        to: "/admin/activities",
+        active: isActive("/admin/activities"),
         onSelect: () => {
           open.value = false;
         },
       },
       {
-        label: "Users",
-        icon: "i-ph-users-duotone",
-        to: "/admin/users",
-        active: isActive("/admin/users"),
+        label: "Pengurus",
+        icon: "i-ph-users-three-duotone",
+        to: "/admin/board-members",
+        active: isActive("/admin/board-members"),
+        onSelect: () => {
+          open.value = false;
+        },
+      },
+      {
+        label: "Testimonial",
+        icon: "i-ph-quotes-duotone",
+        to: "/admin/testimonials",
+        active: isActive("/admin/testimonials"),
+        onSelect: () => {
+          open.value = false;
+        },
+      },
+      {
+        label: "FAQ",
+        icon: "i-ph-question-duotone",
+        to: "/admin/faqs",
+        active: isActive("/admin/faqs"),
+        onSelect: () => {
+          open.value = false;
+        },
+      },
+      {
+        label: "Halaman Publik",
+        icon: "i-ph-article-duotone",
+        to: "/admin/pages",
+        active: isActive("/admin/pages"),
         onSelect: () => {
           open.value = false;
         },
