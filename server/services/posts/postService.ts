@@ -252,7 +252,7 @@ export async function approvePostForActor(
     status: 'published' as const,
     publishedAt: now,
     authorEmail: post.author.email,
-    authorName: post.author.name,
+    authorName: post.author.fullname,
     postTitle: displayTitle,
     postSlug: post.slug,
   }
@@ -296,9 +296,9 @@ export async function rejectPostForActor(
     id: postId,
     status: 'rejected' as const,
     authorEmail: post.author.email,
-    authorName: post.author.name,
+    authorName: post.author.fullname,
     postTitle: displayTitle,
-    reviewerName: actor.name,
+    reviewerName: actor.fullname,
     reviewNote,
   }
 }
