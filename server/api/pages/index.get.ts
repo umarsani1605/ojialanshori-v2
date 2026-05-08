@@ -1,12 +1,16 @@
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
-import { listPagesForAdmin } from '#server/services/pages/pageService'
 
 export default defineEventHandler(async (event) => {
   requireAdmin(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
-  return { data: await listPagesForAdmin(useDb(event)) }
+  const db = useDb(event)
+  const allPages = await db.query.pages.findMany({
+    orderBy: (pages, { desc }) => [desc(pages.updatedAt)],
+  })
+
+  return { data: allPages }
 })
