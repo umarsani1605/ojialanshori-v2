@@ -1,4 +1,4 @@
-import { and, desc, eq, like, or } from 'drizzle-orm'
+import { and, desc, eq, like, or, sql } from 'drizzle-orm'
 import type { MySql2Database } from 'drizzle-orm/mysql2'
 
 import * as schema from '#server/db/schema'
@@ -13,6 +13,7 @@ type UserFilters = {
   phone?: string
   university?: string
   yearEnrolled?: number
+  yearStudy?: number
 }
 
 export async function listUsers(db: Database, filters: UserFilters = {}) {
@@ -24,31 +25,36 @@ export async function listUsers(db: Database, filters: UserFilters = {}) {
   if (filters.search) {
     const pattern = `%${filters.search}%`
     const searchCondition = or(
-      like(schema.users.name, pattern),
+      like(schema.users.fullname, pattern),
+      like(schema.users.nickname, pattern),
       like(schema.users.email, pattern),
-      like(schema.users.username, pattern),
+      like(schema.users.university, pattern),
+      like(sql`cast(${schema.users.yearEnrolled} as char)`, pattern),
     )
     if (searchCondition) conditions.push(searchCondition)
   }
   if (filters.phone) conditions.push(like(schema.users.phone, `%${filters.phone}%`))
   if (filters.university) conditions.push(like(schema.users.university, `%${filters.university}%`))
   if (filters.yearEnrolled) conditions.push(eq(schema.users.yearEnrolled, filters.yearEnrolled))
+  if (filters.yearStudy) conditions.push(eq(schema.users.yearStudy, filters.yearStudy))
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
   return db
     .select({
       id: schema.users.id,
-      name: schema.users.name,
-      username: schema.users.username,
+      fullname: schema.users.fullname,
+      nickname: schema.users.nickname,
       email: schema.users.email,
       role: schema.users.role,
       avatar: schema.users.avatar,
+      bio: schema.users.bio,
       phone: schema.users.phone,
       university: schema.users.university,
       faculty: schema.users.faculty,
       major: schema.users.major,
       yearEnrolled: schema.users.yearEnrolled,
+      yearStudy: schema.users.yearStudy,
       isActive: schema.users.isActive,
       createdAt: schema.users.createdAt,
     })
@@ -60,31 +66,29 @@ export async function listUsers(db: Database, filters: UserFilters = {}) {
 export async function findUserById(db: Database, userId: number) {
   return db.query.users.findFirst({
     where: eq(schema.users.id, userId),
-    columns: { passwordHash: false, passwordType: false },
+    columns: { password: false, passwordType: false },
   })
 }
 
-export async function findUserByEmailOrUsername(
+export async function findUserByEmail(
   db: Database,
   email: string,
-  username: string,
 ) {
   return db.query.users.findFirst({
-    where: or(eq(schema.users.email, email), eq(schema.users.username, username)),
+    where: eq(schema.users.email, email),
   })
 }
 
-export async function findUserByEmailOrUsernameExcluding(
+export async function findUserByEmailExcluding(
   db: Database,
   email: string,
-  username: string,
   excludeId: number,
 ) {
   return db.query.users.findFirst({
-    where: (user, { and, eq: eqFn, ne, or: orFn }) =>
+    where: (user, { and, eq: eqFn, ne }) =>
       and(
         ne(user.id, excludeId),
-        orFn(eqFn(user.email, email), eqFn(user.username, username)),
+        eqFn(user.email, email),
       ),
   })
 }

@@ -8,7 +8,7 @@ export type Database = MySql2Database<typeof schema>
 export async function findProfileById(db: Database, userId: number) {
   return db.query.users.findFirst({
     where: eq(schema.users.id, userId),
-    columns: { passwordHash: false, passwordType: false },
+    columns: { password: false, passwordType: false },
   })
 }
 

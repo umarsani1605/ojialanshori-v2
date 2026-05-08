@@ -23,7 +23,6 @@ export type NormalizedListOptions = {
   type: CategoryType
   category?: string | null
   subcategory?: string | null
-  author?: string | null
   page: number
   limit: number
 }
@@ -52,7 +51,6 @@ export async function getPublicFaqs(db: Database) {
     order: schema.faqs.order,
   })
     .from(schema.faqs)
-    .where(eq(schema.faqs.isActive, true))
     .orderBy(schema.faqs.order, schema.faqs.id)
 }
 
@@ -62,11 +60,10 @@ export async function getPublicTestimonials(db: Database) {
     name: schema.testimonials.name,
     title: schema.testimonials.title,
     content: schema.testimonials.content,
-    avatarPath: schema.testimonials.avatar,
+    avatarPath: schema.testimonials.avatarPath,
     order: schema.testimonials.order,
   })
     .from(schema.testimonials)
-    .where(eq(schema.testimonials.isActive, true))
     .orderBy(schema.testimonials.order, schema.testimonials.id)
 }
 
@@ -83,7 +80,7 @@ export async function getPublicPostBySlug(db: Database, slug: string) {
     categorySlug: schema.categories.slug,
     categoryName: schema.categories.name,
     categoryType: schema.categories.type,
-    authorName: schema.users.name,
+    authorName: schema.users.fullname,
   })
     .from(schema.posts)
     .innerJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
@@ -122,10 +119,6 @@ export async function getPublicPostListing(db: Database, options: NormalizedList
     conditions.push(inArray(schema.posts.categoryId, resolved.categoryIds))
   }
 
-  if (options.author) {
-    conditions.push(eq(schema.users.username, options.author))
-  }
-
   const where = and(...conditions)
 
   const [rows, totalResult] = await Promise.all([
@@ -140,8 +133,7 @@ export async function getPublicPostListing(db: Database, options: NormalizedList
       categoryId: schema.categories.id,
       categorySlug: schema.categories.slug,
       categoryName: schema.categories.name,
-      authorName: schema.users.name,
-      authorUsername: schema.users.username,
+      authorName: schema.users.fullname,
     })
       .from(schema.posts)
       .innerJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
@@ -176,7 +168,6 @@ export async function getPublicPostListing(db: Database, options: NormalizedList
         categoryName: row.categoryName,
         categoryParentSlug: parentSlug,
         authorName: row.authorName,
-        authorUsername: row.authorUsername,
       }
     }),
     pagination: {
