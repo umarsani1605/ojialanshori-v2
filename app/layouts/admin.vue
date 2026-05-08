@@ -6,7 +6,7 @@ const route = useRoute();
 const auth = useAuth();
 const open = ref(false);
 
-const userInitial = computed(() => auth.user.value?.name?.charAt(0) ?? "?");
+const userInitial = computed(() => auth.user.value?.fullname?.charAt(0) ?? "?");
 const userRole = computed(() => auth.user.value?.role ?? "");
 const roleLabel = computed(
   () => roleLabelMap[userRole.value] ?? userRole.value,
@@ -25,14 +25,6 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => [
   ],
   [
     {
-      label: "Profil",
-      icon: "i-ph-user-circle-duotone",
-      slot: "profile" as const,
-      onSelect: () => navigateTo(auth.profilePath.value),
-    },
-  ],
-  [
-    {
       label: "Keluar",
       icon: "i-ph-sign-out-duotone",
       color: "error" as const,
@@ -46,133 +38,103 @@ function isActive(to: string, exact = false) {
   return route.path === to || route.path.startsWith(`${to}/`);
 }
 
-const navLinks = computed<NavigationMenuItem[]>(() => {
-  const items: NavigationMenuItem[] = [
-    {
-      label: "Beranda",
-      icon: "i-ph-house-duotone",
-      to: "/admin",
-      active: isActive("/admin", true),
-      onSelect: () => {
-        open.value = false;
-      },
+const mainLinks = computed<NavigationMenuItem[]>(() => [
+  {
+    label: "Dashboard",
+    icon: "i-ph-house-duotone",
+    to: "/admin",
+    active: isActive("/admin", true),
+    onSelect: () => {
+      open.value = false;
     },
-    {
-      label: "Berita",
-      icon: "i-ph-newspaper-duotone",
-      to: "/admin/berita",
-      active: isActive("/admin/berita"),
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-    {
-      label: "Pena Santri",
-      icon: "i-ph-pen-nib-duotone",
-      to: "/admin/pena-santri",
-      active: isActive("/admin/pena-santri"),
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-    {
-      label: "Kategori",
-      icon: "i-ph-tag-duotone",
-      to: "/admin/categories",
-      active: isActive("/admin/categories"),
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-    {
-      label: "Galeri",
-      icon: "i-ph-images-duotone",
-      to: "/admin/gallery",
-      active: isActive("/admin/gallery"),
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-    {
-      label: "Banner",
-      icon: "i-ph-megaphone-duotone",
-      to: "/admin/banner",
-      active: isActive("/admin/banner"),
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-  ];
-  if (auth.isAdmin.value) {
-    items.splice(4, 0, {
-      label: "Users",
-      icon: "i-ph-users-duotone",
-      to: "/admin/users",
-      active: isActive("/admin/users"),
-      onSelect: () => {
-        open.value = false;
-      },
-    });
+  },
+  ...(auth.isAdmin.value
+    ? [
+        {
+          label: "Daftar Santri",
+          icon: "i-ph-users-duotone",
+          to: "/admin/users",
+          active: isActive("/admin/users"),
+          onSelect: () => {
+            open.value = false;
+          },
+        },
+      ]
+    : []),
+]);
 
-    items.push(
-      {
-        label: "Kegiatan",
-        icon: "i-ph-calendar-check-duotone",
-        to: "/admin/activities",
-        active: isActive("/admin/activities"),
-        onSelect: () => {
-          open.value = false;
+const contentLinks = computed<NavigationMenuItem[]>(() => [
+  {
+    label: "Berita",
+    icon: "i-ph-newspaper-duotone",
+    to: "/admin/berita",
+    active: isActive("/admin/berita"),
+    onSelect: () => {
+      open.value = false;
+    },
+  },
+  {
+    label: "Pena Santri",
+    icon: "i-ph-pen-nib-duotone",
+    to: "/admin/pena-santri",
+    active: isActive("/admin/pena-santri"),
+    onSelect: () => {
+      open.value = false;
+    },
+  },
+  {
+    label: "Kategori",
+    icon: "i-ph-tag-duotone",
+    to: "/admin/categories",
+    active: isActive("/admin/categories"),
+    onSelect: () => {
+      open.value = false;
+    },
+  },
+]);
+
+const settingsLinks = computed<NavigationMenuItem[]>(() => [
+  {
+    label: "Galeri",
+    icon: "i-ph-images-duotone",
+    to: "/admin/gallery",
+    active: isActive("/admin/gallery"),
+    onSelect: () => {
+      open.value = false;
+    },
+  },
+  {
+    label: "Pengumuman",
+    icon: "i-ph-megaphone-duotone",
+    to: "/admin/banner",
+    active: isActive("/admin/banner"),
+    onSelect: () => {
+      open.value = false;
+    },
+  },
+  ...(auth.isAdmin.value
+    ? [
+        {
+          label: "Halaman Publik",
+          icon: "i-ph-article-duotone",
+          to: "/admin/pages",
+          active: isActive("/admin/pages"),
+          onSelect: () => {
+            open.value = false;
+          },
         },
-      },
-      {
-        label: "Pengurus",
-        icon: "i-ph-users-three-duotone",
-        to: "/admin/board-members",
-        active: isActive("/admin/board-members"),
-        onSelect: () => {
-          open.value = false;
+        {
+          label: "Pengaturan Website",
+          icon: "i-ph-gear-duotone",
+          to: "/admin/settings",
+          active: isActive("/admin/settings"),
+          onSelect: () => {
+            open.value = false;
+          },
         },
-      },
-      {
-        label: "Testimonial",
-        icon: "i-ph-quotes-duotone",
-        to: "/admin/testimonials",
-        active: isActive("/admin/testimonials"),
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-      {
-        label: "FAQ",
-        icon: "i-ph-question-duotone",
-        to: "/admin/faqs",
-        active: isActive("/admin/faqs"),
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-      {
-        label: "Halaman Publik",
-        icon: "i-ph-article-duotone",
-        to: "/admin/pages",
-        active: isActive("/admin/pages"),
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-      {
-        label: "Pengaturan",
-        icon: "i-ph-gear-duotone",
-        to: "/admin/settings",
-        active: isActive("/admin/settings"),
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-    );
-  }
-  return items;
-});
+      ]
+    : []),
+]);
 
 const navMenuUi = {
   item: "relative px-4 after:absolute after:left-0 after:top-1/2 after:-translate-y-1/2 after:w-1 after:h-[90%] after:rounded-r-full after:transition-colors has-[[aria-current=page]]:after:bg-primary",
@@ -227,13 +189,49 @@ watch(
       </template>
 
       <template #default="{ collapsed }">
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="navLinks"
-          :ui="navMenuUi"
-          orientation="vertical"
-          tooltip
-        />
+        <div :class="collapsed ? '' : 'space-y-6'">
+          <div>
+            <UNavigationMenu
+              :collapsed="collapsed"
+              :items="mainLinks"
+              :ui="navMenuUi"
+              orientation="vertical"
+              tooltip
+            />
+          </div>
+
+          <div>
+            <p
+              v-if="!collapsed"
+              class="px-6.5 mb-2 font-medium text-xs text-dimmed tracking-wider"
+            >
+              Konten
+            </p>
+            <UNavigationMenu
+              :collapsed="collapsed"
+              :items="contentLinks"
+              :ui="navMenuUi"
+              orientation="vertical"
+              tooltip
+            />
+          </div>
+
+          <div>
+            <p
+              v-if="!collapsed"
+              class="px-6.5 mb-2 font-medium text-xs text-dimmed"
+            >
+              Pengaturan
+            </p>
+            <UNavigationMenu
+              :collapsed="collapsed"
+              :items="settingsLinks"
+              :ui="navMenuUi"
+              orientation="vertical"
+              tooltip
+            />
+          </div>
+        </div>
       </template>
 
       <template #footer="{ collapsed }">
@@ -249,6 +247,7 @@ watch(
       id="main"
       :ui="{
         body: 'p-2 sm:p-6',
+        footer: 'relative',
       }"
     >
       <template #header>
@@ -271,7 +270,7 @@ watch(
                 </div>
                 <span
                   class="hidden sm:block text-sm font-medium text-gray-700"
-                  >{{ auth.user.value?.name }}</span
+                  >{{ auth.user.value?.fullname }}</span
                 >
                 <UIcon
                   name="i-ph-caret-down-duotone"
@@ -290,7 +289,7 @@ watch(
                   </div>
                   <div class="flex flex-col">
                     <span class="font-medium text-gray-800 text-sm">{{
-                      auth.user.value?.name
+                      auth.user.value?.fullname
                     }}</span>
                     <span class="text-xs text-gray-400">{{
                       auth.user.value?.email
@@ -305,6 +304,13 @@ watch(
 
       <template #body>
         <slot />
+      </template>
+      <template #footer>
+        <div
+          class="flex items-center justify-center h-12 text-slate-400 text-sm mt-auto"
+        >
+          Omah Ngaji Al-Anshori © {{ new Date().getFullYear() }}
+        </div>
       </template>
     </UDashboardPanel>
   </UDashboardGroup>

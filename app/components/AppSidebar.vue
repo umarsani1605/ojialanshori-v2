@@ -63,7 +63,7 @@ const profileLink = {
   to: "/admin/profile",
 };
 
-const userInitial = computed(() => auth.user.value?.name?.charAt(0) ?? "?");
+const userInitial = computed(() => auth.user.value?.fullname?.charAt(0) ?? "?");
 const userRole = computed(() => auth.user.value?.role ?? "");
 const roleLabel = computed(
   () => roleLabelMap[userRole.value] ?? userRole.value,
