@@ -79,7 +79,7 @@ const statItems = computed(() => [
   <div class="space-y-6">
     <div>
       <h2 class="text-xl font-semibold">
-        {{ greeting }}, {{ auth.user.value?.name?.split(" ")[0] }}!
+        {{ greeting }}, {{ auth.user.value?.fullname?.split(" ")[0] }}!
       </h2>
       <p class="mt-1 text-sm text-muted">
         Selamat datang di area admin Omah Ngaji Al-Anshori.

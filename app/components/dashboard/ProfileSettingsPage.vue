@@ -261,8 +261,8 @@ async function deleteAvatar() {
             <div class="relative shrink-0">
               <UAvatar
                 :src="user?.avatar ?? undefined"
-                :alt="user?.name ?? ''"
-                :text="getInitials(user?.name)"
+                :alt="user?.fullname ?? ''"
+                :text="getInitials(user?.fullname)"
                 size="3xl"
               />
               <UButton
@@ -281,7 +281,7 @@ async function deleteAvatar() {
             </div>
 
             <div class="min-w-0">
-              <p class="truncate text-lg font-semibold">{{ user?.name }}</p>
+              <p class="truncate text-lg font-semibold">{{ user?.fullname }}</p>
               <p class="truncate text-sm text-muted">{{ user?.email }}</p>
             </div>
           </div>
