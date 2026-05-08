@@ -1,0 +1,18 @@
+import { boardMembers } from '#server/db/schema'
+import { useDb } from '#server/utils/db'
+import { requireAdmin } from '#server/utils/guard'
+
+export default defineEventHandler(async (event) => {
+  requireAdmin(event)
+  const body = await readBody(event)
+  const db = useDb(event)
+  
+  const [result] = await db.insert(boardMembers).values({
+    name: body.name,
+    role: body.role,
+    avatarPath: body.avatarPath,
+    order: body.order || 0
+  })
+  
+  return { data: { id: result.insertId } }
+})
