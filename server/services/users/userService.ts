@@ -18,6 +18,7 @@ type UserFilters = {
   phone?: string
   university?: string
   yearEnrolled?: number
+  yearStudy?: number
 }
 
 export async function listUsersForAdmin(db: Database, actor: Actor, filters: UserFilters = {}) {
@@ -31,8 +32,9 @@ export async function createUser(
   db: Database,
   actor: Actor,
   input: {
-    name: string
-    username: string
+    fullname: string
+    nickname: string | null
+    bio: string | null
     email: string
     role: Role
     password: string
@@ -42,6 +44,7 @@ export async function createUser(
     faculty: string | null
     major: string | null
     yearEnrolled: number | null
+    yearStudy: number | null
     isActive: boolean
   },
 ) {
@@ -49,20 +52,18 @@ export async function createUser(
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
-  const existing = await findUserByEmailOrUsername(db, input.email, input.username)
+  const existing = await findUserByEmail(db, input.email)
   if (existing) {
-    if (existing.email === input.email) {
-      throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
-    }
-    throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
+    throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
   }
 
-  const passwordHash = await hashUserPassword(input.password)
+  const hashedPassword = await hashUserPassword(input.password)
   const newId = await insertUser(db, {
-    name: input.name,
-    username: input.username,
+    fullname: input.fullname,
+    nickname: input.nickname,
+    bio: input.bio,
     email: input.email,
-    passwordHash,
+    password: hashedPassword,
     passwordType: 'bcrypt',
     role: input.role,
     avatar: input.avatar,
@@ -71,6 +72,7 @@ export async function createUser(
     faculty: input.faculty,
     major: input.major,
     yearEnrolled: input.yearEnrolled,
+    yearStudy: input.yearStudy,
     isActive: input.isActive,
   })
 
@@ -82,8 +84,9 @@ export async function patchUser(
   actor: Actor,
   userId: number,
   updates: {
-    name?: string
-    username?: string
+    fullname?: string
+    nickname?: string | null
+    bio?: string | null
     email?: string
     role?: Role
     isActive?: boolean
@@ -93,6 +96,7 @@ export async function patchUser(
     faculty?: string | null
     major?: string | null
     yearEnrolled?: number | null
+    yearStudy?: number | null
   },
 ) {
   if (!canManageUsers(actor.role)) {
@@ -102,19 +106,15 @@ export async function patchUser(
   const user = await findUserById(db, userId)
   if (!user) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
 
-  if (updates.email || updates.username) {
-    const existing = await findUserByEmailOrUsernameExcluding(
+  if (updates.email) {
+    const existing = await findUserByEmailExcluding(
       db,
-      updates.email ?? user.email,
-      updates.username ?? user.username,
+      updates.email,
       userId,
     )
 
     if (existing) {
-      if (existing.email === (updates.email ?? user.email)) {
-        throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
-      }
-      throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
+      throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
     }
   }
 
@@ -135,8 +135,8 @@ export async function resetUserPassword(
   const user = await findUserById(db, userId)
   if (!user) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
 
-  const passwordHash = await hashUserPassword(newPassword)
-  await updateUser(db, userId, { passwordHash, passwordType: 'bcrypt' })
+  const hashedPassword = await hashUserPassword(newPassword)
+  await updateUser(db, userId, { password: hashedPassword, passwordType: 'bcrypt' })
 
   return { success: true }
 }

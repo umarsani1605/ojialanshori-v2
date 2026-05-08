@@ -11,14 +11,16 @@ import {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type ProfileUpdateInput = {
-  name?: string
-  username?: string
+  fullname?: string
+  nickname?: string | null
+  bio?: string | null
   email?: string
   phone?: string | null
   university?: string | null
   faculty?: string | null
   major?: string | null
   yearEnrolled?: number | null
+  yearStudy?: number | null
 }
 
 export async function getOwnProfile(db: Database, userId: number) {
@@ -34,16 +36,13 @@ export async function updateOwnProfile(
 ) {
   const updates: Partial<typeof schema.users.$inferInsert> = {}
 
-  if (body.name !== undefined) {
-    const name = body.name.trim()
-    if (!name) throw createError({ statusCode: 400, message: 'Nama tidak boleh kosong.' })
-    updates.name = name
+  if (body.fullname !== undefined) {
+    const fullname = body.fullname.trim()
+    if (!fullname) throw createError({ statusCode: 400, message: 'Nama tidak boleh kosong.' })
+    updates.fullname = fullname
   }
-  if (body.username !== undefined) {
-    const username = body.username.trim()
-    if (!username) throw createError({ statusCode: 400, message: 'Username tidak boleh kosong.' })
-    updates.username = username
-  }
+  if ('nickname' in body) updates.nickname = body.nickname ?? null
+  if ('bio' in body) updates.bio = body.bio ?? null
   if (body.email !== undefined) {
     const email = body.email.trim().toLowerCase()
     if (!EMAIL_REGEX.test(email)) {
@@ -58,31 +57,29 @@ export async function updateOwnProfile(
   if ('yearEnrolled' in body) {
     const yr = body.yearEnrolled
     if (yr !== null && yr !== undefined && (yr < 1901 || yr > 2155)) {
-      throw createError({ statusCode: 400, message: 'Tahun angkatan tidak valid.' })
+      throw createError({ statusCode: 400, message: 'Tahun angkatan masuk tidak valid.' })
     }
     updates.yearEnrolled = yr ?? null
+  }
+  if ('yearStudy' in body) {
+    const yr = body.yearStudy
+    if (yr !== null && yr !== undefined && (yr < 1901 || yr > 2155)) {
+      throw createError({ statusCode: 400, message: 'Tahun angkatan kuliah tidak valid.' })
+    }
+    updates.yearStudy = yr ?? null
   }
 
   if (Object.keys(updates).length === 0) {
     throw createError({ statusCode: 400, message: 'Tidak ada perubahan untuk disimpan.' })
   }
 
-  if (updates.email || updates.username) {
-    const duplicates = [
-      updates.email ? eq(schema.users.email, updates.email) : undefined,
-      updates.username ? eq(schema.users.username, updates.username) : undefined,
-    ].filter((c): c is NonNullable<typeof c> => !!c)
-
-    const orCondition = duplicates.length > 1 ? or(...duplicates) : duplicates[0]!
+  if (updates.email) {
     const duplicate = await db.query.users.findFirst({
-      where: and(ne(schema.users.id, userId), orCondition),
+      where: and(ne(schema.users.id, userId), eq(schema.users.email, updates.email)),
     })
 
     if (duplicate) {
-      if (updates.email && duplicate.email === updates.email) {
-        throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
-      }
-      throw createError({ statusCode: 400, message: 'Username sudah terdaftar.' })
+      throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
     }
   }
 
@@ -115,13 +112,13 @@ export async function updateOwnPassword(
   const credentials = await findUserCredentials(db, userId)
   if (!credentials) throw createError({ statusCode: 404, message: 'User tidak ditemukan.' })
 
-  const valid = await verifyUserPassword(oldPassword, credentials.passwordHash, credentials.passwordType)
+  const valid = await verifyUserPassword(oldPassword, credentials.password, credentials.passwordType)
   if (!valid) {
     throw createError({ statusCode: 400, message: 'Password lama tidak sesuai.' })
   }
 
   const newHash = await hashUserPassword(newPassword)
-  await updateProfile(db, userId, { passwordHash: newHash, passwordType: 'bcrypt' })
+  await updateProfile(db, userId, { password: newHash, passwordType: 'bcrypt' })
 
   return { success: true }
 }

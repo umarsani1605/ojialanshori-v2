@@ -3,6 +3,13 @@ import {
   updateUserPasswordHash,
   type Database,
 } from '#server/repositories/auth/authRepository'
+import {
+  findUserByEmailOrUsername,
+  findUserById,
+  findUserByUsername,
+  insertUser,
+} from '#server/repositories/users/userRepository'
+import { hashUserPassword, verifyUserPassword } from '#server/utils/password'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_SEC = 15 * 60
@@ -11,6 +18,12 @@ type LoginInput = {
   identifier: string
   password: string
   remember: boolean
+}
+
+type RegisterInput = {
+  name: string
+  email: string
+  password: string
 }
 
 type RateLimitRecord = { count: number; firstAt: number }
@@ -55,18 +68,17 @@ export async function verifyLogin(
     })
   }
 
-  const isEmail = input.identifier.includes('@')
-  const user = await findUserForAuth(db, input.identifier, isEmail)
+  const user = await findUserForAuth(db, input.identifier)
 
   if (!user) {
     await recordFailedLoginAttempt(rateLimitKey)
-    throw createError({ statusCode: 401, message: 'Username atau password salah.' })
+    throw createError({ statusCode: 401, message: 'Email atau password salah.' })
   }
 
-  const isValid = await verifyUserPassword(input.password, user.passwordHash, user.passwordType)
+  const isValid = await verifyUserPassword(input.password, user.password, user.passwordType)
   if (!isValid) {
     await recordFailedLoginAttempt(rateLimitKey)
-    throw createError({ statusCode: 401, message: 'Username atau password salah.' })
+    throw createError({ statusCode: 401, message: 'Email atau password salah.' })
   }
 
   if (!user.isActive) {
@@ -75,7 +87,7 @@ export async function verifyLogin(
 
   if (user.passwordType === 'phpass') {
     const newHash = await hashUserPassword(input.password)
-    updateUserPasswordHash(db, user.id, newHash).catch(() => {})
+    updateUserPassword(db, user.id, newHash).catch(() => {})
   }
 
   await kv.removeItem(rateLimitKey)
@@ -83,11 +95,43 @@ export async function verifyLogin(
   return {
     user: {
       id: user.id,
-      name: user.name,
+      fullname: user.fullname,
       email: user.email,
       role: user.role,
       avatar: user.avatar ?? null,
     },
     maxAge: input.remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24,
   }
+}
+
+export async function registerSantri(
+  db: Database,
+  input: RegisterInput,
+) {
+  const existing = await findUserByEmail(db, input.email)
+  if (existing) {
+    throw createError({ statusCode: 400, message: 'Email sudah terdaftar.' })
+  }
+
+  const hashedPassword = await hashUserPassword(input.password)
+
+  const newUserId = await insertUser(db, {
+    fullname: input.name,
+    email: input.email,
+    password: hashedPassword,
+    passwordType: 'bcrypt',
+    role: 'santri',
+    avatar: null,
+    nickname: null,
+    bio: null,
+    phone: null,
+    university: null,
+    faculty: null,
+    major: null,
+    yearEnrolled: null,
+    yearStudy: null,
+    isActive: false,
+  })
+
+  return findUserById(db, newUserId)
 }
