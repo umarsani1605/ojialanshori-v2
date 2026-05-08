@@ -35,3 +35,24 @@ describe('POST /api/auth/login', () => {
     await expect(handler({} as never)).rejects.toMatchObject({ statusCode: 400 })
   })
 })
+
+describe('POST /api/auth/register', () => {
+  it('rejects registration when password confirmation does not match', async () => {
+    vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+    vi.stubGlobal('readValidatedBody', (_event: unknown, validator: (v: unknown) => unknown) =>
+      Promise.resolve(validator({
+        name: 'Umar',
+        email: 'umar@example.com',
+        password: 'rahasia123',
+        passwordConfirmation: 'beda12345',
+      })))
+    vi.stubGlobal('createError', (input: Record<string, unknown>) => input)
+
+    const handler = (await import('~~/server/api/auth/register.post')).default
+
+    await expect(handler({} as never)).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'Konfirmasi kata sandi tidak cocok.',
+    })
+  })
+})

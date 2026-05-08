@@ -13,7 +13,6 @@ export default defineEventHandler(async (event) => {
     question: body.question,
     answer: body.answer,
     order: body.order,
-    isActive: body.isActive,
     updatedAt: new Date()
   }).where(eq(faqs.id, id))
   

@@ -27,12 +27,16 @@ export default defineEventHandler(async (event) => {
 
   if (existingPage) {
     await db.update(pages)
-      .set({ meta: body.meta, updatedAt: new Date() })
+      .set({ 
+        title: body.title || existingPage.title,
+        meta: body.meta, 
+        updatedAt: new Date() 
+      })
       .where(eq(pages.template, template))
   } else {
     // If it didn't exist in DB yet, create it.
     await db.insert(pages).values({
-      title: template, // Default title to template name
+      title: body.title || template,
       template: template,
       meta: body.meta,
     })

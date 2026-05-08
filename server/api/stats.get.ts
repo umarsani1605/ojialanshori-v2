@@ -19,25 +19,27 @@ export default defineEventHandler(async (event) => {
   const isAdmin = user.role === 'admin'
 
   if (isAdmin) {
-    const [publishedResult, pendingResult, userCountResult, galleryResult, recentPending] = await Promise.all([
+    const [totalPostsResult, publishedResult, pendingResult, santriCountResult, galleryResult, recentPending] = await Promise.all([
+      db.select({ count: count() }).from(schema.posts),
       db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'published')),
       db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'pending_review')),
-      db.select({ count: count() }).from(schema.users),
+      db.select({ count: count() }).from(schema.users).where(eq(schema.users.role, 'santri')),
       db.select({ count: count() }).from(schema.gallery),
       db.query.posts.findMany({
         where: eq(schema.posts.status, 'pending_review'),
         orderBy: [desc(schema.posts.createdAt)],
         limit: 5,
-        columns: { id: true, title: true, slug: true, createdAt: true },
+        columns: { id: true, title: true, slug: true, createdAt: true, featuredImage: true },
         with: { author: { columns: { name: true } } },
       }),
     ])
 
     return {
       type: 'global' as const,
+      totalPosts: totalPostsResult[0]?.count ?? 0,
       publishedPosts: publishedResult[0]?.count ?? 0,
       pendingReviewPosts: pendingResult[0]?.count ?? 0,
-      totalUsers: userCountResult[0]?.count ?? 0,
+      totalSantri: santriCountResult[0]?.count ?? 0,
       totalGallery: galleryResult[0]?.count ?? 0,
       recentPendingPosts: recentPending,
     }

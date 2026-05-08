@@ -13,9 +13,8 @@ export default defineEventHandler(async (event) => {
     name: body.name,
     title: body.title,
     content: body.content,
-    avatar: body.avatar,
-    order: body.order,
-    isActive: body.isActive
+    avatarPath: body.avatarPath,
+    order: body.order
   }).where(eq(testimonials.id, id))
   
   return { success: true }

@@ -106,6 +106,17 @@ const UButton = resolveComponent("UButton");
 
 const columns: TableColumn<AdminPost>[] = [
   {
+    id: "index",
+    header: "No",
+    size: 56,
+    cell: ({ row }) =>
+      h(
+        "span",
+        { class: "text-sm tabular-nums text-muted" },
+        String((page.value - 1) * PAGE_SIZE + row.index + 1),
+      ),
+  },
+  {
     accessorKey: "title",
     header: "Judul",
     cell: ({ row }) =>
@@ -155,7 +166,8 @@ const columns: TableColumn<AdminPost>[] = [
       h("div", { class: "flex gap-1 justify-end" }, [
         h(UButton, {
           size: "sm",
-          variant: "ghost",
+          color: "neutral",
+          variant: "light",
           icon: "i-ph-pencil-simple",
           to:
             row.original.category?.type === "berita"
@@ -164,7 +176,7 @@ const columns: TableColumn<AdminPost>[] = [
         }),
         h(UButton, {
           size: "sm",
-          variant: "ghost",
+          variant: "light",
           color: "error",
           icon: "i-ph-trash",
           onClick: () => confirmDelete(row.original.id),

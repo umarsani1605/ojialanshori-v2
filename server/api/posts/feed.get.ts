@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
       createdAt: schema.posts.createdAt,
       categoryName: schema.categories.name,
       categoryType: schema.categories.type,
-      authorName: schema.users.name,
+      authorName: schema.users.fullname,
     })
     .from(schema.posts)
     .innerJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))

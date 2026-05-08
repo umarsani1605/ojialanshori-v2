@@ -10,8 +10,7 @@ export default defineEventHandler(async (event) => {
   const [result] = await db.insert(faqs).values({
     question: body.question,
     answer: body.answer,
-    order: body.order || 0,
-    isActive: body.isActive ?? true
+    order: body.order || 0
   })
   
   return { data: { id: result.insertId } }

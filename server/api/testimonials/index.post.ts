@@ -11,9 +11,8 @@ export default defineEventHandler(async (event) => {
     name: body.name,
     title: body.title,
     content: body.content,
-    avatar: body.avatar,
-    order: body.order || 0,
-    isActive: body.isActive ?? true
+    avatarPath: body.avatarPath,
+    order: body.order || 0
   })
   
   return { data: { id: result.insertId } }
