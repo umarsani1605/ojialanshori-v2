@@ -23,7 +23,7 @@ const validate = (data: typeof state) => {
   if (!data.identifier) {
     errors.push({
       name: "identifier",
-      message: "Email atau username wajib diisi",
+      message: "Email wajib diisi",
     });
   }
   if (!data.password) {
@@ -95,12 +95,12 @@ async function onSubmit() {
           class="space-y-4"
           @submit="onSubmit"
         >
-          <UFormField name="identifier" label="Username atau Email">
+          <UFormField name="identifier" label="Email">
             <UInput
               v-model="state.identifier"
               placeholder="admin@ojialanshori.com"
-              type="text"
-              autocomplete="username"
+              type="email"
+              autocomplete="email"
               :disabled="loading"
               class="w-full"
             />
@@ -155,10 +155,11 @@ async function onSubmit() {
           </UButton>
         </UForm>
 
-        <!-- Register link (disabled until registration flow exists) -->
         <p class="text-sm text-center text-slate-500 mt-6">
           Belum punya akun?
-          <span>Daftar akun santri</span>
+          <NuxtLink to="/daftar" class="font-medium text-primary hover:underline">
+            Daftar akun santri
+          </NuxtLink>
         </p>
       </div>
     </div>
