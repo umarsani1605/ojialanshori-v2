@@ -23,6 +23,7 @@ export type NormalizedListOptions = {
   type: CategoryType
   category?: string | null
   subcategory?: string | null
+  author?: string | null
   page: number
   limit: number
 }

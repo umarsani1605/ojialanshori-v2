@@ -1,7 +1,6 @@
 <script setup lang="ts" generic="T">
 import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { PaginationState } from "@tanstack/table-core";
 
 const props = withDefaults(
   defineProps<{

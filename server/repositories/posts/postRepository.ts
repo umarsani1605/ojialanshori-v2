@@ -65,15 +65,26 @@ export async function listOwnPenaSantriPosts(
   const baseWhere = eq(schema.posts.authorId, authorId)
   const listWhere = status ? and(baseWhere, eq(schema.posts.status, status)) : baseWhere
 
-  const [rows, statusCounts] = await Promise.all([
+  const [rows, totalResult] = await Promise.all([
     db
       .select({
-        ...schema.posts,
+        id: schema.posts.id,
+        title: schema.posts.title,
+        slug: schema.posts.slug,
+        excerpt: schema.posts.excerpt,
+        featuredImage: schema.posts.featuredImage,
+        publishedAt: schema.posts.publishedAt,
+        createdAt: schema.posts.createdAt,
+        categoryId: schema.posts.categoryId,
         categoryName: schema.categories.name,
+        categorySlug: schema.categories.slug,
         categoryType: schema.categories.type,
+        authorId: schema.users.id,
+        authorFullname: schema.users.fullname,
       })
       .from(schema.posts)
       .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+      .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
       .where(listWhere)
       .orderBy(desc(schema.posts.createdAt)),
     db
