@@ -10,9 +10,9 @@ export async function findPostById(db: Database, postId: number) {
   return db.query.posts.findFirst({
     where: eq(schema.posts.id, postId),
     with: {
-      author: { columns: { id: true, name: true, email: true } },
+      author: { columns: { id: true, fullname: true, email: true } },
       category: { columns: { id: true, name: true, type: true } },
-      reviewer: { columns: { id: true, name: true } },
+      reviewer: { columns: { id: true, fullname: true } },
     },
   })
 }
@@ -22,7 +22,7 @@ export async function findPostByIdForSantri(db: Database, postId: number, author
     where: and(eq(schema.posts.id, postId), eq(schema.posts.authorId, authorId)),
     with: {
       category: { columns: { id: true, name: true, type: true } },
-      reviewer: { columns: { id: true, name: true } },
+      reviewer: { columns: { id: true, fullname: true } },
     },
   })
 }
@@ -39,7 +39,7 @@ export async function listAllPosts(db: Database) {
       publishedAt: true,
     },
     with: {
-      author: { columns: { id: true, name: true } },
+      author: { columns: { id: true, fullname: true } },
       category: { columns: { id: true, name: true, type: true } },
     },
   })
@@ -51,7 +51,7 @@ export async function listPostsForReview(db: Database) {
     orderBy: [desc(schema.posts.updatedAt)],
     columns: { id: true, title: true, slug: true, status: true, updatedAt: true },
     with: {
-      author: { columns: { id: true, name: true } },
+      author: { columns: { id: true, fullname: true } },
       category: { columns: { id: true, name: true, type: true } },
     },
   })
