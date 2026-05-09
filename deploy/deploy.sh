@@ -26,8 +26,11 @@ rsync -az --delete \
   .output/ \
   "${SSH_HOST}:${APP_DIR}/.output/"
 
-echo "==> Install sharp di VPS (linux binary)…"
-ssh "${SSH_HOST}" "cd ${APP_DIR}/.output/server && npm install --omit=dev --no-package-lock --silent sharp"
+echo "==> Install server dependencies di VPS…"
+ssh "${SSH_HOST}" "cd ${APP_DIR}/.output/server && pnpm install --prod --no-lockfile --silent"
+
+echo "==> Reinstall sharp di VPS (linux binary, ganti darwin build)…"
+ssh "${SSH_HOST}" "cd ${APP_DIR}/.output/server && pnpm add --prod --silent sharp"
 
 echo "==> Restart app via PM2…"
 ssh "${SSH_HOST}" "pm2 restart ${PM2_APP}"
