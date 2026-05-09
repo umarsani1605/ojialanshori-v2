@@ -104,7 +104,7 @@ const shareButtons = computed(() => [
 
         <!-- Article Body -->
         <div
-          class="prose prose-neutral mt-10 max-w-none leading-relaxed"
+          class="prose prose-neutral mt-10 max-w-none leading-relaxed break-words"
           v-html="post.content"
         />
 

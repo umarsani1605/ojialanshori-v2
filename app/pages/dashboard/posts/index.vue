@@ -256,9 +256,13 @@ const columns: TableColumn<PostRow>[] = [
           </div>
           <div
             v-else-if="postsForTab(tab.value).length === 0"
-            class="py-16 text-center text-sm text-dimmed"
+            class="py-32 text-center text-sm text-dimmed"
           >
-            Tidak ada artikel.
+            <UIcon
+              name="i-ph-folder-open-duotone"
+              class="text-primary w-12 h-12 mb-4"
+            />
+            <div>Tidak ada artikel.</div>
           </div>
           <UTable
             v-else

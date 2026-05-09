@@ -278,6 +278,13 @@ export default defineAppConfig({
         size: "lg",
       },
     },
+    avatar: {
+      slots: {
+        root: "bg-primary text-white text-xs rounded-full",
+        fallback: "text-inherit font-bold",
+        icon: "text-inherit",
+      },
+    },
     select: {
       slots: {
         base: ["cursor-pointer rounded-lg"],

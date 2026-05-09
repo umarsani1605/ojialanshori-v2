@@ -35,7 +35,9 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
     "post-editor-categories",
     async () => {
       if (auth.canReview.value) {
-        const response = await $fetch<{ data: CategoryItem[] }>("/api/categories");
+        const response = await $fetch<{ data: CategoryItem[] }>(
+          "/api/categories",
+        );
         return response.data;
       }
 
@@ -48,9 +50,9 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
   );
 
   const postData = ref<EditorPost | null>(options.initialPost ?? null);
-  const postStatus = ref<
-    "idle" | "pending" | "success" | "error"
-  >(options.initialPost === undefined ? "idle" : "success");
+  const postStatus = ref<"idle" | "pending" | "success" | "error">(
+    options.initialPost === undefined ? "idle" : "success",
+  );
 
   if (options.initialPost === undefined) {
     const postDataKey = computed(
@@ -63,7 +65,9 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
         const postId = resolvedPostId.value;
         if (!postId) return null;
 
-        const response = await $fetch<{ data: EditorPost }>(`/api/posts/${postId}`);
+        const response = await $fetch<{ data: EditorPost }>(
+          `/api/posts/${postId}`,
+        );
         return response.data;
       },
       {
@@ -127,23 +131,6 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
       options.state.currentStatus.value = post.status;
       options.state.existingReviewNote.value = post.reviewNote;
       options.state.reviewerName.value = post.reviewer?.fullname ?? null;
-
-      if (
-        !auth.canReview.value &&
-        post.status === "pending_review" &&
-        import.meta.client
-      ) {
-        options.toast.add({
-          title: "Artikel sedang direview",
-          description:
-            "Artikel yang berstatus menunggu review tidak bisa diedit.",
-          color: "warning",
-          icon: "i-ph-clock",
-        });
-        void navigateTo("/dashboard/posts?status=pending_review", {
-          replace: true,
-        });
-      }
     },
     { immediate: true },
   );

@@ -8,7 +8,9 @@ const props = defineProps<{
   target?: string;
 }>();
 
-const dateFormatted = computed(() => formatDate(props.date, "Tanggal belum tersedia"));
+const dateFormatted = computed(() =>
+  formatDate(props.date, "Tanggal belum tersedia"),
+);
 </script>
 
 <template>
@@ -30,7 +32,7 @@ const dateFormatted = computed(() => formatDate(props.date, "Tanggal belum terse
         <UIcon name="ph:image" class="size-8" />
       </div>
     </div>
-    <div class="flex flex-col md:flex-row min-w-0 flex-1">
+    <div class="flex flex-col gap-2 md:flex-row min-w-0 flex-1">
       <div class="flex flex-col flex-1 gap-1.5">
         <p
           class="line-clamp-2 text-md font-medium leading-snug transition-colors group-hover:text-primary"

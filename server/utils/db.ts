@@ -10,13 +10,9 @@ import { hasMysqlRuntimeConfig, requireMysqlUrl } from '#server/utils/runtime'
 
 export type Database = MySql2Database<typeof schema>
 
-type DbEventContext = H3Event['context'] & {
-  db?: Database
-  dbClient?: Pool
-}
-
-function getDbContext(event: H3Event): DbEventContext {
-  return event.context as DbEventContext
+const globalForDb = globalThis as unknown as {
+  _dbClient?: Pool
+  _db?: Database
 }
 
 export function isMysqlConfigured(event: H3Event) {
@@ -24,30 +20,26 @@ export function isMysqlConfigured(event: H3Event) {
 }
 
 export function useDbClient(event: H3Event) {
-  const context = getDbContext(event)
-
-  if (context.dbClient) {
-    return context.dbClient
+  if (globalForDb._dbClient) {
+    return globalForDb._dbClient
   }
 
-  context.dbClient = mysql.createPool(requireMysqlUrl(event))
+  globalForDb._dbClient = mysql.createPool(requireMysqlUrl(event))
 
-  return context.dbClient
+  return globalForDb._dbClient
 }
 
 export function useDb(event: H3Event) {
-  const context = getDbContext(event)
-
-  if (context.db) {
-    return context.db
+  if (globalForDb._db) {
+    return globalForDb._db
   }
 
-  context.db = drizzle({
+  globalForDb._db = drizzle({
     client: useDbClient(event),
     schema,
     casing: 'snake_case',
     mode: 'default',
   })
 
-  return context.db
+  return globalForDb._db
 }

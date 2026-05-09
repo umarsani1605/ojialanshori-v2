@@ -31,7 +31,7 @@ defineOptions({ inheritAttrs: false });
 
 const table = useTemplateRef("table");
 
-const pagination = ref<PaginationState>({
+const pagination = ref({
   pageIndex: 0,
   pageSize: props.defaultPageSize,
 });
@@ -105,7 +105,7 @@ defineExpose({
 
 <template>
   <UCard
-    class="flex flex-col min-h-[850px]"
+    class="flex flex-col min-h-[850px] overflow-auto"
     :ui="{ body: 'flex-1', footer: 'mt-auto' }"
   >
     <template

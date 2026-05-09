@@ -43,16 +43,23 @@ export function usePostEditor(opts: {
   const coverInputKey = ref(0);
   const coverFile = ref<File | null>(null);
 
+  const isInitializingCover = ref(false);
+
   async function initCoverFile(imageUrl: string | null) {
     if (!imageUrl) return;
     if (import.meta.server) return;
     try {
+      isInitializingCover.value = true;
       const res = await fetch(imageUrl);
       const blob = await res.blob();
       const filename = imageUrl.split("/").pop()?.split("?")[0] ?? "cover.jpg";
       coverFile.value = new File([blob], filename, { type: blob.type });
     } catch {
       // ignore
+    } finally {
+      setTimeout(() => {
+        isInitializingCover.value = false;
+      }, 50);
     }
   }
 
@@ -74,6 +81,7 @@ export function usePostEditor(opts: {
     (url) => {
       void initCoverFile(url ?? null);
     },
+    { immediate: true },
   );
 
   const presentation = usePostEditorPresentation({
@@ -96,6 +104,7 @@ export function usePostEditor(opts: {
   });
 
   watch(coverFile, (file) => {
+    if (isInitializingCover.value) return;
     void uploads.handleCoverChange(file);
   });
 

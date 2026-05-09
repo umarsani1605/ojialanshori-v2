@@ -88,9 +88,9 @@ async function save() {
       </div>
 
       <!-- Home Template Form -->
-      <UCard v-if="template === 'home'" :ui="{ body: 'max-w-3xl ' }">
+      <UCard v-if="template === 'home'">
         <div class="space-y-6">
-          <div class="space-y-6">
+          <div class="space-y-6 max-w-3xl">
             <div class="text-lg font-semibold">Header Utama</div>
             <UFormField label="Subjudul" name="subtitle">
               <UInput v-model="meta.subtitle" class="w-full" />
@@ -103,16 +103,7 @@ async function save() {
             </UFormField>
           </div>
           <USeparator />
-          <div class="space-y-6">
-            <div class="text-lg font-semibold">Layanan</div>
-            <div
-              class="flex items-center justify-center text-sm text-muted h-16"
-            >
-              On Planning...
-            </div>
-          </div>
-          <USeparator />
-          <div class="space-y-6">
+          <div class="space-y-6 max-w-3xl">
             <div class="text-lg font-semibold">Konten</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <UFormField label="Maks Berita Ditampilkan" name="maxNews">
@@ -124,14 +115,17 @@ async function save() {
             </div>
           </div>
           <USeparator />
-          <AdminTestimonialsPage />
+          <div class="space-y-6">
+            <div class="text-lg font-semibold">Kata Alumni</div>
+            <AdminTestimonialsPage />
+          </div>
         </div>
       </UCard>
 
       <!-- Profile Template Form -->
       <UCard v-else-if="template === 'profile'">
         <div class="space-y-6">
-          <div class="space-y-6">
+          <div class="space-y-6 max-w-3xl">
             <UFormField label="Selayang Pandang" name="overview">
               <UTextarea v-model="meta.overview" class="w-full" :rows="10" />
             </UFormField>
@@ -148,18 +142,27 @@ async function save() {
             </UFormField>
           </div>
           <USeparator />
-          <AdminBoardMembersPage />
+          <div class="space-y-6">
+            <div class="text-lg font-semibold">Pengurus</div>
+            <AdminBoardMembersPage />
+          </div>
         </div>
       </UCard>
 
       <!-- Activities Template Form -->
       <UCard v-else-if="template === 'activities'">
-        <AdminActivitiesPage />
+        <div class="space-y-6">
+          <div class="text-lg font-semibold">Program</div>
+          <AdminActivitiesPage />
+        </div>
       </UCard>
 
       <!-- FAQ Template Form -->
       <UCard v-else-if="template === 'faqs'">
-        <AdminFaqsPage />
+        <div class="space-y-6">
+          <div class="text-lg font-semibold">Daftar Tanya-Jawab</div>
+          <AdminFaqsPage />
+        </div>
       </UCard>
 
       <!-- Fallback / Empty State -->

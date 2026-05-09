@@ -210,11 +210,12 @@ const columns: TableColumn<GalleryItem>[] = [
   {
     accessorKey: "imagePath",
     header: "Foto",
+    size: 150,
     cell: ({ row }) =>
       h("img", {
         src: row.original.imagePath,
         alt: row.original.title,
-        class: "h-24 w-auto rounded-xl object-cover",
+        class: "h-24 w-32 rounded-xl object-cover",
       }),
   },
   {
@@ -258,7 +259,7 @@ const columns: TableColumn<GalleryItem>[] = [
       />
     </template>
     <template #toolbar-right>
-      <div class="flex items-center gap-4">
+      <div class="flex flex-row-reverse md:flex-row items-center gap-4">
         <p v-if="isGalleryFull" class="text-sm">Maksimal 8 foto.</p>
         <UButton
           label="Upload Foto"

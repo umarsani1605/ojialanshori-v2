@@ -102,7 +102,7 @@ const statItems = computed(() => [
     </template>
 
     <template v-else-if="adminStats">
-      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <AppStatCard
           v-for="item in statItems"
           :key="item.label"
@@ -113,7 +113,7 @@ const statItems = computed(() => [
         />
       </div>
 
-      <UCard :ui="{ body: 'min-h-[300px] flex flex-col' }">
+      <UCard :ui="{ body: 'min-h-[350px] flex flex-col' }">
         <template #header>
           <div class="flex items-center justify-between gap-3">
             <h3 class="font-semibold">Artikel Menunggu Review</h3>

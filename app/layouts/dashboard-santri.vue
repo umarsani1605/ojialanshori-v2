@@ -108,7 +108,7 @@ function isActive(to: string) {
                 :src="auth.user.value?.avatar ?? undefined"
                 :alt="auth.user.value?.fullname ?? ''"
                 :text="getInitials(auth.user.value?.fullname)"
-                size="xs"
+                class="bg-primary text-white! text-xs rounded-full"
               />
               <span class="text-sm font-medium">{{
                 auth.user.value?.fullname
@@ -130,8 +130,8 @@ function isActive(to: string) {
 
     <USlideover
       v-model:open="mobileOpen"
-      side="left"
-      :ui="{ content: 'w-full max-w-xs', overlay: 'bg-black/50' }"
+      side="right"
+      :ui="{ content: 'w-full max-w-md', overlay: 'bg-black/50' }"
     >
       <template #content>
         <div class="flex h-full flex-col bg-white">
@@ -140,9 +140,9 @@ function isActive(to: string) {
           >
             <NuxtLink :to="auth.homePath.value" class="shrink-0">
               <img
-                src="/images/logo/logo.png"
+                src="/images/logo/logo_santri.png"
                 alt="Omah Ngaji Al-Anshori"
-                class="h-10 w-auto object-contain"
+                class="h-16 w-auto object-contain"
               />
             </NuxtLink>
 
@@ -156,18 +156,18 @@ function isActive(to: string) {
           </div>
 
           <div class="flex flex-1 flex-col px-5 py-5">
-            <nav class="flex flex-col gap-1">
+            <nav class="flex flex-col gap-2">
               <NuxtLink
                 v-if="auth.canWritePenaSantri.value"
                 :to="writePath"
-                class="mb-1"
+                class="mb-2"
               >
                 <UButton
-                  size="sm"
+                  size="lg"
                   color="primary"
                   variant="solid"
                   icon="i-ph-pen-nib"
-                  class="w-full justify-center"
+                  class="w-full justify-center p-2.5"
                 >
                   Tulis Artikel
                 </UButton>
@@ -187,15 +187,15 @@ function isActive(to: string) {
               </NuxtLink>
             </nav>
 
-            <div class="mt-auto border-t border-default pt-4">
+            <div class="mt-auto pt-4 flex flex-col gap-6">
               <div
-                class="flex items-center gap-3 rounded-xl bg-slate-100/70 p-3"
+                class="flex items-center gap-4 rounded-xl border border-default p-4"
               >
                 <UAvatar
+                  size="lg"
                   :src="auth.user.value?.avatar ?? undefined"
                   :alt="auth.user.value?.fullname ?? ''"
                   :text="getInitials(auth.user.value?.fullname)"
-                  size="sm"
                 />
                 <div class="min-w-0 flex-1">
                   <p class="truncate text-sm font-medium">
@@ -206,16 +206,19 @@ function isActive(to: string) {
                   </p>
                 </div>
               </div>
-
-              <UButton
-                color="error"
-                variant="ghost"
-                icon="i-ph-sign-out"
-                class="mt-3 w-full justify-center"
-                @click="auth.logout()"
-              >
-                Keluar
-              </UButton>
+              <USeparator />
+              <div>
+                <UButton
+                  color="error"
+                  size="lg"
+                  variant="soft"
+                  icon="i-ph-sign-out"
+                  class="w-full"
+                  @click="auth.logout()"
+                >
+                  Keluar
+                </UButton>
+              </div>
             </div>
           </div>
         </div>

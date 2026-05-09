@@ -246,7 +246,7 @@ watch(
     <UDashboardPanel
       id="main"
       :ui="{
-        body: 'p-2 sm:p-6',
+        body: 'p-6',
       }"
     >
       <template #header>

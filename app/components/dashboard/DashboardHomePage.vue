@@ -237,7 +237,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
         />
         <img
           src="/images/greetings-right.png"
-          class="absolute top-0 right-0 h-full object-contain pointer-events-none"
+          class="hidden md:block absolute top-0 right-0 h-full object-contain pointer-events-none"
           alt=""
         />
 
@@ -245,7 +245,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
           <h1 class="text-2xl font-bold">
             {{ greeting }}, {{ auth.user.value?.fullname?.split(" ")[0] }}! 👋🏻
           </h1>
-          <p class="text-white/90">
+          <p class="font-medium text-white/90">
             Langkah kecil menuju karya besar. Tuliskan ide-idemu dan pantau
             progress artikelmu!
           </p>
@@ -279,7 +279,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
       </template>
 
       <template v-else>
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
           <AppStatCard
             v-for="item in statItems"
             :key="item.label"
@@ -347,7 +347,6 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
                   <UBadge
                     :color="getPostStatusTone(post.status)"
                     variant="subtle"
-                    size="sm"
                   >
                     {{ getPostStatusLabel(post.status) }}
                   </UBadge>

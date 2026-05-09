@@ -22,12 +22,9 @@ type User = {
 const auth = useAuth();
 const toast = useToast();
 
-const { data, refresh } = await useFetch<{ user: User }>(
-  "/api/profile",
-  {
-    key: "profile-self",
-  },
-);
+const { data, refresh } = await useFetch<{ user: User }>("/api/profile", {
+  key: "profile-self",
+});
 
 const user = computed(() => data.value?.user);
 
@@ -353,7 +350,7 @@ async function deleteAvatar() {
                 />
               </UFormField>
 
-              <UFormField label="Angkatan Masuk OJI" name="yearEnrolled">
+              <UFormField label="Angkatan Masuk Oji" name="yearEnrolled">
                 <USelect
                   v-model="profileForm.yearEnrolled"
                   :items="yearOptions"

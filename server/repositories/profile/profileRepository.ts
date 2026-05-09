@@ -25,7 +25,7 @@ export async function findUserCredentials(db: Database, userId: number) {
     where: eq(schema.users.id, userId),
     columns: {
       id: true,
-      passwordHash: true,
+      password: true,
       passwordType: true,
     },
   })

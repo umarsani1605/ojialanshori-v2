@@ -35,7 +35,7 @@ const iconClass: Record<Color, string> = {
       body: 'p-4!',
     }"
   >
-    <div class="flex items-center gap-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
       <div
         :class="[
           bgClass[color],

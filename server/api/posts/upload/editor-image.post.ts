@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
   const storageKey = `posts/${currentUser.id}/inline/${Date.now()}.${ext}`;
   const publicPath = `/images/${storageKey}`;
 
-  await putR2(event, storageKey, new Blob([file.data], { type: mime }), { contentType: mime });
+  await putR2(event, storageKey, new Blob([file.data as any], { type: mime }), { contentType: mime });
 
   return { url: publicPath };
 });

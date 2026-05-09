@@ -329,7 +329,7 @@ const editorHandlers = {
 <template>
   <div class="min-h-[calc(100vh-60px)] bg-slate-50">
     <div
-      class="flex flex-col gap-3 px-2 mb-4 md:flex-row md:items-center md:justify-between"
+      class="flex gap-3 px-2 mb-4 flex-row flex-wrap md:items-center md:justify-between"
     >
       <UButton
         :to="backTo"
@@ -341,7 +341,7 @@ const editorHandlers = {
         Kembali
       </UButton>
 
-      <div class="flex flex-col gap-2 sm:flex-row">
+      <div class="flex flex-row justify-end gap-2">
         <!-- Review mode: Tolak + Publish (reviewer viewing someone else's pena_santri) -->
         <template v-if="showReviewActions">
           <UButton
@@ -450,7 +450,7 @@ const editorHandlers = {
               :ui="{
                 root: 'min-h-[520px]',
                 content: 'py-4',
-                base: 'min-h-[420px] max-w-none px-2!',
+                base: 'min-h-[420px] max-w-none px-2! break-words',
               }"
             >
               <template #default="{ editor }">
@@ -482,7 +482,7 @@ const editorHandlers = {
         <UCard
           v-if="
             !showReviewActions &&
-            currentStatus === 'rejected' &&
+            currentStatus != 'published' &&
             existingReviewNote
           "
         >
@@ -508,14 +508,13 @@ const editorHandlers = {
                 <UFileUpload
                   :key="coverInputKey"
                   v-model="coverFile"
-                  accept="image/jpeg,image/png"
+                  accept="image/jpeg,image/png,image/webp"
                   variant="area"
                   layout="grid"
                   size="md"
-                  icon="i-ph-image-square"
                   label="Pilih gambar atau jatuhkan"
                   :highlight="!form.featuredImage"
-                  class="min-h-40 rounded-xl aspect-3/2"
+                  class="min-h-40 rounded-xl aspect-3/2 w-full"
                 />
                 <div class="text-sm text-muted">
                   JPG/PNG, maksimal ukuran file 2MB, direkomendasikan aspek
