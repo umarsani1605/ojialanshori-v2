@@ -61,7 +61,7 @@ async function onSubmit() {
 
 <template>
   <div class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-    <div class="w-full max-w-sm">
+    <div class="w-full max-w-md">
       <div
         class="bg-white rounded-2xl shadow-sm border border-slate-100 px-8 py-10"
       >
@@ -157,7 +157,10 @@ async function onSubmit() {
 
         <p class="text-sm text-center text-slate-500 mt-6">
           Belum punya akun?
-          <NuxtLink to="/daftar" class="font-medium text-primary hover:underline">
+          <NuxtLink
+            to="/daftar"
+            class="font-medium text-primary hover:underline"
+          >
             Daftar akun santri
           </NuxtLink>
         </p>

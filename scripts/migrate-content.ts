@@ -126,7 +126,7 @@ async function main() {
   }
 
   console.log("🔌 Connecting to database...");
-  const connection = await mysql.createConnection(process.env.MYSQL_URL);
+  const connection = mysql.createPool(process.env.MYSQL_URL);
   const db = drizzle(connection, {
     schema,
     casing: "snake_case",
@@ -206,6 +206,24 @@ async function main() {
   // All posts temporarily attributed to author ID 1 (admin)
   const PLACEHOLDER_AUTHOR_ID = 1;
 
+  // Ensure placeholder user exists to satisfy foreign key constraint
+  const existingUser = await db.query.users.findFirst({
+    where: eq(schema.users.id, PLACEHOLDER_AUTHOR_ID),
+  });
+
+  if (!existingUser) {
+    console.log("  👤 Creating placeholder user (ID 1)...");
+    await db.insert(schema.users).values({
+      fullname: "System Admin",
+      email: "admin@ojialanshori.com",
+      password: "placeholder",
+      role: "admin",
+      isActive: true,
+    });
+    // In case the auto-increment wasn't 1, force update it
+    await connection.query(`UPDATE users SET id = 1 WHERE email = 'admin@ojialanshori.com'`);
+  }
+
   let postOk = 0,
     postErr = 0;
   for (const post of wpPosts) {
@@ -248,8 +266,8 @@ async function main() {
       });
       mapping.posts[post.id] = result[0].insertId;
       postOk++;
-    } catch (e) {
-      console.error(`  ❌ Post "${post.slug}":`, (e as Error).message);
+    } catch (e: any) {
+      console.error(`  ❌ Post "${post.slug}":`, e.message, e.cause?.message || e.cause || '');
       postErr++;
     }
   }

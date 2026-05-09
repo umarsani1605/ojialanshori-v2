@@ -1,5 +1,6 @@
-import { createHash, createHmac } from 'node:crypto'
-import bcrypt from 'bcryptjs'
+import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+import { createHash } from 'node:crypto';
 
 // Phpass portable hash alphabet (WordPress-compatible)
 const PHPASS_ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
@@ -21,9 +22,6 @@ function phpassEncode64(input: Buffer, count: number): string {
   return output
 }
 
-/**
- * Verify a plaintext password against a WordPress phpass hash (pure JS, no native deps).
- */
 function verifyPhpass(plain: string, storedHash: string): boolean {
   if (storedHash.length !== 34) return false
   const iterChar = storedHash[3]!
@@ -42,43 +40,23 @@ function verifyPhpass(plain: string, storedHash: string): boolean {
   return computed === storedHash
 }
 
-/**
- * Verify whether a plaintext password matches a stored phpass or bcrypt hash.
- *
- * @param plain - The plaintext password to verify
- * @param hash - The stored password hash to check against
- * @param type - Hash algorithm to use: `'phpass'` or `'bcrypt'`
- * @returns `true` if the plaintext matches the hash, `false` otherwise
- */
 export async function verifyUserPassword(
   plain: string,
   hash: string,
   type: 'phpass' | 'bcrypt',
 ): Promise<boolean> {
   if (type === 'phpass') {
-    // WordPress portable hashes start with $P$
     if (hash.startsWith('$P$')) {
-      return verifyPhpass(plain, hash)
+      return verifyPhpass(plain, hash);
     }
-    // WordPress 6.8+ bcrypt hashes start with $wp$
+    // Handle WordPress's modified bcrypt hashes ($wp$...)
     if (hash.startsWith('$wp$')) {
-      // 1. WP 6.8 pre-hashes the password using HMAC-SHA384 and encodes to base64
-      const preHash = createHmac('sha384', 'wp-sha384').update(plain).digest('base64');
-      // 2. The $wp$ prefix is 3 chars. Stripping it leaves $2y$10... which is valid bcrypt
-      const bcryptPart = hash.substring(3);
-      return bcrypt.compare(preHash, bcryptPart);
+      const normalizedBcryptHash = hash.replace('$wp$', '$');
+      return bcrypt.compare(plain, normalizedBcryptHash);
     }
-    return verifyPhpass(plain, hash)
   }
   return bcrypt.compare(plain, hash)
 }
 
-/**
- * Creates a bcrypt hash of a plaintext password.
- *
- * @param plain - The plaintext password to hash
- * @returns The bcrypt-formatted hash of `plain`
- */
-export async function hashUserPassword(plain: string): Promise<string> {
-  return bcrypt.hash(plain, 12)
-}
+console.log('Testing...');
+console.log('Is valid WP Bcrypt?', await verifyUserPassword('wrongpassword', '$wp$2y$10$5CG2SwZGLrV7fWDFGAd5f.qTdZqcFKm4bgonkif2iuCXg4zTHTBUW', 'phpass'));

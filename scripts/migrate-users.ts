@@ -86,9 +86,9 @@ async function main() {
   // Connect to both databases
   console.log('🔌 Connecting to databases...')
   const [wpConn, newConn] = await Promise.all([
-    mysql.createConnection(process.env.WP_MYSQL_URL),
-    mysql.createConnection(process.env.MYSQL_URL),
-  ])
+    mysql.createPool(process.env.WP_MYSQL_URL),
+    mysql.createPool(process.env.MYSQL_URL),
+  ]);
   const db = drizzle(newConn, { schema, casing: 'snake_case', mode: 'default' })
 
   const mapping: Record<number, number> = {} // wp_user_id → new_user_id
