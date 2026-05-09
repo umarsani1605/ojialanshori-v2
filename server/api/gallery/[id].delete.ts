@@ -1,4 +1,4 @@
-import { blob } from '@nuxthub/blob'
+import { deleteR2 } from '~~/server/utils/r2Storage'
 
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const imagePath = await removeGalleryItem(useDb(event), id)
 
   if (imagePath?.startsWith('/images/')) {
-    try { await blob.delete(imagePath.replace(/^\/images\//, '')) } catch {}
+    try { await deleteR2(event, imagePath.replace(/^\/images\//, '')) } catch {}
   }
 
   return { success: true }

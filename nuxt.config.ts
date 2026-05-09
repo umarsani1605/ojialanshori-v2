@@ -59,9 +59,6 @@ export default defineNuxtConfig({
       applyMigrationsDuringBuild: false,
       applyMigrationsDuringDev: false,
     },
-    blob: true,
-    kv: true,
-    cache: true,
   },
 
   // Disable dynamic OG image — dikonfigurasi di E8 (SEO & Performance)
@@ -70,10 +67,7 @@ export default defineNuxtConfig({
   },
 
   image: {
-    provider: process.env.NODE_ENV === "production" ? "cloudflare" : "none",
-    cloudflare: {
-      baseURL: "/",
-    },
+    provider: process.env.NODE_ENV === "production" ? "ipx" : "none",
   },
 
   disqus: {

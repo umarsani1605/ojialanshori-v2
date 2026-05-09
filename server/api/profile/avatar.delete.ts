@@ -1,4 +1,4 @@
-import { blob } from '@nuxthub/blob'
+import { deleteR2 } from '~~/server/utils/r2Storage'
 
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   const oldPath = existing?.avatar
 
   if (oldPath?.startsWith('/images/')) {
-    try { await blob.delete(oldPath.replace(/^\/images\//, '')) } catch {}
+    try { await deleteR2(event, oldPath.replace(/^\/images\//, '')) } catch {}
   }
 
   await removeProfileAvatar(db, actor.id)

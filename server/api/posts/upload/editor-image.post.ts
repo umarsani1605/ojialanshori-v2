@@ -1,4 +1,4 @@
-import { blob } from "@nuxthub/blob";
+import { putR2 } from "~~/server/utils/r2Storage";
 
 import { requireAuth } from "~~/server/utils/guard";
 
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
   const storageKey = `posts/${currentUser.id}/inline/${Date.now()}.${ext}`;
   const publicPath = `/images/${storageKey}`;
 
-  await blob.put(storageKey, new Blob([file.data], { type: mime }), { contentType: mime });
+  await putR2(event, storageKey, new Blob([file.data], { type: mime }), { contentType: mime });
 
   return { url: publicPath };
 });

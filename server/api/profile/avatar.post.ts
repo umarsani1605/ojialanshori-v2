@@ -1,4 +1,4 @@
-import { blob } from '@nuxthub/blob'
+import { putR2, deleteR2 } from '~~/server/utils/r2Storage'
 
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
@@ -35,14 +35,14 @@ export default defineEventHandler(async (event) => {
   const existing = await findProfileById(db, actor.id)
   const oldPath = existing?.avatar
   if (oldPath?.startsWith('/images/')) {
-    try { await blob.delete(oldPath.replace(/^\/images\//, '')) } catch {}
+    try { await deleteR2(event, oldPath.replace(/^\/images\//, '')) } catch {}
   }
 
   const ext = EXT_MAP[mime]!
   const storageKey = `avatars/${actor.id}/${Date.now()}.${ext}`
   const publicPath = `/images/${storageKey}`
 
-  await blob.put(storageKey, file.data, { contentType: mime })
+  await putR2(event, storageKey, file.data, { contentType: mime })
   await setProfileAvatar(db, actor.id, publicPath)
 
   await setUserSession(event, {

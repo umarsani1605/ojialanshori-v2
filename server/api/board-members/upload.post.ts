@@ -1,4 +1,4 @@
-import { blob } from '@nuxthub/blob'
+import { putR2 } from '~~/server/utils/r2Storage'
 import { requireAdmin } from '#server/utils/guard'
 
 const MAX_SIZE = 5 * 1024 * 1024
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   const storageKey = `profiles/${Date.now()}.${ext}`
   const publicPath = `/images/${storageKey}`
 
-  await blob.put(storageKey, new Blob([file.data], { type: mime }), { contentType: mime })
+  await putR2(event, storageKey, new Blob([file.data], { type: mime }), { contentType: mime })
 
   return { path: publicPath }
 })
