@@ -1,4 +1,4 @@
-CREATE TABLE `faqs` (
+CREATE TABLE IF NOT EXISTS `faqs` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`question` varchar(500) NOT NULL,
 	`answer` text NOT NULL,
