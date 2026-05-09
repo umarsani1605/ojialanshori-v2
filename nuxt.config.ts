@@ -15,7 +15,6 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   modules: [
-    "@nuxthub/core",
     "@nuxt/ui",
     "@nuxtjs/seo",
     "@nuxt/image",
@@ -48,16 +47,6 @@ export default defineNuxtConfig({
           tagPriority: "critical",
         },
       ],
-    },
-  },
-
-  hub: {
-    db: {
-      dialect: "mysql",
-      casing: "snake_case",
-      // Matikan auto-migrate saat build & dev — jalankan manual via pnpm db:migrate
-      applyMigrationsDuringBuild: false,
-      applyMigrationsDuringDev: false,
     },
   },
 
@@ -105,11 +94,6 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "node-server",
-    externals: {
-      // @nuxthub/db adalah virtual package — tidak ada di npm registry.
-      // Inline supaya di-bundle ke output, bukan di-list sebagai external dep.
-      inline: ["@nuxthub/db"],
-    },
   },
 
   vite: {
