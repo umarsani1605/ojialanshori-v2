@@ -105,6 +105,11 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "node-server",
+    externals: {
+      // @nuxthub/db adalah virtual package — tidak ada di npm registry.
+      // Inline supaya di-bundle ke output, bukan di-list sebagai external dep.
+      inline: ["@nuxthub/db"],
+    },
   },
 
   vite: {
