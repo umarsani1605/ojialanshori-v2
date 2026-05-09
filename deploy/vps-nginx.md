@@ -1,174 +1,225 @@
-# Deploy ke VPS + Nginx
+# Deploy ke VPS dengan aaPanel
 
-Panduan deploy Omah Ngaji Al-Anshori (Nuxt 4 + Node SSR) ke VPS dengan Nginx reverse proxy.
+Panduan deploy Omah Ngaji Al-Anshori (Nuxt 4 + Node SSR) menggunakan aaPanel.
 
-## Prasyarat di VPS
+## Overview
 
-Asumsi VPS sudah punya:
-- Node.js >= 20 (`node --version`)
-- Nginx (`nginx -v`)
-- MySQL (`mysql --version`)
-- `sudo` access dan user deploy non-root
+aaPanel menangani Node.js via PM2, Nginx via GUI, dan SSL via Let's Encrypt — tidak perlu setup systemd manual.
 
-Yang masih perlu disiapkan: certbot untuk SSL (`apt install certbot python3-certbot-nginx`).
+Flow deploy:
+1. Build `.output/` di lokal
+2. Rsync ke VPS
+3. PM2 auto-restart via `deploy.sh`
 
-## Layout direktori di VPS
+---
 
-```
-/var/www/ojialanshori/
-├── current  -> releases/20260509-103000/   # symlink ke release aktif
-├── releases/
-│   └── 20260509-103000/
-│       └── .output/                        # hasil build
-└── shared/
-    └── .env                                # env vars (sekali setup, tidak di-overwrite)
-```
+## Setup Awal di VPS (sekali saja)
 
-## Setup awal di VPS (sekali saja)
+### 1. Install Node.js di aaPanel
 
-### 1. Buat user & direktori
+**aaPanel > App Store > Runtime** → install **Node.js** versi 20.x (atau 22.x).
+
+### 2. Buat direktori project
+
+Di terminal VPS atau via aaPanel File Manager:
 
 ```bash
-sudo useradd -r -s /bin/bash -d /var/www/ojialanshori www-data 2>/dev/null || true  # biasanya sudah ada
-sudo mkdir -p /var/www/ojialanshori/{releases,shared}
-sudo chown -R www-data:www-data /var/www/ojialanshori
+mkdir -p /www/wwwroot/ojialanshori
 ```
 
-Buat juga user deploy (kalau belum) untuk SSH dari mesin lokal:
+### 3. Buat database MySQL
+
+**aaPanel > Database > Add Database:**
+- Database name: `ojialanshori`
+- Username: `ojialanshori`
+- Password: (generate kuat)
+- Access: `127.0.0.1`
+
+Catat credentials untuk `.env`.
+
+### 4. Siapkan environment file
+
+Di VPS, buat file `/www/wwwroot/ojialanshori/.env`:
 
 ```bash
-sudo adduser deploy
-sudo usermod -aG www-data deploy
-# Tambahkan public key SSH lokal Anda ke /home/deploy/.ssh/authorized_keys
-# Beri akses sudo terbatas untuk restart service:
-echo 'deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart ojialanshori, /bin/systemctl status ojialanshori' | sudo tee /etc/sudoers.d/deploy
+nano /www/wwwroot/ojialanshori/.env
 ```
 
-### 2. Setup environment file
+Isi berdasarkan `deploy/.env.production.example` — ganti semua `USER`, `PASSWORD`, dll:
 
-Copy `.env.production.example` ke VPS sebagai `/var/www/ojialanshori/shared/.env`, lalu isi:
+```env
+NUXT_MYSQL_URL=mysql://ojialanshori:PASSWORD@127.0.0.1:3306/ojialanshori
+NUXT_SESSION_SECRET=<output dari: openssl rand -hex 32>
+NUXT_BREVO_API_KEY=...
+NUXT_R2_ACCESS_KEY_ID=...
+NUXT_R2_SECRET_ACCESS_KEY=...
+NUXT_R2_BUCKET=ojialanshori
+NUXT_R2_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+NUXT_PUBLIC_SITE_URL=https://ojialanshori.com
+NUXT_PUBLIC_DISQUS_SHORTNAME=...
+```
+
+Amankan file:
 
 ```bash
-sudo cp .env.production.example /var/www/ojialanshori/shared/.env
-sudo chown www-data:www-data /var/www/ojialanshori/shared/.env
-sudo chmod 600 /var/www/ojialanshori/shared/.env
-sudo nano /var/www/ojialanshori/shared/.env
+chmod 600 /www/wwwroot/ojialanshori/.env
 ```
 
-Generate session secret: `openssl rand -hex 32`
+### 5. Deploy pertama kali (upload .output/)
 
-### 3. Buat database & jalankan migration
+Dari mesin lokal di project root:
 
 ```bash
-sudo mysql -u root <<'SQL'
-CREATE DATABASE ojialanshori CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'ojialanshori'@'localhost' IDENTIFIED BY 'STRONG_PASSWORD';
-GRANT ALL PRIVILEGES ON ojialanshori.* TO 'ojialanshori'@'localhost';
-FLUSH PRIVILEGES;
-SQL
+./deploy/deploy.sh
 ```
 
-Migration dijalankan dari mesin lokal yang punya akses ke `MYSQL_URL` VPS:
+Script akan build dan rsync `.output/` ke `/www/wwwroot/ojialanshori/.output/`.
+
+Untuk deploy pertama, PM2 belum ada — lanjut ke step berikutnya dulu.
+
+### 6. Tambahkan Node Project di aaPanel
+
+**aaPanel > Node Projects > Add:**
+
+| Field | Value |
+|-------|-------|
+| Project path | `/www/wwwroot/ojialanshori` |
+| Startup file | `.output/server/index.mjs` |
+| Node version | 20.x |
+| Port | `3000` |
+| PM2 mode | `fork` |
+
+Setelah project ditambahkan, aaPanel otomatis jalankan via PM2 dengan nama project (default = nama folder).
+
+**Set environment variables:** Klik project → **Environment** → tambahkan semua `NUXT_*` vars dari `.env`.
+
+> Atau, set `NODE_ENV=production` + biarkan app baca `.env` langsung. Pastikan startup file `index.mjs` membaca `process.env`.
+
+Catat **PM2 app name** (biasanya = nama folder: `ojialanshori`) — sesuaikan `PM2_APP` di `deploy.sh` kalau berbeda.
+
+### 7. Tambahkan Website (Nginx + SSL)
+
+**aaPanel > Website > Add Site:**
+
+| Field | Value |
+|-------|-------|
+| Domain | `ojialanshori.com` |
+| Additional domains | `www.ojialanshori.com` |
+| PHP | pure static / no PHP |
+| Root | `/www/wwwroot/ojialanshori` |
+
+**Aktifkan SSL:** Site → **SSL** → Let's Encrypt → centang domain → Apply.
+
+**Konfigurasi Reverse Proxy:** Site → **Proxy** → Add:
+
+| Field | Value |
+|-------|-------|
+| Name | `nuxt-app` |
+| Target URL | `http://127.0.0.1:3000` |
+| Send domain | aktif |
+
+Atau edit Nginx config langsung (Site → **Config**) dan tambahkan:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 60s;
+}
+```
+
+### 8. Jalankan database migration
+
+Dari mesin lokal (butuh akses ke MySQL VPS):
+
+```bash
+# Via SSH tunnel (aman, tidak expose port MySQL ke publik):
+ssh -L 3307:127.0.0.1:3306 root@ojialanshori.com -N &
+MYSQL_URL=mysql://ojialanshori:PASSWORD@127.0.0.1:3307/ojialanshori pnpm db:migrate
+kill %1
+```
+
+---
+
+## Deploy Berikutnya
 
 ```bash
 # Dari project root lokal:
-MYSQL_URL=mysql://ojialanshori:PASS@VPS_IP:3306/ojialanshori pnpm db:migrate
+./deploy/deploy.sh
 ```
 
-(Atau temporarily expose MySQL port via SSH tunnel: `ssh -L 3307:localhost:3306 deploy@VPS`, lalu pakai `MYSQL_URL=mysql://...@127.0.0.1:3307/...`)
+Script: build lokal → rsync → install sharp → `pm2 restart ojialanshori`.
 
-### 4. Install systemd service
+### Override SSH host / path
 
 ```bash
-# Dari mesin lokal — copy file service ke VPS:
-scp deploy/ojialanshori.service deploy@VPS:/tmp/
-
-# Di VPS:
-sudo mv /tmp/ojialanshori.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable ojialanshori
-# Jangan start dulu — belum ada release.
+SSH_HOST=root@ojialanshori.com APP_DIR=/www/wwwroot/ojialanshori PM2_APP=ojialanshori ./deploy/deploy.sh
 ```
 
-### 5. Install Nginx config
-
-```bash
-# Dari lokal:
-scp deploy/nginx.conf deploy@VPS:/tmp/
-
-# Di VPS:
-sudo mv /tmp/nginx.conf /etc/nginx/sites-available/ojialanshori.conf
-
-# Edit sementara: comment out semua block HTTPS + redirect, biarkan hanya server :80 yang proxy ke app.
-# Ini diperlukan agar certbot HTTP-01 challenge bisa jalan.
-sudo nano /etc/nginx/sites-available/ojialanshori.conf
-
-sudo ln -s /etc/nginx/sites-available/ojialanshori.conf /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-### 6. Generate SSL certificate (Let's Encrypt)
-
-```bash
-sudo certbot --nginx -d ojialanshori.com -d www.ojialanshori.com
-# Setelah sukses, restore block HTTPS + redirect HTTP→HTTPS di nginx.conf:
-sudo nano /etc/nginx/sites-available/ojialanshori.conf
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-## Deploy pertama & berikutnya
-
-Dari mesin lokal, di project root:
-
-```bash
-# Sesuaikan default kalau perlu:
-SSH_HOST=deploy@ojialanshori.com APP_DIR=/var/www/ojialanshori ./deploy/deploy.sh
-```
-
-Script akan:
-1. Build `.output/` di lokal (`pnpm build`)
-2. Rsync ke `/var/www/ojialanshori/releases/<timestamp>/.output/`
-3. Install `sharp` di VPS (binary arch-specific)
-4. Atomic-switch symlink `current` → release baru
-5. Restart `ojialanshori.service`
-6. Hapus release > 5 yang lama
+---
 
 ## Verifikasi
 
 ```bash
-# Status service
-ssh deploy@VPS 'systemctl status ojialanshori'
+# Status PM2
+ssh root@ojialanshori.com 'pm2 status'
 
-# Logs
-ssh deploy@VPS 'sudo journalctl -u ojialanshori -f --since "1 min ago"'
+# Logs realtime
+ssh root@ojialanshori.com 'pm2 logs ojialanshori --lines 30'
 
-# Health check via local proxy
+# Test endpoint
 curl -I https://ojialanshori.com
 ```
 
+---
+
 ## Troubleshooting
 
-**Service gagal start dengan error sharp/binary mismatch:**
-- Pastikan step "install sharp di VPS" di `deploy.sh` jalan tanpa error.
-- Atau install manual: `ssh VPS 'cd /var/www/ojialanshori/current/.output/server && npm i sharp'`
+**PM2 tidak bisa restart (app name salah):**
 
-**Nginx 502 Bad Gateway:**
-- Cek service: `systemctl status ojialanshori`
-- Cek port 3000 listening: `ss -tlnp | grep 3000`
-- Cek logs: `journalctl -u ojialanshori -n 50`
+```bash
+ssh VPS 'pm2 list'  # lihat nama app yang terdaftar
+# Sesuaikan PM2_APP di deploy.sh
+```
+
+**502 Bad Gateway:**
+
+```bash
+ssh VPS 'pm2 status'         # pastikan app running
+ssh VPS 'ss -tlnp | grep 3000'  # pastikan port 3000 listen
+ssh VPS 'pm2 logs ojialanshori --lines 50'  # cek error
+```
+
+**Sharp error (binary mismatch):**
+
+```bash
+ssh VPS 'cd /www/wwwroot/ojialanshori/.output/server && npm install sharp'
+ssh VPS 'pm2 restart ojialanshori'
+```
 
 **Image upload gagal:**
-- Verifikasi `NUXT_R2_*` env vars di `/var/www/ojialanshori/shared/.env`
-- Test akses R2 dari VPS: `curl -I $NUXT_R2_ENDPOINT`
+- Verifikasi `NUXT_R2_*` vars sudah di-set di aaPanel Node Project > Environment
+- Test: `curl -I $NUXT_R2_ENDPOINT`
 
-**Migration belum jalan / schema mismatch:**
-- Jalankan ulang dari lokal: `pnpm db:migrate` dengan `MYSQL_URL` ke VPS
+**Migration belum jalan / kolom tidak ada:**
+
+```bash
+# Dari lokal via SSH tunnel:
+ssh -L 3307:127.0.0.1:3306 root@ojialanshori.com -N &
+MYSQL_URL=mysql://ojialanshori:PASS@127.0.0.1:3307/ojialanshori pnpm db:migrate
+kill %1
+```
+
+---
 
 ## File-file di folder ini
 
-- `ojialanshori.service` — systemd unit
-- `nginx.conf` — server block Nginx (SSL + reverse proxy + static caching)
-- `.env.production.example` — template env vars (jangan commit yang sudah terisi)
-- `deploy.sh` — deploy script (build lokal → rsync → restart)
-- `README.md` — dokumen ini
+- `deploy.sh` — deploy script (build lokal → rsync → pm2 restart)
+- `.env.production.example` — template env vars
+- `nginx.conf` — referensi Nginx config (untuk setup manual non-aaPanel)
