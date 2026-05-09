@@ -210,7 +210,8 @@ useSeoMeta({
         reverse
         class="relative z-10 py-10"
         :ui="{
-          container: 'py-14 sm:py-16 lg:py-18 gap-12 lg:gap-16 items-center',
+          container:
+            'py-14 sm:py-16 lg:py-18 gap-12 lg:gap-16 items-left md:items-center',
           wrapper: 'items-start',
           headline: 'text-xl font-semibold text-white/90',
           title:
@@ -233,17 +234,17 @@ useSeoMeta({
         </template>
         <template #links>
           <UButton
+            href="/profil"
             variant="ghost"
-            icon="i-ph-arrow-down"
-            class="px-3 py-2 rounded-xl text-white border border-white hover:text-primary hover:bg-white"
-            @click="scrollToFeatures"
+            trailing-icon="i-ph-arrow-right"
+            class="px-3 py-2 rounded-xl text-white border border-white hover:text-primary hover:bg-white active:text-primary active:bg-white"
           >
             Kenali lebih dekat
           </UButton>
         </template>
 
         <!-- Default slot = the visual on the opposite side of text (logo) -->
-        <div class="flex justify-center">
+        <div class="flex justify-start md:justify-center">
           <NuxtImg
             src="/images/logo/logo_white.png"
             alt="Omah Ngaji Al-Anshori"
@@ -298,8 +299,8 @@ useSeoMeta({
           :next="{ variant: 'ghost', color: 'neutral' }"
           :ui="{
             root: 'group/testimonials relative',
-            prev: 'absolute rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
-            next: 'absolute rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
+            prev: 'absolute left-6! rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
+            next: 'absolute right-6! rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
           }"
         >
           <div class="max-w-3xl mx-auto px-4 text-center">
@@ -383,11 +384,7 @@ useSeoMeta({
             base-path="/pena-santri"
           />
         </div>
-        <PublicEmptyState
-          v-else
-          title="Belum ada karya"
-          icon="i-ph-pen-nib"
-        />
+        <PublicEmptyState v-else title="Belum ada karya" icon="i-ph-pen-nib" />
       </UContainer>
     </section>
 
@@ -457,13 +454,13 @@ useSeoMeta({
           :href="instagramUrl"
           target="_blank"
           rel="noopener"
-          class="group flex flex-col md:flex-row gap-6 items-center text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
+          class="group flex flex-col md:flex-row gap-6 items-center justify-between text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
         >
-          <div class="flex items-center gap-5">
+          <div class="flex items-start gap-5">
             <div
-              class="size-14 rounded-2xl border border-default flex items-center justify-center shrink-0 text-slate-700"
+              class="size-16 rounded-2xl flex items-center justify-center shrink-0 text-slate-600"
             >
-              <UIcon name="i-ph-instagram-logo" class="size-8" />
+              <UIcon name="i-ph-instagram-logo" class="size-full" />
             </div>
             <div class="text-left">
               <h4 class="font-bold text-lg md:text-xl mb-0.5">@omahngaji_</h4>

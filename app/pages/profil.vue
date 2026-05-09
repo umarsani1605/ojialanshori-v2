@@ -82,7 +82,7 @@ useSeoMeta({
         <div class="mb-12">
           <h3 class="font-bold text-lg mb-8">Penasehat:</h3>
           <div
-            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10"
+            class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-10 text-left"
           >
             <PublicProfileFigure
               v-for="person in penasehat"

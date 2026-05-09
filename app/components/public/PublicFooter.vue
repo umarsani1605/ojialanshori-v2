@@ -13,29 +13,18 @@ const navLinks = [
 
 const year = new Date().getFullYear();
 
-const facebookUrl = computed(
-  () =>
-    props.settings?.facebook_url ??
-    props.settings?.contact_facebook_url ??
-    "https://facebook.com/ojialanshori",
-);
+const facebookUrl = computed(() => props.settings?.social_facebook ?? "#");
 const instagramUrl = computed(
   () =>
-    props.settings?.instagram_url ??
-    props.settings?.contact_instagram_url ??
-    "https://www.instagram.com/omahngaji_",
+    props.settings?.social_instagram ?? "https://www.instagram.com/omahngaji_",
 );
 const youtubeUrl = computed(
   () =>
-    props.settings?.youtube_url ??
-    props.settings?.contact_youtube_url ??
+    props.settings?.social_youtube ??
     "https://youtube.com/@ojientertainment4897",
 );
 const tiktokUrl = computed(
-  () =>
-    props.settings?.tiktok_url ??
-    props.settings?.contact_tiktok_url ??
-    "https://tiktok.com/@omahngaji_",
+  () => props.settings?.social_tiktok ?? "https://tiktok.com/@omahngaji_",
 );
 
 const mapsEmbedUrl = computed(
@@ -71,7 +60,7 @@ const socials = computed(() => [
           <!-- Logo -->
           <NuxtLink to="/" class="inline-flex">
             <NuxtImg
-              src="/images/logo/logo3.png"
+              src="/images/logo/logo_white.png"
               alt="Omah Ngaji Al-Anshori"
               class="h-24 w-auto object-contain"
             />

@@ -18,11 +18,11 @@ const email = computed(
 );
 
 const whatsappPutra = computed(
-  () => settings.value?.contact_whatsapp_putra ?? "0881-0261-69525",
+  () => settings.value?.contact_wa_putra ?? "+628123456789",
 );
 
 const whatsappPutri = computed(
-  () => settings.value?.contact_whatsapp_putri ?? "0823-2846-2702",
+  () => settings.value?.contact_wa_putri ?? "+628123456789",
 );
 
 const mapsEmbedUrl = computed(
