@@ -27,24 +27,26 @@ type RegisterInput = {
 
 type RateLimitRecord = { count: number; firstAt: number }
 
-async function getRateLimit(key: string): Promise<RateLimitRecord | null> {
-  return kv.getItem<RateLimitRecord>(key)
+const rateLimitStore = new Map<string, RateLimitRecord>()
+
+function getRateLimit(key: string): RateLimitRecord | null {
+  const record = rateLimitStore.get(key)
+  if (!record) return null
+  if (Date.now() - record.firstAt >= RATE_LIMIT_WINDOW_SEC * 1000) {
+    rateLimitStore.delete(key)
+    return null
+  }
+  return record
 }
 
-async function recordFailedLoginAttempt(key: string): Promise<void> {
+function recordFailedLoginAttempt(key: string): void {
   const now = Date.now()
-  const current = await kv.getItem<RateLimitRecord>(key)
-
+  const current = rateLimitStore.get(key)
   if (!current || Date.now() - current.firstAt >= RATE_LIMIT_WINDOW_SEC * 1000) {
-    await kv.setItem(key, { count: 1, firstAt: now }, { ttl: RATE_LIMIT_WINDOW_SEC })
+    rateLimitStore.set(key, { count: 1, firstAt: now })
   }
   else {
-    const remainingTtl = Math.ceil(RATE_LIMIT_WINDOW_SEC - (Date.now() - current.firstAt) / 1000)
-    await kv.setItem(
-      key,
-      { count: current.count + 1, firstAt: current.firstAt },
-      { ttl: remainingTtl > 0 ? remainingTtl : 1 },
-    )
+    rateLimitStore.set(key, { count: current.count + 1, firstAt: current.firstAt })
   }
 }
 
@@ -55,7 +57,7 @@ export async function verifyLogin(
 ) {
   const rateLimitKey = `ratelimit:login:${ip}`
 
-  const attempts = await getRateLimit(rateLimitKey)
+  const attempts = getRateLimit(rateLimitKey)
   if (
     attempts &&
     attempts.count >= RATE_LIMIT_MAX &&
@@ -70,13 +72,13 @@ export async function verifyLogin(
   const user = await findUserForAuth(db, input.identifier)
 
   if (!user) {
-    await recordFailedLoginAttempt(rateLimitKey)
+    recordFailedLoginAttempt(rateLimitKey)
     throw createError({ statusCode: 401, message: 'Email atau password salah.' })
   }
 
   const isValid = await verifyUserPassword(input.password, user.password, user.passwordType)
   if (!isValid) {
-    await recordFailedLoginAttempt(rateLimitKey)
+    recordFailedLoginAttempt(rateLimitKey)
     throw createError({ statusCode: 401, message: 'Email atau password salah.' })
   }
 
@@ -89,7 +91,7 @@ export async function verifyLogin(
     updateUserPassword(db, user.id, newHash).catch(() => {})
   }
 
-  await kv.removeItem(rateLimitKey)
+  rateLimitStore.delete(rateLimitKey)
 
   return {
     user: {
