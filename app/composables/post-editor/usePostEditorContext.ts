@@ -103,7 +103,10 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
 
   const isOwnPost = computed(() => {
     if (!auth.canReview.value) return true;
-    return auth.user.value?.id === postData.value?.author?.id;
+    const authorId = postData.value?.author?.id;
+    const userId = auth.user.value?.id;
+    if (authorId == null || userId == null) return true;
+    return userId === authorId;
   });
 
   const showBeritaActions = computed(
