@@ -6,7 +6,7 @@ import { requireRole } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 
 export default defineEventHandler(async (event) => {
-  const currentUser = requireRole(event, ['santri'])
+  const currentUser = requireRole(event, ['santri', 'reviewer'])
 
   if (!isMysqlConfigured(event)) {
     throw createDatabaseNotConfiguredError()
@@ -15,7 +15,9 @@ export default defineEventHandler(async (event) => {
   const db = useDb(event)
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
-  const [statusCounts, latestApprovedRows] = await Promise.all([
+  const isReviewer = currentUser.role === 'reviewer'
+
+  const [statusCounts, latestApprovedRows, queueCountResult] = await Promise.all([
     db
       .select({ status: schema.posts.status, count: count() })
       .from(schema.posts)
@@ -38,6 +40,9 @@ export default defineEventHandler(async (event) => {
       ))
       .orderBy(desc(schema.posts.publishedAt), desc(schema.posts.createdAt))
       .limit(1),
+    isReviewer
+      ? db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'pending_review'))
+      : Promise.resolve(null),
   ])
 
   const countByStatus = Object.fromEntries(
@@ -50,5 +55,6 @@ export default defineEventHandler(async (event) => {
     pendingReview: countByStatus.pending_review ?? 0,
     rejected: countByStatus.rejected ?? 0,
     latestApprovedPost: latestApprovedRows[0] ?? null,
+    queueCount: queueCountResult?.[0]?.count,
   }
 })

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
+import { h, resolveComponent } from "vue";
 
 definePageMeta({
   layout: "admin",
@@ -22,7 +22,7 @@ type AdminPost = {
 
 const STATUS_OPTIONS = [
   { label: "Terbit", value: "published" },
-  { label: "Dalam Ulasan", value: "pending_review" },
+  { label: "Dalam Review", value: "pending_review" },
   { label: "Draft", value: "draft" },
   { label: "Ditolak", value: "rejected" },
 ];
@@ -39,7 +39,7 @@ const STATUS_COLOR: Record<
 
 const STATUS_LABEL: Record<string, string> = {
   published: "Terbit",
-  pending_review: "Dalam Ulasan",
+  pending_review: "Dalam Review",
   draft: "Draft",
   rejected: "Ditolak",
 };
@@ -190,23 +190,13 @@ const columns: TableColumn<AdminPost>[] = [
   <UCard>
     <template #header>
       <div class="flex items-center justify-between gap-3">
-        <USelect
-          v-model="statusFilter"
-          :items="STATUS_OPTIONS"
-          value-key="value"
-          label-key="label"
-          placeholder="Semua status"
-          class="w-44"
-        />
+        <USelect v-model="statusFilter" :items="STATUS_OPTIONS" value-key="value" label-key="label"
+          placeholder="Semua status" class="w-44" />
       </div>
     </template>
 
     <div class="overflow-x-auto">
-      <UTable
-        :data="paginatedPosts"
-        :columns="columns"
-        :loading="status === 'pending'"
-      >
+      <UTable :data="paginatedPosts" :columns="columns" :loading="status === 'pending'">
         <template #empty>
           <div class="py-12 text-center">
             <p class="text-muted">Tidak ada artikel ditemukan.</p>
@@ -218,13 +208,7 @@ const columns: TableColumn<AdminPost>[] = [
     <template #footer>
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
         <p class="text-sm text-muted shrink-0">Total {{ total }} artikel</p>
-        <UPagination
-          v-model:page="page"
-          :total="total"
-          :items-per-page="PAGE_SIZE"
-          size="sm"
-          variant="ghost"
-        />
+        <UPagination v-model:page="page" :total="total" :items-per-page="PAGE_SIZE" size="sm" variant="ghost" />
       </div>
     </template>
   </UCard>

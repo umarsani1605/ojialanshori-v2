@@ -11,7 +11,7 @@ INSERT INTO `pages` (`title`, `template`, `meta`, `updated_at`)
 VALUES (
   'Beranda',
   'home',
-  '{"subtitle":"Asrama Mahasiswa","description":"Omah Ngaji Al-Anshori adalah asrama mahasiswa yang bertujuan untuk mengembangkan karakter dan spiritualitas mahasiswa.","features":"Kuliah sambil Ngaji\\nNgaji Al-Qur\'an dan Kitab\\nRumah Baru, Keluarga Baru\\nKegiatan Seru Lainnya","maxNews":4,"maxPena":4}',
+  '{"subtitle":"Asrama Mahasiswa","title":"Omah Ngaji Al-Anshori","description":"Omah Ngaji Al-Anshori adalah asrama mahasiswa yang bertujuan untuk mengembangkan karakter dan spiritualitas mahasiswa.","features":"Kuliah sambil Ngaji\\nNgaji Al-Qur\'an dan Kitab\\nRumah Baru, Keluarga Baru\\nKegiatan Seru Lainnya","maxNews":4,"maxPena":4}',
   NOW()
 );
 

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 type Color = "blue" | "green" | "amber" | "red" | "slate" | "purple" | "orange";
 
-defineProps<{
+withDefaults(defineProps<{
   label: string;
   value: number | string;
   icon: string;
   color: Color;
-}>();
+  wrap?: boolean;
+}>(), {
+  wrap: true,
+});
 
 const bgClass: Record<Color, string> = {
   blue: "bg-blue-50 dark:bg-blue-950/50",
@@ -30,18 +33,15 @@ const iconClass: Record<Color, string> = {
 </script>
 
 <template>
-  <UCard
-    :ui="{
-      body: 'p-4!',
-    }"
-  >
-    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-      <div
-        :class="[
-          bgClass[color],
-          'size-12 rounded-lg flex items-center justify-center shrink-0',
-        ]"
-      >
+  <UCard :ui="{
+    body: 'p-4!',
+  }">
+    <div
+      :class="wrap ? 'flex flex-col md:flex-row items-start md:items-center gap-6' : 'flex flex-row items-center gap-6'">
+      <div :class="[
+        bgClass[color],
+        'size-12 rounded-lg flex items-center justify-center shrink-0',
+      ]">
         <UIcon :name="icon" :class="['size-6', iconClass[color]]" />
       </div>
       <div class="min-w-0 flex-1">

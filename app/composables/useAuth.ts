@@ -13,7 +13,7 @@ export function useAuth() {
     isReviewer: computed(() => user.value?.role === 'reviewer'),
     isSantri: computed(() => user.value?.role === 'santri'),
     canReview: computed(() => ['admin', 'reviewer'].includes(user.value?.role ?? '')),
-    canWritePenaSantri: computed(() => user.value?.role === 'santri'),
+    canWritePenaSantri: computed(() => ['santri', 'reviewer'].includes(user.value?.role ?? '')),
     canManageBerita: computed(() => user.value?.role === 'admin'),
     cluster: computed(() => getRoleCluster(role.value)),
     homePath: computed(() => getRoleHomePath(role.value)),

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
+import { h, resolveComponent } from "vue";
 
 definePageMeta({
   layout: "admin",
@@ -28,7 +28,7 @@ type SelectItem = {
 
 const STATUS_OPTIONS = [
   { label: "Terbit", value: "published" },
-  { label: "Dalam Ulasan", value: "pending_review" },
+  { label: "Dalam Review", value: "pending_review" },
   { label: "Draft", value: "draft" },
   { label: "Ditolak", value: "rejected" },
 ];
@@ -45,7 +45,7 @@ const STATUS_COLOR: Record<
 
 const STATUS_LABEL: Record<string, string> = {
   published: "Terbit",
-  pending_review: "Dalam Ulasan",
+  pending_review: "Dalam Review",
   draft: "Draft",
   rejected: "Ditolak",
 };
@@ -190,13 +190,13 @@ const columns: TableColumn<AdminPost>[] = [
       const src = row.original.featuredImage;
       return src
         ? h("img", {
-            src,
-            class: "h-24 w-32 rounded-xl object-cover bg-elevated shrink-0",
-          })
+          src,
+          class: "h-24 w-32 rounded-xl object-cover bg-elevated shrink-0",
+        })
         : h("div", {
-            class:
-              "h-24 w-32 rounded-xl bg-elevated flex items-center justify-center shrink-0",
-          }, h(resolveComponent("UIcon"), { name: "i-ph-image", class: "size-5 text-dimmed" }));
+          class:
+            "h-24 w-32 rounded-xl bg-elevated flex items-center justify-center shrink-0",
+        }, h(resolveComponent("UIcon"), { name: "i-ph-image", class: "size-5 text-dimmed" }));
     },
   },
   {
@@ -264,54 +264,20 @@ const columns: TableColumn<AdminPost>[] = [
 </script>
 
 <template>
-  <AdminDataTable
-    v-model:search="search"
-    :data="filteredPosts"
-    :columns="columns"
-    :loading="status === 'pending'"
-    search-placeholder="Cari judul artikel…"
-  >
+  <AdminDataTable v-model:search="search" :data="filteredPosts" :columns="columns" :loading="status === 'pending'"
+    search-placeholder="Cari judul artikel…">
     <template #toolbar-left>
-      <USelect
-        v-model="authorFilter"
-        :items="authorOptions"
-        value-key="value"
-        label-key="label"
-        placeholder="Semua penulis"
-        class="w-48"
-      />
-      <USelect
-        v-model="categoryFilter"
-        :items="categoryOptions"
-        value-key="value"
-        label-key="label"
-        placeholder="Semua kategori"
-        class="w-48"
-      />
-      <USelect
-        v-model="statusFilter"
-        :items="STATUS_OPTIONS"
-        value-key="value"
-        label-key="label"
-        placeholder="Semua status"
-        class="w-48"
-      />
-      <UButton
-        v-if="isFiltered"
-        variant="link"
-        color="neutral"
-        icon="i-ph-x"
-        label="Reset"
-        @click="resetFilters"
-      />
+      <USelect v-model="authorFilter" :items="authorOptions" value-key="value" label-key="label"
+        placeholder="Semua penulis" class="w-48" />
+      <USelect v-model="categoryFilter" :items="categoryOptions" value-key="value" label-key="label"
+        placeholder="Semua kategori" class="w-48" />
+      <USelect v-model="statusFilter" :items="STATUS_OPTIONS" value-key="value" label-key="label"
+        placeholder="Semua status" class="w-48" />
+      <UButton v-if="isFiltered" variant="link" color="neutral" icon="i-ph-x" label="Reset" @click="resetFilters" />
     </template>
 
     <template #toolbar-right>
-      <UButton
-        label="Tulis Artikel"
-        icon="i-ph-plus-bold"
-        to="/admin/pena-santri/create"
-      />
+      <UButton label="Tulis Artikel" icon="i-ph-plus-bold" to="/admin/pena-santri/create" />
     </template>
 
     <template #empty>
@@ -331,17 +297,8 @@ const columns: TableColumn<AdminPost>[] = [
 
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton
-          variant="ghost"
-          label="Batal"
-          @click="isDeleteModalOpen = false"
-        />
-        <UButton
-          color="error"
-          label="Hapus"
-          :loading="deleting"
-          @click="doDelete"
-        />
+        <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
+        <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
       </div>
     </template>
   </UModal>
