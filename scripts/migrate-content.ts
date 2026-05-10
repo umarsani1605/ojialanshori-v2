@@ -27,30 +27,6 @@ interface WPCategory {
   parent: number;
 }
 
-interface WPPost {
-  id: number;
-  slug: string;
-  title: { rendered: string };
-  content: { rendered: string };
-  excerpt: { rendered: string };
-  date: string;
-  author: number;
-  categories: number[];
-  featured_media: number;
-  _embedded?: {
-    "wp:featuredmedia"?: Array<{ source_url?: string }>;
-  };
-}
-
-interface WPPage {
-  id: number;
-  slug: string;
-  status: string;
-  title: { rendered: string };
-  content: { rendered: string };
-  date: string;
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const WP_API = "https://ojialanshori.com/wp-json/wp/v2";
@@ -116,6 +92,120 @@ async function fetchAll<T>(
   }
 
   return results;
+}
+
+// ─── SQL Parser ──────────────────────────────────────────────────────────────
+
+function splitSqlValues(row: string): string[] {
+  const values: string[] = [];
+  let current = "";
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+    if (escaped) {
+      current += char;
+      escaped = false;
+    } else if (char === "\\") {
+      current += char;
+      escaped = true;
+    } else if (char === "'") {
+      inString = !inString;
+      current += char;
+    } else if (char === "," && !inString) {
+      values.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  values.push(current.trim());
+  return values;
+}
+
+function unquote(val: string): string | null {
+  if (val === "NULL") return null;
+  if (val.startsWith("'") && val.endsWith("'")) {
+    return val
+      .slice(1, -1)
+      .replace(/\\'/g, "'")
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, "\n")
+      .replace(/\\r/g, "\r")
+      .replace(/\\t/g, "\t")
+      .replace(/\\\\/g, "\\");
+  }
+  return val;
+}
+
+function parseWPPostsSql(sqlContent: string): any[] {
+  const posts: any[] = [];
+  const insertRegex = /INSERT INTO `wp_posts` \((.*?)\) VALUES\s*([\s\S]*?);/g;
+  let match;
+
+  while ((match = insertRegex.exec(sqlContent)) !== null) {
+    const columns = match[1].split(",").map((c) => c.trim().replace(/`/g, ""));
+    const valuesPart = match[2].trim();
+
+    let currentRow = "";
+    let inString = false;
+    let escaped = false;
+    let parenLevel = 0;
+
+    for (let i = 0; i < valuesPart.length; i++) {
+      const char = valuesPart[i];
+      if (escaped) {
+        currentRow += char;
+        escaped = false;
+      } else if (char === "\\") {
+        currentRow += char;
+        escaped = true;
+      } else if (char === "'") {
+        inString = !inString;
+        currentRow += char;
+      } else if (!inString) {
+        if (char === "(") {
+          parenLevel++;
+          if (parenLevel > 1) currentRow += char;
+        } else if (char === ")") {
+          parenLevel--;
+          if (parenLevel === 0) {
+            const values = splitSqlValues(currentRow);
+            const post: any = {};
+            columns.forEach((col, idx) => {
+              post[col] = unquote(values[idx]);
+            });
+            posts.push(post);
+            currentRow = "";
+          } else {
+            currentRow += char;
+          }
+        } else if (char === "," && parenLevel === 0) {
+          // Skip comma between rows
+        } else {
+          currentRow += char;
+        }
+      } else {
+        currentRow += char;
+      }
+    }
+  }
+  return posts;
+}
+
+function mapWPStatusToPostStatus(wpStatus: string): PostStatus {
+  switch (wpStatus) {
+    case "publish":
+    case "future":
+      return "published";
+    case "pending":
+      return "pending_review";
+    case "draft":
+    case "private":
+    case "trash":
+    default:
+      return "draft";
+  }
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -197,10 +287,15 @@ async function main() {
 
   // ── 2. Posts ────────────────────────────────────────────────────────────────
 
-  console.log("\n📝 Migrating posts...");
-  const wpPosts = await fetchAll<WPPost>("/posts", {
-    _embed: "wp:featuredmedia",
-  });
+  console.log("\n📝 Migrating posts from SQL...");
+  const sqlPath = path.join(process.cwd(), "scripts/wp_posts.sql");
+  const sqlContent = await fs.readFile(sqlPath, "utf-8");
+  const wpPostsRaw = parseWPPostsSql(sqlContent);
+
+  const wpPosts = wpPostsRaw.filter(
+    (p) => p.post_type === "post" && p.post_status !== "auto-draft",
+  );
+  console.log(`    Found ${wpPosts.length} posts in SQL (excluding auto-drafts)`);
 
   // Default author ID — placeholder until E1-004 (user migration)
   // All posts temporarily attributed to author ID 1 (admin)
@@ -221,53 +316,62 @@ async function main() {
       isActive: true,
     });
     // In case the auto-increment wasn't 1, force update it
-    await connection.query(`UPDATE users SET id = 1 WHERE email = 'admin@ojialanshori.com'`);
+    await connection.query(
+      `UPDATE users SET id = 1 WHERE email = 'admin@ojialanshori.com'`,
+    );
   }
 
   let postOk = 0,
     postErr = 0;
   for (const post of wpPosts) {
-    const categoryNewId = post.categories[0]
-      ? (mapping.categories[post.categories[0]] ?? null)
-      : null;
+    // Categories are NOT available in SQL wp_posts table, default to 1
+    const categoryNewId = 1;
 
-    if (!categoryNewId) {
-      console.warn(
-        `  ⚠️  Post "${post.slug}" has no mapped category (wp_categories: ${post.categories})`,
-      );
-    }
+    // Featured image is NOT available in SQL directly
+    const featuredImageUrl = null;
 
-    const featuredImageUrl =
-      post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null;
+    // Generate slug if post_name is empty
+    const slug =
+      post.post_name ||
+      stripHtml(post.post_title)
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .substring(0, 200) ||
+      `post-${post.ID}`;
 
     try {
       const existing = await db.query.posts.findFirst({
-        where: eq(schema.posts.slug, post.slug),
+        where: eq(schema.posts.slug, slug),
       });
 
       if (existing) {
-        mapping.posts[post.id] = existing.id;
+        mapping.posts[post.ID] = existing.id;
         postOk++;
         continue;
       }
 
       const result = await db.insert(schema.posts).values({
-        title: stripHtml(post.title.rendered),
-        slug: post.slug,
-        content: post.content.rendered,
-        excerpt: stripHtml(post.excerpt.rendered) || null,
+        title: stripHtml(post.post_title) || "Untitled Post",
+        slug: slug,
+        content: post.post_content || "",
+        excerpt: stripHtml(post.post_excerpt) || null,
         featuredImage: featuredImageUrl,
-        categoryId: categoryNewId ?? 1,
+        categoryId: categoryNewId,
         authorId: PLACEHOLDER_AUTHOR_ID,
-        status: "published",
-        publishedAt: new Date(post.date),
-        createdAt: new Date(post.date),
-        updatedAt: new Date(post.date),
+        status: mapWPStatusToPostStatus(post.post_status),
+        publishedAt: new Date(post.post_date),
+        createdAt: new Date(post.post_date),
+        updatedAt: new Date(post.post_modified),
       });
-      mapping.posts[post.id] = result[0].insertId;
+      mapping.posts[post.ID] = result[0].insertId;
       postOk++;
     } catch (e: any) {
-      console.error(`  ❌ Post "${post.slug}":`, e.message, e.cause?.message || e.cause || '');
+      console.error(
+        `  ❌ Post "${slug}":`,
+        e.message,
+        e.cause?.message || e.cause || "",
+      );
       postErr++;
     }
   }

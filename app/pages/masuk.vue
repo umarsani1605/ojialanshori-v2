@@ -98,7 +98,7 @@ async function onSubmit() {
           <UFormField name="identifier" label="Email">
             <UInput
               v-model="state.identifier"
-              placeholder="admin@ojialanshori.com"
+              placeholder="santri@ojialanshori.com"
               type="email"
               autocomplete="email"
               :disabled="loading"
@@ -119,7 +119,6 @@ async function onSubmit() {
                 <UButton
                   color="neutral"
                   variant="link"
-                  size="sm"
                   :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
                   :aria-label="
                     showPassword
@@ -132,17 +131,11 @@ async function onSubmit() {
             </UInput>
           </UFormField>
 
-          <div class="flex items-center gap-2">
-            <input
-              id="remember"
-              v-model="state.remember"
-              type="checkbox"
-              class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-            />
-            <label for="remember" class="text-sm text-slate-600 cursor-pointer">
-              Ingat saya
-            </label>
-          </div>
+          <UCheckbox
+            v-model="state.remember"
+            name="remember"
+            label="Ingat saya"
+          />
 
           <UButton
             type="submit"

@@ -228,7 +228,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
   <UContainer class="space-y-6">
     <template v-if="auth.isSantri.value">
       <div
-        class="relative overflow-hidden rounded-xl bg-linear-to-r from-[#5DDB71] to-[#8BEC9B] p-8 text-white"
+        class="relative overflow-hidden rounded-xl bg-linear-to-r from-[#3FC0A2] to-[#73CD8F] p-8 text-white"
       >
         <img
           src="/images/greetings-left.png"

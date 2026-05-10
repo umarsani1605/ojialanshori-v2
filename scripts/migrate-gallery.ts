@@ -50,7 +50,8 @@ function urlToR2Key(url: string): string {
 }
 
 function urlToNewUrl(url: string): string {
-  return url
+  const path = url.replace(/https?:\/\/ojialanshori\.com\/wp-content\/uploads\//, '')
+  return `/images/uploads/${path}`
 }
 
 function getMimeType(url: string): string {
@@ -137,9 +138,9 @@ async function main() {
   let inserted = 0, updated = 0
   for (let i = 0; i < ITEMS.length; i++) {
     const item = ITEMS[i]
-    const imagePath = urlToNewUrl(item.url) // absolute WP URL, sama dgn format posts.featuredImage
-    const legacyPathR2 = urlToR2Key(item.url)        // uploads/2024/11/oji-3.png
-    const legacyPathLocal = `/images/${legacyPathR2}` // /images/uploads/2024/11/oji-3.png
+    const imagePath = urlToNewUrl(item.url)
+    const legacyPathR2 = urlToR2Key(item.url)
+    const legacyPathLocal = `/images/${legacyPathR2}`
     const order = i + 1
 
     const existing = await db.select({ id: schema.gallery.id, imagePath: schema.gallery.imagePath })
