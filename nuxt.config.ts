@@ -82,10 +82,12 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    sessionSecret:
-      process.env.NUXT_SESSION_SECRET ||
-      process.env.NUXT_SESSION_PASSWORD ||
-      "",
+    session: {
+      password:
+        process.env.NUXT_SESSION_PASSWORD ||
+        process.env.NUXT_SESSION_SECRET ||
+        "8dc6e480ab1f431d9582c02f0b06a3ba",
+    },
     brevoApiKey:
       process.env.NUXT_BREVO_API_KEY || process.env.BREVO_API_KEY || "",
     mysqlUrl: process.env.NUXT_MYSQL_URL || process.env.MYSQL_URL || "",

@@ -25,13 +25,20 @@ export default defineEventHandler(async (event) => {
       db.select({ count: count() }).from(schema.posts).where(eq(schema.posts.status, 'pending_review')),
       db.select({ count: count() }).from(schema.users).where(eq(schema.users.role, 'santri')),
       db.select({ count: count() }).from(schema.gallery),
-      db.query.posts.findMany({
-        where: eq(schema.posts.status, 'pending_review'),
-        orderBy: [desc(schema.posts.createdAt)],
-        limit: 5,
-        columns: { id: true, title: true, slug: true, createdAt: true, featuredImage: true },
-        with: { author: { columns: { fullname: true } } },
-      }),
+      db
+        .select({
+          id: schema.posts.id,
+          title: schema.posts.title,
+          slug: schema.posts.slug,
+          createdAt: schema.posts.createdAt,
+          featuredImage: schema.posts.featuredImage,
+          authorFullname: schema.users.fullname,
+        })
+        .from(schema.posts)
+        .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
+        .where(eq(schema.posts.status, 'pending_review'))
+        .orderBy(desc(schema.posts.createdAt))
+        .limit(5),
     ])
 
     return {
@@ -41,7 +48,14 @@ export default defineEventHandler(async (event) => {
       pendingReviewPosts: pendingResult[0]?.count ?? 0,
       totalSantri: santriCountResult[0]?.count ?? 0,
       totalGallery: galleryResult[0]?.count ?? 0,
-      recentPendingPosts: recentPending,
+      recentPendingPosts: recentPending.map(row => ({
+        id: row.id,
+        title: row.title,
+        slug: row.slug,
+        createdAt: row.createdAt,
+        featuredImage: row.featuredImage,
+        author: { fullname: row.authorFullname! },
+      })),
     }
   }
 

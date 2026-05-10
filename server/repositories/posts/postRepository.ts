@@ -6,55 +6,186 @@ import * as schema from '#server/db/schema'
 
 export type Database = MySql2Database<typeof schema>
 
+async function fetchReviewer(db: Database, reviewedBy: number | null) {
+  if (reviewedBy === null) return null
+  const [r] = await db
+    .select({ id: schema.users.id, fullname: schema.users.fullname })
+    .from(schema.users)
+    .where(eq(schema.users.id, reviewedBy))
+    .limit(1)
+  return r ?? null
+}
+
 export async function findPostById(db: Database, postId: number) {
-  return db.query.posts.findFirst({
-    where: eq(schema.posts.id, postId),
-    with: {
-      author: { columns: { id: true, fullname: true, email: true } },
-      category: { columns: { id: true, name: true, type: true } },
-      reviewer: { columns: { id: true, fullname: true } },
-    },
-  })
+  const [row] = await db
+    .select({
+      id: schema.posts.id,
+      title: schema.posts.title,
+      slug: schema.posts.slug,
+      content: schema.posts.content,
+      excerpt: schema.posts.excerpt,
+      featuredImage: schema.posts.featuredImage,
+      categoryId: schema.posts.categoryId,
+      authorId: schema.posts.authorId,
+      reviewedBy: schema.posts.reviewedBy,
+      status: schema.posts.status,
+      reviewNote: schema.posts.reviewNote,
+      publishedAt: schema.posts.publishedAt,
+      createdAt: schema.posts.createdAt,
+      updatedAt: schema.posts.updatedAt,
+      authorUserId: schema.users.id,
+      authorFullname: schema.users.fullname,
+      authorEmail: schema.users.email,
+      categoryRowId: schema.categories.id,
+      categoryName: schema.categories.name,
+      categoryType: schema.categories.type,
+    })
+    .from(schema.posts)
+    .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
+    .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+    .where(eq(schema.posts.id, postId))
+    .limit(1)
+
+  if (!row) return undefined
+  const reviewer = await fetchReviewer(db, row.reviewedBy)
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    content: row.content,
+    excerpt: row.excerpt,
+    featuredImage: row.featuredImage,
+    categoryId: row.categoryId,
+    authorId: row.authorId,
+    reviewedBy: row.reviewedBy,
+    status: row.status,
+    reviewNote: row.reviewNote,
+    publishedAt: row.publishedAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    author: { id: row.authorUserId!, fullname: row.authorFullname!, email: row.authorEmail! },
+    category: row.categoryRowId !== null
+      ? { id: row.categoryRowId, name: row.categoryName!, type: row.categoryType! }
+      : null,
+    reviewer,
+  }
 }
 
 export async function findPostByIdForSantri(db: Database, postId: number, authorId: number) {
-  return db.query.posts.findFirst({
-    where: and(eq(schema.posts.id, postId), eq(schema.posts.authorId, authorId)),
-    with: {
-      category: { columns: { id: true, name: true, type: true } },
-      reviewer: { columns: { id: true, fullname: true } },
-    },
-  })
+  const [row] = await db
+    .select({
+      id: schema.posts.id,
+      title: schema.posts.title,
+      slug: schema.posts.slug,
+      content: schema.posts.content,
+      excerpt: schema.posts.excerpt,
+      featuredImage: schema.posts.featuredImage,
+      categoryId: schema.posts.categoryId,
+      authorId: schema.posts.authorId,
+      reviewedBy: schema.posts.reviewedBy,
+      status: schema.posts.status,
+      reviewNote: schema.posts.reviewNote,
+      publishedAt: schema.posts.publishedAt,
+      createdAt: schema.posts.createdAt,
+      updatedAt: schema.posts.updatedAt,
+      categoryRowId: schema.categories.id,
+      categoryName: schema.categories.name,
+      categoryType: schema.categories.type,
+    })
+    .from(schema.posts)
+    .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+    .where(and(eq(schema.posts.id, postId), eq(schema.posts.authorId, authorId)))
+    .limit(1)
+
+  if (!row) return undefined
+  const reviewer = await fetchReviewer(db, row.reviewedBy)
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    content: row.content,
+    excerpt: row.excerpt,
+    featuredImage: row.featuredImage,
+    categoryId: row.categoryId,
+    authorId: row.authorId,
+    reviewedBy: row.reviewedBy,
+    status: row.status,
+    reviewNote: row.reviewNote,
+    publishedAt: row.publishedAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    category: row.categoryRowId !== null
+      ? { id: row.categoryRowId, name: row.categoryName!, type: row.categoryType! }
+      : null,
+    reviewer,
+  }
 }
 
 export async function listAllPosts(db: Database) {
-  return db.query.posts.findMany({
-    orderBy: [desc(schema.posts.updatedAt)],
-    columns: {
-      id: true,
-      title: true,
-      slug: true,
-      status: true,
-      updatedAt: true,
-      publishedAt: true,
-    },
-    with: {
-      author: { columns: { id: true, fullname: true } },
-      category: { columns: { id: true, name: true, type: true } },
-    },
-  })
+  const rows = await db
+    .select({
+      id: schema.posts.id,
+      title: schema.posts.title,
+      slug: schema.posts.slug,
+      status: schema.posts.status,
+      updatedAt: schema.posts.updatedAt,
+      publishedAt: schema.posts.publishedAt,
+      authorUserId: schema.users.id,
+      authorFullname: schema.users.fullname,
+      categoryRowId: schema.categories.id,
+      categoryName: schema.categories.name,
+      categoryType: schema.categories.type,
+    })
+    .from(schema.posts)
+    .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
+    .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+    .orderBy(desc(schema.posts.updatedAt))
+
+  return rows.map(row => ({
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    status: row.status,
+    updatedAt: row.updatedAt,
+    publishedAt: row.publishedAt,
+    author: { id: row.authorUserId!, fullname: row.authorFullname! },
+    category: row.categoryRowId !== null
+      ? { id: row.categoryRowId, name: row.categoryName!, type: row.categoryType! }
+      : null,
+  }))
 }
 
 export async function listPostsForReview(db: Database) {
-  return db.query.posts.findMany({
-    where: eq(schema.posts.status, 'pending_review'),
-    orderBy: [desc(schema.posts.updatedAt)],
-    columns: { id: true, title: true, slug: true, status: true, updatedAt: true },
-    with: {
-      author: { columns: { id: true, fullname: true } },
-      category: { columns: { id: true, name: true, type: true } },
-    },
-  })
+  const rows = await db
+    .select({
+      id: schema.posts.id,
+      title: schema.posts.title,
+      slug: schema.posts.slug,
+      status: schema.posts.status,
+      updatedAt: schema.posts.updatedAt,
+      authorUserId: schema.users.id,
+      authorFullname: schema.users.fullname,
+      categoryRowId: schema.categories.id,
+      categoryName: schema.categories.name,
+      categoryType: schema.categories.type,
+    })
+    .from(schema.posts)
+    .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
+    .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+    .where(eq(schema.posts.status, 'pending_review'))
+    .orderBy(desc(schema.posts.updatedAt))
+
+  return rows.map(row => ({
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    status: row.status,
+    updatedAt: row.updatedAt,
+    author: { id: row.authorUserId!, fullname: row.authorFullname! },
+    category: row.categoryRowId !== null
+      ? { id: row.categoryRowId, name: row.categoryName!, type: row.categoryType! }
+      : null,
+  }))
 }
 
 export async function listOwnPenaSantriPosts(

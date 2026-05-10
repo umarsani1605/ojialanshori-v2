@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 
 import * as schema from '#server/db/schema'
 import type { PostStatus } from '#server/db/schema'
@@ -55,16 +55,40 @@ type RejectPayload = ReviewPayload & {
 
 export async function listPostsForActor(db: Database, actor: Actor, status?: PostStatus) {
   if (actor.role === 'admin') {
-    const rows = await db.query.posts.findMany({
-      where: status ? eq(schema.posts.status, status) : undefined,
-      orderBy: (posts, { desc }) => [desc(posts.updatedAt)],
-      columns: { id: true, title: true, slug: true, status: true, updatedAt: true, publishedAt: true },
-      with: {
-        author: { columns: { id: true, fullname: true } },
-        category: { columns: { id: true, name: true, type: true } },
-      },
-    })
-    return { data: rows }
+    const rows = await db
+      .select({
+        id: schema.posts.id,
+        title: schema.posts.title,
+        slug: schema.posts.slug,
+        status: schema.posts.status,
+        updatedAt: schema.posts.updatedAt,
+        publishedAt: schema.posts.publishedAt,
+        authorUserId: schema.users.id,
+        authorFullname: schema.users.fullname,
+        categoryRowId: schema.categories.id,
+        categoryName: schema.categories.name,
+        categoryType: schema.categories.type,
+      })
+      .from(schema.posts)
+      .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
+      .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+      .where(status ? eq(schema.posts.status, status) : undefined)
+      .orderBy(desc(schema.posts.updatedAt))
+
+    return {
+      data: rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        slug: row.slug,
+        status: row.status,
+        updatedAt: row.updatedAt,
+        publishedAt: row.publishedAt,
+        author: { id: row.authorUserId!, fullname: row.authorFullname! },
+        category: row.categoryRowId !== null
+          ? { id: row.categoryRowId, name: row.categoryName!, type: row.categoryType! }
+          : null,
+      })),
+    }
   }
   if (actor.role === 'reviewer') {
     return { data: await listPostsForReview(db) }
