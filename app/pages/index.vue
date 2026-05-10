@@ -184,7 +184,7 @@ useSeoMeta({
         src="/images/hero/hero-left-top.png"
         alt=""
         aria-hidden="true"
-        class="absolute top-6 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
+        class="absolute top-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
       />
       <NuxtImg
         src="/images/hero/hero-left-bottom.png"
@@ -210,19 +210,19 @@ useSeoMeta({
         reverse
         class="relative z-10 py-10"
         :ui="{
-          container:
-            'py-14 sm:py-16 lg:py-18 gap-12 lg:gap-16 items-left md:items-center',
+          container: 'py-8 sm:py-14 lg:py-16 gap-12 lg:gap-16 items-center',
           wrapper: 'items-start',
-          headline: 'text-xl font-semibold text-white/90',
+          headline:
+            'text-xl font-semibold text-white/90 text-center md:text-left',
           title:
-            'font-ui text-xl md:text-2xl lg:text-4xl font-extrabold text-white tracking-wide',
+            'font-ui text-xl md:text-2xl lg:text-4xl font-extrabold text-white tracking-wide text-center md:text-left',
           description:
-            'text-base md:text-lg text-white/85 max-w-xl leading-relaxed',
-          links: 'mt-2',
+            'text-base md:text-lg text-white/85 max-w-xl leading-relaxed text-center md:text-left',
+          links: 'mt-2 justify-center md:justify-start',
         }"
       >
         <template #headline>
-          <span class="flex items-center gap-3">
+          <span>
             {{ siteTagline }}
           </span>
         </template>
