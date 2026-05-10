@@ -25,7 +25,7 @@ import * as schema from '../server/db/schema.js'
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const WP_UPLOADS_BASE = 'https://ojialanshori.com/wp-content/uploads/'
-const NEW_URL_PREFIX = '/images/uploads/'
+const NEW_URL_PREFIX = 'https://assets.ojialanshori.com/uploads/'
 const URL_REGEX = /https?:\/\/ojialanshori\.com\/wp-content\/uploads\/([^\s"'<>)\]]+)/g
 
 const MIME_MAP: Record<string, string> = {

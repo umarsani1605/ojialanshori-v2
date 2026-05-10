@@ -143,7 +143,7 @@ const statItems = computed(() => [
               class="flex gap-4"
             >
               <div
-                class="size-16 shrink-0 overflow-hidden rounded-lg bg-slate-100"
+                class="h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-slate-100"
               >
                 <img
                   v-if="post.featuredImage"
@@ -158,11 +158,14 @@ const statItems = computed(() => [
                   <UIcon name="i-ph-image" class="text-xl" />
                 </div>
               </div>
-              <div class="min-w-0 mt-2">
+              <div class="min-w-0 mt-4">
                 <p class="truncate font-medium group-hover:opacity-80">
                   {{ post.title }}
                 </p>
-                <p class="mt-0.5 text-sm">oleh {{ post.author.fullname }}</p>
+                <p class="mt-0.5 text-sm text-muted">
+                  oleh {{ post.author.fullname }} ·
+                  {{ formatDatetime(post.createdAt) }}
+                </p>
               </div>
             </NuxtLink>
           </li>

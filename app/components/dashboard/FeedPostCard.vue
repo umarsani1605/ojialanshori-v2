@@ -18,7 +18,7 @@ const dateFormatted = computed(() =>
     <div
       class="w-28 aspect-3/2 shrink-0 overflow-hidden rounded-lg bg-slate-100"
     >
-      <NuxtImg
+      <img
         v-if="featuredImage"
         :src="featuredImage"
         :alt="title"

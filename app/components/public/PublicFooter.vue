@@ -59,7 +59,7 @@ const socials = computed(() => [
         >
           <!-- Logo -->
           <NuxtLink to="/" class="inline-flex">
-            <NuxtImg
+            <img
               src="/images/logo/logo_white.png"
               alt="Omah Ngaji Al-Anshori"
               class="h-24 w-auto object-contain"

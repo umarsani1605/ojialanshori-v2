@@ -28,7 +28,7 @@ const dateFormatted = computed(() =>
 <template>
   <NuxtLink :to="href" class="group flex flex-col">
     <div class="aspect-3/2 bg-slate-100 rounded-2xl overflow-hidden">
-      <NuxtImg
+      <img
         v-if="post.featuredImage"
         :src="post.featuredImage"
         :alt="post.title"

@@ -35,6 +35,19 @@ const filters = reactive({
   search: "",
 });
 
+const isFiltered = computed(
+  () =>
+    filters.role !== "all" ||
+    filters.status !== "all" ||
+    filters.search !== "",
+);
+
+function resetFilters() {
+  filters.role = "all";
+  filters.status = "all";
+  filters.search = "";
+}
+
 const query = computed(() => ({
   role: filters.role === "all" ? undefined : filters.role,
   status: filters.status === "all" ? undefined : filters.status,
@@ -415,6 +428,14 @@ const columns: TableColumn<User>[] = [
         :items="statusOptions"
         value-key="value"
         class="w-40"
+      />
+      <UButton
+        v-if="isFiltered"
+        variant="link"
+        color="neutral"
+        icon="i-ph-x"
+        label="Reset"
+        @click="resetFilters"
       />
     </template>
 

@@ -60,7 +60,7 @@ useSeoMeta({
               class="flex-none h-72 w-full max-w-120 rounded-2xl overflow-hidden bg-slate-100 aspect-4/3"
               :class="idx % 2 === 1 ? 'md:order-2' : ''"
             >
-              <NuxtImg
+              <img
                 :src="program.image"
                 :alt="program.title"
                 loading="lazy"

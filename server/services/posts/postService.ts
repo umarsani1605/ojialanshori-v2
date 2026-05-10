@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 
 import * as schema from '#server/db/schema'
 import type { PostStatus } from '#server/db/schema'
@@ -60,6 +60,7 @@ export async function listPostsForActor(db: Database, actor: Actor, status?: Pos
         id: schema.posts.id,
         title: schema.posts.title,
         slug: schema.posts.slug,
+        featuredImage: schema.posts.featuredImage,
         status: schema.posts.status,
         updatedAt: schema.posts.updatedAt,
         publishedAt: schema.posts.publishedAt,
@@ -73,13 +74,23 @@ export async function listPostsForActor(db: Database, actor: Actor, status?: Pos
       .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
       .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
       .where(status ? eq(schema.posts.status, status) : undefined)
-      .orderBy(desc(schema.posts.updatedAt))
+      .orderBy(
+        sql`CASE ${schema.posts.status}
+          WHEN 'pending_review' THEN 0
+          WHEN 'rejected' THEN 1
+          WHEN 'draft' THEN 2
+          WHEN 'published' THEN 3
+          ELSE 4
+        END`,
+        desc(schema.posts.updatedAt),
+      )
 
     return {
       data: rows.map(row => ({
         id: row.id,
         title: row.title,
         slug: row.slug,
+        featuredImage: row.featuredImage,
         status: row.status,
         updatedAt: row.updatedAt,
         publishedAt: row.publishedAt,

@@ -30,6 +30,7 @@ export async function serveR2MediaObject(event: H3Event, pathname: string) {
   const s3 = new S3Client({
     region: 'auto',
     endpoint: mediaConfig.endpoint,
+    forcePathStyle: true,
     credentials: {
       accessKeyId: mediaConfig.accessKeyId,
       secretAccessKey: mediaConfig.secretAccessKey,
@@ -43,10 +44,19 @@ export async function serveR2MediaObject(event: H3Event, pathname: string) {
         Key: pathname,
       }),
     )
-    const body = await readS3Body(object.Body as S3Body | Readable | undefined)
 
-    if (!body) {
+    if (!object.Body) {
       return null
+    }
+
+    // Gunakan transformToByteArray jika tersedia (lebih stabil di Node.js/Nitro)
+    let body: Uint8Array
+    if (typeof (object.Body as any).transformToByteArray === 'function') {
+      body = await (object.Body as any).transformToByteArray()
+    } else {
+      const manualBody = await readS3Body(object.Body as S3Body | Readable | undefined)
+      if (!manualBody) return null
+      body = manualBody
     }
 
     setHeader(
@@ -60,13 +70,9 @@ export async function serveR2MediaObject(event: H3Event, pathname: string) {
       setHeader(event, 'etag', object.ETag)
     }
 
-    return new ReadableStream({
-      start(controller) {
-        controller.enqueue(body)
-        controller.close()
-      },
-    })
-  } catch {
+    return body
+  } catch (e) {
+    console.error(`[R2 Proxy Error] Path: ${pathname}`, e)
     return null
   }
 }

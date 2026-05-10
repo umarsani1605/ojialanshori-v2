@@ -76,7 +76,7 @@ function handleOpenChange(value: boolean) {
 
           <div class="flex w-full max-w-6xl flex-col items-center justify-center gap-4">
             <div class="overflow-hidden rounded-2xl bg-white/5">
-              <NuxtImg
+              <img
                 v-if="activeItem"
                 :src="activeItem.imagePath"
                 :alt="activeItem.title"

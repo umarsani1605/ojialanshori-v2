@@ -347,6 +347,7 @@ const editorHandlers = {
           <UButton
             color="error"
             variant="light"
+            size="lg"
             :loading="loadingAction === 'reject'"
             :disabled="!!loadingAction"
             @click="reject()"

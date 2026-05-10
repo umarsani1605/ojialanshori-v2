@@ -180,25 +180,25 @@ useSeoMeta({
     <!-- 1. Hero — green gradient + Arabic letter ornaments -->
     <section class="hero-gradient relative overflow-hidden text-white">
       <!-- Decorative ornaments — white Arabic letters & shapes on green bg -->
-      <NuxtImg
+      <img
         src="/images/hero/hero-left-top.png"
         alt=""
         aria-hidden="true"
         class="absolute top-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
       />
-      <NuxtImg
+      <img
         src="/images/hero/hero-left-bottom.png"
         alt=""
         aria-hidden="true"
         class="absolute bottom-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
       />
-      <NuxtImg
+      <img
         src="/images/hero/hero-right-top.png"
         alt=""
         aria-hidden="true"
         class="absolute top-12 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
       />
-      <NuxtImg
+      <img
         src="/images/hero/hero-right-bottom.png"
         alt=""
         aria-hidden="true"
@@ -245,7 +245,7 @@ useSeoMeta({
 
         <!-- Default slot = the visual on the opposite side of text (logo) -->
         <div class="flex justify-start md:justify-center">
-          <NuxtImg
+          <img
             src="/images/logo/logo_white.png"
             alt="Omah Ngaji Al-Anshori"
             class="max-w-sm object-contain"
@@ -266,7 +266,7 @@ useSeoMeta({
             <div
               class="size-24 md:size-28 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
             >
-              <NuxtImg
+              <img
                 :src="feature.image"
                 :alt="feature.title"
                 class="size-20 md:size-24 object-contain"
@@ -307,7 +307,7 @@ useSeoMeta({
             <p class="text-base md:text-lg leading-relaxed mb-8">
               &ldquo;{{ item.quote }}&rdquo;
             </p>
-            <NuxtImg
+            <img
               :src="item.avatar"
               :alt="item.name"
               class="size-16 rounded-full object-cover mx-auto mb-3"
@@ -415,7 +415,7 @@ useSeoMeta({
             :aria-label="`Lihat foto ${item.title}`"
             @click="galleryLightbox.open(index)"
           >
-            <NuxtImg
+            <img
               :src="item.imagePath"
               :alt="item.title"
               loading="lazy"

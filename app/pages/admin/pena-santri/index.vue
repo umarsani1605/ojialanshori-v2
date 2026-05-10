@@ -13,6 +13,7 @@ type AdminPost = {
   id: number;
   title: string;
   slug: string;
+  featuredImage: string | null;
   status: "draft" | "pending_review" | "published" | "rejected";
   updatedAt: string;
   publishedAt: string | null;
@@ -51,9 +52,24 @@ const STATUS_LABEL: Record<string, string> = {
 
 const toast = useToast();
 const search = ref("");
-const statusFilter = ref<string | undefined>();
-const authorFilter = ref<string | undefined>();
-const categoryFilter = ref<string | undefined>();
+const statusFilter = ref<string | undefined>(undefined);
+const authorFilter = ref<string | undefined>(undefined);
+const categoryFilter = ref<string | undefined>(undefined);
+
+const isFiltered = computed(
+  () =>
+    search.value !== "" ||
+    statusFilter.value !== undefined ||
+    authorFilter.value !== undefined ||
+    categoryFilter.value !== undefined,
+);
+
+function resetFilters() {
+  search.value = "";
+  statusFilter.value = undefined;
+  authorFilter.value = undefined;
+  categoryFilter.value = undefined;
+}
 
 const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>(
   "/api/posts",
@@ -72,12 +88,10 @@ const authorOptions = computed<SelectItem[]>(() => {
     authors.set(post.author.id, post.author.fullname);
   }
 
-  return [
-    ...Array.from(authors.entries()).map(([id, name]) => ({
-      label: name,
-      value: String(id),
-    })),
-  ];
+  return Array.from(authors.entries()).map(([id, name]) => ({
+    label: name,
+    value: String(id),
+  }));
 });
 
 const categoryOptions = computed<SelectItem[]>(() => {
@@ -89,12 +103,10 @@ const categoryOptions = computed<SelectItem[]>(() => {
     }
   }
 
-  return [
-    ...Array.from(categories.entries()).map(([id, name]) => ({
-      label: name,
-      value: String(id),
-    })),
-  ];
+  return Array.from(categories.entries()).map(([id, name]) => ({
+    label: name,
+    value: String(id),
+  }));
 });
 
 const filteredPosts = computed(() => {
@@ -171,6 +183,22 @@ const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
 
 const columns: TableColumn<AdminPost>[] = [
+  {
+    accessorKey: "featuredImage",
+    header: "Gambar",
+    cell: ({ row }) => {
+      const src = row.original.featuredImage;
+      return src
+        ? h("img", {
+            src,
+            class: "h-24 w-32 rounded-xl object-cover bg-elevated shrink-0",
+          })
+        : h("div", {
+            class:
+              "h-24 w-32 rounded-xl bg-elevated flex items-center justify-center shrink-0",
+          }, h(resolveComponent("UIcon"), { name: "i-ph-image", class: "size-5 text-dimmed" }));
+    },
+  },
   {
     accessorKey: "title",
     header: "Judul",
@@ -267,6 +295,14 @@ const columns: TableColumn<AdminPost>[] = [
         label-key="label"
         placeholder="Semua status"
         class="w-48"
+      />
+      <UButton
+        v-if="isFiltered"
+        variant="link"
+        color="neutral"
+        icon="i-ph-x"
+        label="Reset"
+        @click="resetFilters"
       />
     </template>
 

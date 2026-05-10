@@ -172,13 +172,13 @@ watch(
             :to="auth.homePath.value"
             class="flex items-center justify-center w-full"
           >
-            <NuxtImg
+            <img
               v-if="!collapsed"
               src="/images/logo/logo.png"
               alt="Omah Ngaji"
               class="h-9 w-auto"
             />
-            <NuxtImg
+            <img
               v-else
               src="/images/logo/logo_small.png"
               alt="Omah Ngaji"

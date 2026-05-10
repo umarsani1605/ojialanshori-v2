@@ -1,4 +1,4 @@
-import { putR2 } from '~~/server/utils/r2Storage'
+import { getR2PublicUrl, putR2 } from '~~/server/utils/r2Storage'
 
 import { requireAuth } from '~~/server/utils/guard'
 
@@ -30,9 +30,8 @@ export default defineEventHandler(async (event) => {
 
   const ext = EXT_MAP[mime]!
   const storageKey = `covers/${currentUser.id}/${Date.now()}.${ext}`
-  const publicPath = `/images/${storageKey}`
 
   await putR2(event, storageKey, new Blob([file.data as any], { type: mime }), { contentType: mime })
 
-  return { path: publicPath }
+  return { path: getR2PublicUrl(event, storageKey) }
 })

@@ -87,7 +87,7 @@ const shareButtons = computed(() => [
 
         <!-- Featured Image -->
         <div class="mt-8 aspect-video overflow-hidden rounded-2xl bg-slate-100">
-          <NuxtImg
+          <img
             v-if="post.featuredImage"
             :src="post.featuredImage"
             :alt="post.title"

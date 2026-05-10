@@ -249,7 +249,7 @@ async function main() {
   const [postRows] = await wpConn.execute<mysql.RowDataPacket[]>(`
     SELECT ID, post_author
     FROM ${WP_TABLE_PREFIX}posts
-    WHERE post_status = 'publish' AND post_type = 'post'
+    WHERE post_status IN ('publish', 'draft', 'pending', 'draft-revision') AND post_type = 'post'
   `)
 
   const wpPosts = postRows as WpPost[]

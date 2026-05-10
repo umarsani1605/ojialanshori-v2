@@ -2,6 +2,11 @@ import type { H3Event } from 'h3'
 
 import { getR2MediaConfig } from '#server/utils/runtime'
 
+export function getR2PublicUrl(event: H3Event, key: string) {
+  const cfg = useRuntimeConfig(event)
+  return `https://${cfg.public.r2PublicDomain}/${key}`
+}
+
 async function getClient(event: H3Event) {
   const cfg = getR2MediaConfig(event)
   if (!cfg) {

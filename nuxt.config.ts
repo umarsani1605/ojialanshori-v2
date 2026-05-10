@@ -75,6 +75,7 @@ export default defineNuxtConfig({
 
   image: {
     provider: process.env.NODE_ENV === "production" ? "ipx" : "none",
+    domains: ["assets.ojialanshori.com"],
   },
 
   disqus: {
@@ -100,6 +101,8 @@ export default defineNuxtConfig({
     r2Bucket: process.env.NUXT_R2_BUCKET || process.env.R2_BUCKET || "",
     r2Endpoint: process.env.NUXT_R2_ENDPOINT || process.env.R2_ENDPOINT || "",
     public: {
+      r2PublicDomain:
+        process.env.NUXT_PUBLIC_R2_DOMAIN || "assets.ojialanshori.com",
       disqusShortname:
         process.env.NUXT_PUBLIC_DISQUS_SHORTNAME ||
         process.env.DISQUS_SHORTNAME ||

@@ -67,7 +67,7 @@ async function onSubmit() {
       >
         <!-- Logo -->
         <div class="flex justify-center mb-6">
-          <NuxtImg
+          <img
             src="/logo.png"
             alt="Logo Omah Ngaji Al-Anshori"
             class="h-20 w-auto object-contain"

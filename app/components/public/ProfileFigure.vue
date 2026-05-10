@@ -26,7 +26,7 @@ withDefaults(
         maxWidthClass,
       ]"
     >
-      <NuxtImg
+      <img
         :src="image"
         :alt="alt ?? name"
         loading="lazy"
