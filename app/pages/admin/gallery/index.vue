@@ -283,26 +283,10 @@ const columns: TableColumn<GalleryItem>[] = [
   <UModal v-model:open="isUploadModalOpen" title="Upload Foto">
     <template #body>
       <div class="space-y-4">
-        <div class="rounded-lg border-2 border-dashed p-4 text-center">
-          <img
-            v-if="uploadPreview"
-            :src="uploadPreview"
-            alt="Preview"
-            class="mx-auto mb-3 max-h-48 rounded object-contain"
-          />
-          <label class="cursor-pointer">
-            <span class="text-sm text-primary">{{
-              uploadPreview ? "Ganti gambar" : "Pilih gambar"
-            }}</span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              class="sr-only"
-              @change="onFileChange"
-            />
-          </label>
-          <p class="mt-1 text-xs text-muted">JPG, PNG, WebP · Maks 5MB</p>
-        </div>
+        <AdminImageUploadField
+          v-model="uploadPreview"
+          @file="(f) => (uploadFile = f)"
+        />
 
         <UFormField label="Judul" required>
           <UInput
@@ -359,24 +343,11 @@ const columns: TableColumn<GalleryItem>[] = [
     </template>
   </UModal>
 
-  <UModal v-model:open="isDeleteModalOpen" title="Hapus Foto">
-    <template #body>
-      <p class="text-sm">Apakah kamu yakin ingin menghapus foto ini?</p>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton
-          variant="ghost"
-          label="Batal"
-          @click="isDeleteModalOpen = false"
-        />
-        <UButton
-          color="error"
-          label="Hapus"
-          :loading="deleting"
-          @click="doDelete"
-        />
-      </div>
-    </template>
-  </UModal>
+  <AdminDeleteConfirmModal
+    v-model:open="isDeleteModalOpen"
+    title="Hapus Foto"
+    description="Apakah kamu yakin ingin menghapus foto ini?"
+    :loading="deleting"
+    @confirm="doDelete"
+  />
 </template>

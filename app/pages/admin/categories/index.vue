@@ -198,27 +198,11 @@ const columns: TableColumn<Category>[] = [
     </template>
   </UModal>
 
-  <UModal v-model:open="isDeleteModalOpen" title="Hapus Kategori">
-    <template #body>
-      <p class="text-sm">
-        Apakah kamu yakin ingin menghapus kategori ini? Kategori tidak bisa
-        dihapus jika masih digunakan oleh artikel.
-      </p>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton
-          variant="ghost"
-          label="Batal"
-          @click="isDeleteModalOpen = false"
-        />
-        <UButton
-          color="error"
-          label="Hapus"
-          :loading="deleting"
-          @click="doDelete"
-        />
-      </div>
-    </template>
-  </UModal>
+  <AdminDeleteConfirmModal
+    v-model:open="isDeleteModalOpen"
+    title="Hapus Kategori"
+    description="Apakah kamu yakin ingin menghapus kategori ini? Kategori tidak bisa dihapus jika masih digunakan oleh artikel."
+    :loading="deleting"
+    @confirm="doDelete"
+  />
 </template>

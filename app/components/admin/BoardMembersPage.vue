@@ -206,26 +206,11 @@ const columns: TableColumn<BoardMember>[] = [
           </UFormField>
 
           <UFormField label="Foto (Opsional)">
-            <div class="rounded-lg border-2 border-dashed p-4 text-center">
-              <img
-                v-if="uploadPreview"
-                :src="uploadPreview"
-                alt="Preview"
-                class="mx-auto mb-3 size-24 rounded-full object-cover"
-              />
-              <label class="cursor-pointer">
-                <span class="text-sm text-primary">{{
-                  uploadPreview ? "Ganti foto" : "Pilih foto"
-                }}</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  class="sr-only"
-                  @change="onFileChange"
-                />
-              </label>
-              <p class="mt-1 text-xs text-muted">JPG, PNG, WebP · Maks 5MB</p>
-            </div>
+            <AdminImageUploadField
+              v-model="uploadPreview"
+              shape="circle"
+              @file="(f) => (uploadFile = f)"
+            />
           </UFormField>
 
           <UFormField label="Urutan">
@@ -241,28 +226,12 @@ const columns: TableColumn<BoardMember>[] = [
       </template>
     </UModal>
 
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus Pengurus">
-      <template #body>
-        <p class="text-sm">
-          Apakah kamu yakin ingin menghapus data pengurus ini? Tindakan ini
-          tidak bisa dibatalkan.
-        </p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            variant="ghost"
-            label="Batal"
-            @click="isDeleteModalOpen = false"
-          />
-          <UButton
-            color="error"
-            label="Hapus"
-            :loading="deleting"
-            @click="doDelete"
-          />
-        </div>
-      </template>
-    </UModal>
+    <AdminDeleteConfirmModal
+      v-model:open="isDeleteModalOpen"
+      title="Hapus Pengurus"
+      description="Apakah kamu yakin ingin menghapus data pengurus ini? Tindakan ini tidak bisa dibatalkan."
+      :loading="deleting"
+      @confirm="doDelete"
+    />
   </div>
 </template>

@@ -110,16 +110,12 @@ const columns: TableColumn<FAQ>[] = [
       </template>
     </UModal>
 
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus FAQ">
-      <template #body>
-        <p class="text-sm">Apakah kamu yakin ingin menghapus pertanyaan ini? Tindakan ini tidak bisa dibatalkan.</p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
-          <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
-        </div>
-      </template>
-    </UModal>
+    <AdminDeleteConfirmModal
+      v-model:open="isDeleteModalOpen"
+      title="Hapus FAQ"
+      description="Apakah kamu yakin ingin menghapus pertanyaan ini? Tindakan ini tidak bisa dibatalkan."
+      :loading="deleting"
+      @confirm="doDelete"
+    />
   </div>
 </template>

@@ -255,25 +255,11 @@ const columns: TableColumn<PostRow>[] = [
     </UCard>
   </UContainer>
 
-  <UModal v-model:open="deleteModalOpen" title="Hapus Artikel?">
-    <template #body>
-      <p class="text-sm">
-        Apakah kamu yakin ingin menghapus artikel ini? Tindakan ini tidak bisa
-        dibatalkan.
-      </p>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton variant="outline" :disabled="deleting" @click="
-          deleteModalOpen = false;
-        deleteTarget = null;
-        ">
-          Batal
-        </UButton>
-        <UButton color="error" :loading="deleting" @click="confirmDelete">
-          Hapus
-        </UButton>
-      </div>
-    </template>
-  </UModal>
+  <AdminDeleteConfirmModal
+    v-model:open="deleteModalOpen"
+    title="Hapus Artikel?"
+    description="Apakah kamu yakin ingin menghapus artikel ini? Tindakan ini tidak bisa dibatalkan."
+    :loading="deleting"
+    @confirm="confirmDelete"
+  />
 </template>

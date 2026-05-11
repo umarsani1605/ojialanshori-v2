@@ -183,17 +183,11 @@ const columns: TableColumn<AdminPost>[] = [
     </template>
   </UCard>
 
-  <UModal v-model:open="isDeleteModalOpen" title="Hapus Artikel">
-    <template #body>
-      <p class="text-sm">
-        Apakah kamu yakin ingin menghapus artikel ini? Tindakan ini tidak bisa dibatalkan.
-      </p>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton variant="ghost" label="Batal" @click="isDeleteModalOpen = false" />
-        <UButton color="error" label="Hapus" :loading="deleting" @click="doDelete" />
-      </div>
-    </template>
-  </UModal>
+  <AdminDeleteConfirmModal
+    v-model:open="isDeleteModalOpen"
+    title="Hapus Artikel"
+    description="Apakah kamu yakin ingin menghapus artikel ini? Tindakan ini tidak bisa dibatalkan."
+    :loading="deleting"
+    @confirm="doDelete"
+  />
 </template>

@@ -197,26 +197,10 @@ const columns: TableColumn<Activity>[] = [
           </UFormField>
 
           <UFormField label="Foto" required>
-            <div class="rounded-lg border-2 border-dashed p-4 text-center">
-              <img
-                v-if="uploadPreview"
-                :src="uploadPreview"
-                alt="Preview"
-                class="mx-auto mb-3 max-h-48 rounded object-contain"
-              />
-              <label class="cursor-pointer">
-                <span class="text-sm text-primary">{{
-                  uploadPreview ? "Ganti foto" : "Pilih foto"
-                }}</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  class="sr-only"
-                  @change="onFileChange"
-                />
-              </label>
-              <p class="mt-1 text-xs text-muted">JPG, PNG, WebP · Maks 5MB</p>
-            </div>
+            <AdminImageUploadField
+              v-model="uploadPreview"
+              @file="(f) => (uploadFile = f)"
+            />
           </UFormField>
 
           <UFormField label="Deskripsi">
@@ -236,28 +220,12 @@ const columns: TableColumn<Activity>[] = [
       </template>
     </UModal>
 
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus Kegiatan">
-      <template #body>
-        <p class="text-sm">
-          Apakah kamu yakin ingin menghapus kegiatan ini? Tindakan ini tidak
-          bisa dibatalkan.
-        </p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            variant="ghost"
-            label="Batal"
-            @click="isDeleteModalOpen = false"
-          />
-          <UButton
-            color="error"
-            label="Hapus"
-            :loading="deleting"
-            @click="doDelete"
-          />
-        </div>
-      </template>
-    </UModal>
+    <AdminDeleteConfirmModal
+      v-model:open="isDeleteModalOpen"
+      title="Hapus Kegiatan"
+      description="Apakah kamu yakin ingin menghapus kegiatan ini? Tindakan ini tidak bisa dibatalkan."
+      :loading="deleting"
+      @confirm="doDelete"
+    />
   </div>
 </template>
