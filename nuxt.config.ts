@@ -84,6 +84,25 @@ export default defineNuxtConfig({
     },
   },
 
+  routeRules: {
+    '/admin/**': { robots: false },
+    '/dashboard/**': { robots: false },
+    '/masuk': { robots: false },
+    '/daftar': { robots: false },
+  },
+
+  robots: {
+    disallow: ['/admin', '/dashboard', '/masuk', '/daftar'],
+  },
+
+  sitemap: {
+    exclude: ['/admin/**', '/dashboard/**', '/masuk', '/daftar'],
+  },
+
+  seo: {
+    redirectToCanonicalSiteUrl: true,
+  },
+
   // Disable dynamic OG image — dikonfigurasi di E8 (SEO & Performance)
   ogImage: {
     enabled: false,
