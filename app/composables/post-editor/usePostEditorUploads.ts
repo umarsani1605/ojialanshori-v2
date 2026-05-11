@@ -37,7 +37,7 @@ export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
         color: "success",
         icon: "i-ph-check",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       options.toast.add({
         title: "Gagal mengunggah cover",
         description: errorMessage(error),
@@ -87,7 +87,7 @@ export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
           color: "success",
           icon: "i-ph-check",
         });
-      } catch (error) {
+      } catch (error: unknown) {
         options.toast.add({
           title: "Gagal mengunggah gambar",
           description: errorMessage(error),

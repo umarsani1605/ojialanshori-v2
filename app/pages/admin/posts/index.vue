@@ -63,8 +63,8 @@ async function doDelete() {
     toast.add({ title: "Artikel dihapus", color: "success", icon: "i-ph-check-circle" });
     isDeleteModalOpen.value = false;
     await refresh();
-  } catch (e: unknown) {
-    toast.add({ title: "Gagal menghapus", description: errorMessage(e), color: "error", icon: "i-ph-x-circle" });
+  } catch (error: unknown) {
+    toast.add({ title: "Gagal menghapus", description: errorMessage(error), color: "error", icon: "i-ph-x-circle" });
   } finally {
     deleting.value = false;
     deletingId.value = null;

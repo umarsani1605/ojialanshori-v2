@@ -51,10 +51,10 @@ async function save() {
     });
     toast.add({ title: "Perubahan disimpan", color: "success", icon: "i-ph-check-circle" });
     await refresh();
-  } catch (e: unknown) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal menyimpan",
-      description: errorMessage(e),
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });

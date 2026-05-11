@@ -97,7 +97,7 @@ function handleEditorImagePrompt(editor: RichTextEditor) {
         color: "success",
         icon: "i-ph-check",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       toast.add({
         title: "Gagal mengunggah gambar",
         description: errorMessage(error),
