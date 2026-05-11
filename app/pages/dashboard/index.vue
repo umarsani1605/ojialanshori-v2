@@ -21,6 +21,7 @@ const {
   refresh: refreshSantriStats,
 } = useLazyFetch<SantriDashboardStats>("/api/posts/stats", {
   key: `dashboard-santri-stats-${auth.user.value?.id}`,
+  default: () => null,
 });
 
 const {
@@ -29,6 +30,7 @@ const {
   refresh: refreshSantriMyPosts,
 } = useLazyFetch<{ data: SantriMyPost[] }>("/api/posts/my-posts", {
   key: `dashboard-santri-my-posts-${auth.user.value?.id}`,
+  default: () => ({ data: [] }),
 });
 
 const {
@@ -37,6 +39,7 @@ const {
   refresh: refreshSantriFeed,
 } = useLazyFetch<{ data: SantriFeedPost[] }>("/api/posts/feed", {
   key: `dashboard-santri-feed-${auth.user.value?.id}`,
+  default: () => ({ data: [] }),
 });
 
 const latestApprovedPost = computed(

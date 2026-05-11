@@ -8,6 +8,7 @@ const posthog = usePostHog();
 
 const { data, refresh } = useLazyFetch<{ user: User }>("/api/profile", {
   key: "profile-self",
+  default: () => null,
 });
 
 const user = computed(() => data.value?.user);
@@ -98,14 +99,6 @@ async function saveProfile() {
     profileSaving.value = false;
   }
 }
-
-const yearOptions = Array.from({ length: 12 }, (_, index) => {
-  const year = 2015 + index;
-  return {
-    label: String(year),
-    value: year,
-  };
-});
 
 const passwordForm = reactive({
   oldPassword: "",
@@ -326,7 +319,7 @@ async function deleteAvatar() {
               <UFormField label="Angkatan Masuk Oji" name="yearEnrolled">
                 <USelect
                   v-model="profileForm.yearEnrolled"
-                  :items="yearOptions"
+                  :items="YEAR_OPTIONS"
                   placeholder="Pilih angkatan"
                   :disabled="profileSaving"
                   class="w-full"
@@ -336,7 +329,7 @@ async function deleteAvatar() {
               <UFormField label="Angkatan Kuliah" name="yearStudy">
                 <USelect
                   v-model="profileForm.yearStudy"
-                  :items="yearOptions"
+                  :items="YEAR_OPTIONS"
                   placeholder="Pilih angkatan"
                   :disabled="profileSaving"
                   class="w-full"

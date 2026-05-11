@@ -26,6 +26,7 @@ watch(activeStatus, () => {
 
 const { data, status, refresh } = useLazyFetch<ListResponse>("/api/posts", {
   key: "dashboard-santri-posts",
+  default: () => ({ data: [] }),
 });
 
 const allPosts = computed(() => data.value?.data ?? []);
