@@ -76,12 +76,12 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
         posthog?.capture("post_draft_saved", {
           post_id: response.id,
           is_new: !postId,
-          post_type: toValue(options.effectivePostType),
+          post_type: options.effectivePostType.value,
         });
       }
 
       return response.id;
-    } catch (error) {
+    } catch (error: unknown) {
       if (!silent) {
         options.toast.add({
           title: "Gagal menyimpan draft",
@@ -137,7 +137,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
         icon: "i-ph-paper-plane-tilt",
       });
       await navigateTo("/dashboard/posts?status=pending_review");
-    } catch (error) {
+    } catch (error: unknown) {
       options.toast.add({
         title: "Gagal mengirim artikel",
         description: errorMessage(error),
@@ -169,7 +169,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
         icon: "i-ph-check-circle",
       });
       await navigateTo("/admin/pena-santri");
-    } catch (error) {
+    } catch (error: unknown) {
       options.toast.add({
         title: "Gagal publish",
         description: errorMessage(error),
@@ -213,7 +213,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
         icon: "i-ph-x-circle",
       });
       await navigateTo("/admin/pena-santri");
-    } catch (error) {
+    } catch (error: unknown) {
       options.toast.add({
         title: "Gagal menolak",
         description: errorMessage(error),
