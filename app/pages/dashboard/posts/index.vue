@@ -36,7 +36,7 @@ watch(activeStatus, () => {
   page.value = 1;
 });
 
-const { data, status, refresh } = await useFetch<ListResponse>("/api/posts", {
+const { data, status, refresh } = useLazyFetch<ListResponse>("/api/posts", {
   key: "dashboard-santri-posts",
 });
 

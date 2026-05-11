@@ -35,7 +35,9 @@ const form = reactive<BannerForm>({
   endDate: "",
 });
 
-const { data, status, refresh } = useLazyFetch<BannerResponse>("/api/banners");
+const { data, status, refresh } = useLazyFetch<BannerResponse>("/api/banners", {
+  key: "admin-banner",
+});
 
 watch(
   () => data.value?.data,

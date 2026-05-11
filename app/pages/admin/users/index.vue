@@ -61,6 +61,7 @@ const query = computed(() => ({
 }));
 
 const { data, status, refresh } = useLazyFetch<{ data: User[] }>("/api/users", {
+  key: "admin-users-list",
   query,
   watch: [() => filters.role, () => filters.status, () => filters.search],
 });

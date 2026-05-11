@@ -19,7 +19,7 @@ const {
   data: santriStats,
   status: santriStatsStatus,
   refresh: refreshSantriStats,
-} = await useFetch<SantriDashboardStats>("/api/posts/stats", {
+} = useLazyFetch<SantriDashboardStats>("/api/posts/stats", {
   key: `dashboard-santri-stats-${auth.user.value?.id}`,
 });
 
@@ -27,7 +27,7 @@ const {
   data: santriMyPosts,
   status: santriMyPostsStatus,
   refresh: refreshSantriMyPosts,
-} = await useFetch<{ data: SantriMyPost[] }>("/api/posts/my-posts", {
+} = useLazyFetch<{ data: SantriMyPost[] }>("/api/posts/my-posts", {
   key: `dashboard-santri-my-posts-${auth.user.value?.id}`,
 });
 
@@ -35,7 +35,7 @@ const {
   data: santriFeed,
   status: santriFeedStatus,
   refresh: refreshSantriFeed,
-} = await useFetch<{ data: SantriFeedPost[] }>("/api/posts/feed", {
+} = useLazyFetch<{ data: SantriFeedPost[] }>("/api/posts/feed", {
   key: `dashboard-santri-feed-${auth.user.value?.id}`,
 });
 

@@ -2,9 +2,11 @@
 const props = defineProps<{ template: string }>();
 const toast = useToast();
 
-const { data, refresh } = useFetch<{
+const { data, refresh } = useLazyFetch<{
   data: { title: string; meta: Record<string, any> };
-}>(`/api/pages/${props.template}`);
+}>(`/api/pages/${props.template}`, {
+  key: `admin-page-${props.template}`,
+});
 const title = ref("");
 const meta = ref<Record<string, any>>({});
 const saving = ref(false);

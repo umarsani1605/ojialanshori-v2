@@ -21,7 +21,9 @@ import { MAX_GALLERY_ITEMS } from "~/constants/gallery";
 
 const toast = useToast();
 
-const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>("/api/gallery");
+const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>("/api/gallery", {
+  key: "admin-gallery-list",
+});
 const items = computed(() => data.value?.data ?? []);
 const isGalleryFull = computed(() => items.value.length >= MAX_GALLERY_ITEMS);
 

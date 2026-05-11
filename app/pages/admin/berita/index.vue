@@ -30,6 +30,7 @@ function resetFilters() {
 
 const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>(
   "/api/posts",
+  { key: "admin-posts-list-berita" },
 );
 
 const posts = computed(() =>

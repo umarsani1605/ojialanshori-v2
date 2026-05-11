@@ -16,7 +16,9 @@ type Category = {
 
 const toast = useToast();
 
-const { data, refresh } = useLazyFetch<{ data: Category[] }>("/api/categories");
+const { data, refresh } = useLazyFetch<{ data: Category[] }>("/api/categories", {
+  key: "admin-categories-list",
+});
 const categories = computed(() => data.value?.data ?? []);
 const search = ref("");
 

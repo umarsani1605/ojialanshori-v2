@@ -5,7 +5,9 @@ import type { TableColumn } from '@nuxt/ui'
 type FAQ = { id: number, question: string, answer: string }
 
 const toast = useToast()
-const { data, refresh } = useFetch<{ data: FAQ[] }>('/api/faqs')
+const { data, refresh } = useLazyFetch<{ data: FAQ[] }>('/api/faqs', {
+  key: 'admin-faqs-list',
+})
 const faqs = computed(() => data.value?.data ?? [])
 
 const isModalOpen = ref(false)

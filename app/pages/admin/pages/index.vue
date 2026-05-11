@@ -15,7 +15,9 @@ type PageItem = {
   template: string;
   updatedAt: string;
 };
-const { data } = useFetch<{ data: PageItem[] }>("/api/pages");
+const { data } = useLazyFetch<{ data: PageItem[] }>("/api/pages", {
+  key: "admin-pages-list",
+});
 const pages = computed(() => data.value?.data ?? []);
 
 const UButton = resolveComponent("UButton");

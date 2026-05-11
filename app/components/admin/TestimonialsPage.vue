@@ -12,8 +12,9 @@ type Testimonial = {
 };
 
 const toast = useToast();
-const { data, refresh } = useFetch<{ data: Testimonial[] }>(
+const { data, refresh } = useLazyFetch<{ data: Testimonial[] }>(
   "/api/testimonials",
+  { key: "admin-testimonials-list" },
 );
 const testimonials = computed(() => data.value?.data ?? []);
 

@@ -11,7 +11,9 @@ type Activity = {
 };
 
 const toast = useToast();
-const { data, refresh } = useFetch<{ data: Activity[] }>("/api/activities");
+const { data, refresh } = useLazyFetch<{ data: Activity[] }>("/api/activities", {
+  key: "admin-activities-list",
+});
 const activities = computed(() => data.value?.data ?? []);
 
 const isModalOpen = ref(false);

@@ -13,8 +13,9 @@ type BoardMember = {
 const ROLES = ["Penasehat", "Pengajar"];
 
 const toast = useToast();
-const { data, refresh } = useFetch<{ data: BoardMember[] }>(
+const { data, refresh } = useLazyFetch<{ data: BoardMember[] }>(
   "/api/board-members",
+  { key: "admin-board-members-list" },
 );
 const members = computed(() => data.value?.data ?? []);
 

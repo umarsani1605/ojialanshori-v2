@@ -20,7 +20,7 @@ type QueuePost = {
 const PAGE_SIZE = 10;
 const page = ref(1);
 
-const { data, status } = await useFetch<{ data: QueuePost[] }>("/api/posts", {
+const { data, status } = useLazyFetch<{ data: QueuePost[] }>("/api/posts", {
   key: "dashboard-review-queue",
 });
 

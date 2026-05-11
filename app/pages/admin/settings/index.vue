@@ -14,7 +14,9 @@ type Setting = {
 
 const toast = useToast();
 
-const { data, refresh } = useLazyFetch<{ data: Setting[] }>("/api/settings");
+const { data, refresh } = useLazyFetch<{ data: Setting[] }>("/api/settings", {
+  key: "admin-settings",
+});
 const settings = computed(() => data.value?.data ?? []);
 
 const form = reactive({

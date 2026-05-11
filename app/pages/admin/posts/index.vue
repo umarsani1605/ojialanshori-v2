@@ -25,6 +25,7 @@ const toast = useToast();
 
 const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>(
   "/api/posts",
+  { key: "admin-posts-list-all" },
 );
 
 const posts = computed(() => data.value?.data ?? []);

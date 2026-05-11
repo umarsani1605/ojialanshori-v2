@@ -129,6 +129,8 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
       options.currentStatus.value = response.status;
       options.existingReviewNote.value = null;
 
+      await refreshNuxtData("admin-layout-stats");
+
       options.toast.add({
         title: "Artikel dikirim untuk review",
         color: "success",
@@ -158,6 +160,8 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
         method: "POST",
         body: buildPayload(options.form),
       });
+
+      await refreshNuxtData("admin-layout-stats");
 
       options.toast.add({
         title: "Artikel dipublish",
@@ -200,6 +204,8 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
           ...buildPayload(options.form),
         },
       });
+
+      await refreshNuxtData("admin-layout-stats");
 
       options.toast.add({
         title: "Artikel ditolak",

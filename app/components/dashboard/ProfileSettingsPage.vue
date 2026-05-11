@@ -22,7 +22,7 @@ type User = {
 const auth = useAuth();
 const toast = useToast();
 
-const { data, refresh } = await useFetch<{ user: User }>("/api/profile", {
+const { data, refresh } = useLazyFetch<{ user: User }>("/api/profile", {
   key: "profile-self",
 });
 
