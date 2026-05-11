@@ -37,11 +37,11 @@ async function save() {
     const url = editingId.value ? `/api/faqs/${editingId.value}` : '/api/faqs'
     const method = editingId.value ? 'PATCH' : 'POST'
     await $fetch(url, { method, body: form })
-    toast.add({ title: 'FAQ disimpan', color: 'success' })
+    toast.add({ title: 'FAQ disimpan', color: 'success', icon: 'i-ph-check-circle' })
     isModalOpen.value = false
     await refresh()
-  } catch (e: any) {
-    toast.add({ title: 'Gagal menyimpan', description: e.message, color: 'error' })
+  } catch (e: unknown) {
+    toast.add({ title: 'Gagal menyimpan', description: errorMessage(e), color: 'error', icon: 'i-ph-x-circle' })
   } finally {
     saving.value = false
   }
@@ -57,11 +57,11 @@ async function doDelete() {
   deleting.value = true
   try {
     await $fetch(`/api/faqs/${deletingId.value}`, { method: 'DELETE' })
-    toast.add({ title: 'FAQ dihapus', color: 'success' })
+    toast.add({ title: 'FAQ dihapus', color: 'success', icon: 'i-ph-check-circle' })
     isDeleteModalOpen.value = false
     await refresh()
-  } catch (e: any) {
-    toast.add({ title: 'Gagal menghapus', description: e.message, color: 'error' })
+  } catch (e: unknown) {
+    toast.add({ title: 'Gagal menghapus', description: errorMessage(e), color: 'error', icon: 'i-ph-x-circle' })
   } finally {
     deleting.value = false
     deletingId.value = null

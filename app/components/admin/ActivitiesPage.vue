@@ -90,15 +90,16 @@ async function save() {
     const method = editingId.value ? "PATCH" : "POST";
 
     await $fetch(url, { method, body: payload });
-    toast.add({ title: "Kegiatan disimpan", color: "success" });
+    toast.add({ title: "Kegiatan disimpan", color: "success", icon: "i-ph-check-circle" });
     isModalOpen.value = false;
     await refresh();
-  } catch (e: any) {
+  } catch (e: unknown) {
     uploading.value = false;
     toast.add({
       title: "Gagal menyimpan",
-      description: e.message,
+      description: errorMessage(e),
       color: "error",
+      icon: "i-ph-x-circle",
     });
   } finally {
     saving.value = false;
@@ -115,14 +116,15 @@ async function doDelete() {
   deleting.value = true;
   try {
     await $fetch(`/api/activities/${deletingId.value}`, { method: "DELETE" });
-    toast.add({ title: "Kegiatan dihapus", color: "success" });
+    toast.add({ title: "Kegiatan dihapus", color: "success", icon: "i-ph-check-circle" });
     isDeleteModalOpen.value = false;
     await refresh();
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast.add({
       title: "Gagal menghapus",
-      description: e.message,
+      description: errorMessage(e),
       color: "error",
+      icon: "i-ph-x-circle",
     });
   } finally {
     deleting.value = false;

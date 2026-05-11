@@ -49,13 +49,14 @@ async function save() {
         meta: meta.value,
       },
     });
-    toast.add({ title: "Perubahan disimpan", color: "success" });
+    toast.add({ title: "Perubahan disimpan", color: "success", icon: "i-ph-check-circle" });
     await refresh();
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast.add({
       title: "Gagal menyimpan",
-      description: e.message,
+      description: errorMessage(e),
       color: "error",
+      icon: "i-ph-x-circle",
     });
   } finally {
     saving.value = false;
