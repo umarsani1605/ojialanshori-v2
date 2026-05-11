@@ -1,11 +1,12 @@
 import { activities } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
-import { defineValidatedHandler } from '#server/utils/validated-handler'
-import { upsertActivitySchema } from '#server/schemas'
+import { zValidator } from '#server/utils/zod-validator'
+import { upsertActivitySchema } from '~~/shared/schemas'
 
-export default defineValidatedHandler(upsertActivitySchema, async (event, body) => {
+export default defineEventHandler(async (event) => {
   requireAdmin(event)
+  const body = await readValidatedBody(event, zValidator(upsertActivitySchema))
   const db = useDb(event)
 
   const [result] = await db.insert(activities).values({

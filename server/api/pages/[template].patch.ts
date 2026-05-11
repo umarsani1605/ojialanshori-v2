@@ -3,10 +3,10 @@ import { pages } from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
-import { defineValidatedHandler } from '#server/utils/validated-handler'
-import { updatePageSchema } from '#server/schemas'
+import { zValidator } from '#server/utils/zod-validator'
+import { updatePageSchema } from '~~/shared/schemas'
 
-export default defineValidatedHandler(updatePageSchema, async (event, body) => {
+export default defineEventHandler(async (event) => {
   requireAdmin(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
@@ -14,6 +14,7 @@ export default defineValidatedHandler(updatePageSchema, async (event, body) => {
   const template = getRouterParam(event, 'template')
   if (!template) throw createError({ statusCode: 400, statusMessage: 'Template required' })
 
+  const body = await readValidatedBody(event, zValidator(updatePageSchema))
   const db = useDb(event)
 
   // Upsert: update kalau sudah ada, insert kalau belum.

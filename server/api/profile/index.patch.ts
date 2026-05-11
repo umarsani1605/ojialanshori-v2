@@ -2,14 +2,15 @@ import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { updateOwnProfile } from '#server/services/profile/profileService'
-import { defineValidatedHandler } from '#server/utils/validated-handler'
-import { updateProfileSchema } from '#server/schemas'
+import { zValidator } from '#server/utils/zod-validator'
+import { updateProfileSchema } from '~~/shared/schemas'
 
-export default defineValidatedHandler(updateProfileSchema, async (event, body) => {
+export default defineEventHandler(async (event) => {
   const actor = requireAuth(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
+  const body = await readValidatedBody(event, zValidator(updateProfileSchema))
   const result = await updateOwnProfile(useDb(event), actor.id, body)
 
   if (result.user) {

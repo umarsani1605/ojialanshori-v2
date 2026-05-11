@@ -1,11 +1,12 @@
 import { testimonials } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
-import { defineValidatedHandler } from '#server/utils/validated-handler'
-import { upsertTestimonialSchema } from '#server/schemas'
+import { zValidator } from '#server/utils/zod-validator'
+import { upsertTestimonialSchema } from '~~/shared/schemas'
 
-export default defineValidatedHandler(upsertTestimonialSchema, async (event, body) => {
+export default defineEventHandler(async (event) => {
   requireAdmin(event)
+  const body = await readValidatedBody(event, zValidator(upsertTestimonialSchema))
   const db = useDb(event)
 
   const [result] = await db.insert(testimonials).values({

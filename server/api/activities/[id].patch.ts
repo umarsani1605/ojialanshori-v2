@@ -2,12 +2,13 @@ import { eq } from 'drizzle-orm'
 import { activities } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
-import { defineValidatedHandler } from '#server/utils/validated-handler'
-import { updateActivitySchema } from '#server/schemas'
+import { zValidator } from '#server/utils/zod-validator'
+import { updateActivitySchema } from '~~/shared/schemas'
 
-export default defineValidatedHandler(updateActivitySchema, async (event, body) => {
+export default defineEventHandler(async (event) => {
   requireAdmin(event)
   const id = parseInt(getRouterParam(event, 'id') || '0', 10)
+  const body = await readValidatedBody(event, zValidator(updateActivitySchema))
   const db = useDb(event)
 
   await db.update(activities).set(body).where(eq(activities.id, id))
