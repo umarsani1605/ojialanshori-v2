@@ -155,39 +155,32 @@ const columns: TableColumn<Activity>[] = [
       </template>
     </AdminDataTable>
 
-    <UModal
+    <AdminFormModal
       v-model:open="isModalOpen"
-      :title="editingId ? 'Edit Kegiatan' : 'Tambah Kegiatan'"
+      :is-edit="!!editingId"
+      entity-label="Kegiatan"
+      :loading="saving"
+      @submit="save"
     >
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Judul" required>
-            <UInput v-model="form.title" class="w-full" />
-          </UFormField>
+      <UFormField label="Judul" required>
+        <UInput v-model="form.title" class="w-full" />
+      </UFormField>
 
-          <UFormField label="Foto" required>
-            <AdminImageUploadField
-              v-model="uploadPreview"
-              @file="(f) => (uploadFile = f)"
-            />
-          </UFormField>
+      <UFormField label="Foto" required>
+        <AdminImageUploadField
+          v-model="uploadPreview"
+          @file="(f) => (uploadFile = f)"
+        />
+      </UFormField>
 
-          <UFormField label="Deskripsi">
-            <UTextarea v-model="form.description" class="w-full" :rows="3" />
-          </UFormField>
+      <UFormField label="Deskripsi">
+        <UTextarea v-model="form.description" class="w-full" :rows="3" />
+      </UFormField>
 
-          <UFormField label="Urutan">
-            <UInput v-model="form.order" type="number" class="w-full" />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-          <UButton label="Simpan" :loading="saving" @click="save" />
-        </div>
-      </template>
-    </UModal>
+      <UFormField label="Urutan">
+        <UInput v-model="form.order" type="number" class="w-full" />
+      </UFormField>
+    </AdminFormModal>
 
     <AdminDeleteConfirmModal
       v-model:open="isDeleteModalOpen"

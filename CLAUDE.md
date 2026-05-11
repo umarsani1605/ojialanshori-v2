@@ -142,7 +142,44 @@ Untuk styling teks di komponen publik, pilih sesuai hirarki — jangan asal hard
 
 - `app/error.vue` menangani 404 dan 500 globally. Jangan buat halaman error custom per-route kecuali ada alasan khusus.
 
-### Data fetching (akan diperbarui di Fase 3)
+### Catch parameter
+
+- Pakai `catch (error: unknown)` — typed dan readable.
+- **Jangan** `catch (e: any)`, `catch (e)` (untyped), atau campur penamaan `e` vs `error`.
+
+### Server validation (Zod)
+
+- Semua endpoint API yang menerima body / query harus validasi pakai Zod via helper `zValidator`.
+- Schema disimpan di `shared/schemas/index.ts` — bisa di-share client kelak (mis. validasi form di browser).
+- Pesan error Bahasa Indonesia: `z.string().min(8, 'Password minimal 8 karakter.')`.
+- Pola endpoint:
+  ```ts
+  import { zValidator, requireId } from '#server/utils/zod-validator'
+  import { upsertActivitySchema } from '~~/shared/schemas'
+
+  export default defineEventHandler(async (event) => {
+    requireAdmin(event)
+    const id = requireId(event) // untuk endpoint dgn route param [id]
+    const body = await readValidatedBody(event, zValidator(upsertActivitySchema))
+    // body sudah ter-type & ter-validasi
+  })
+  ```
+- Route param `id` → `requireId(event)`. Route param `slug` → `requireSlug(event)`. Tidak perlu inline parsing manual.
+
+### Komponen admin reusable
+
+- `<AdminDeleteConfirmModal>` — modal konfirmasi hapus standar. Props: `open` (v-model), `title`, `description`, `loading`. Emit: `confirm`.
+- `<AdminImageUploadField>` — field upload gambar dgn preview. Props: `modelValue`, `shape` (`rect`/`circle`), `accept`, `hint`. Emit: `update:modelValue`, `file`.
+- `<AdminFormModal>` — modal create/edit standar dgn auto-title. Props: `open` (v-model), `isEdit`, `entityLabel` (untuk auto-title "Tambah X" / "Edit X"), atau `title` (override manual), `loading`, `submitLabel` (default "Simpan"), `wide` (max-w-4xl). Emit: `submit`. Form fields di slot default.
+
+### Table column helpers
+
+- `actionsColumn<T>({ onEdit | editTo, onDelete, ...})` — kolom aksi Edit + Hapus. `onEdit` untuk modal callback, `editTo` untuk NuxtLink navigasi.
+- `imageColumn<T>({ accessorKey, alt, shape, fallbackIcon })` — kolom gambar dgn fallback.
+- `badgeColumn<T, V>({ accessorKey, colorMap, labelMap })` — kolom status badge.
+- Hindari boilerplate `resolveComponent('UButton')` + `h(UButton, ...)` saat 3 helper ini sudah cukup.
+
+### Data fetching
 
 | Konteks | Composable |
 | --- | --- |

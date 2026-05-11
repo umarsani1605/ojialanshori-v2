@@ -155,26 +155,17 @@ const columns: TableColumn<Category>[] = [
     </template>
   </AdminDataTable>
 
-  <UModal
+  <AdminFormModal
     v-model:open="isModalOpen"
-    :title="editingId ? 'Edit Kategori' : 'Tambah Kategori'"
+    :is-edit="!!editingId"
+    entity-label="Kategori"
+    :loading="saving"
+    @submit="save"
   >
-    <template #body>
-      <UFormField label="Nama" required>
-        <UInput
-          v-model="form.name"
-          placeholder="Nama kategori"
-          class="w-full"
-        />
-      </UFormField>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-        <UButton label="Simpan" :loading="saving" @click="save" />
-      </div>
-    </template>
-  </UModal>
+    <UFormField label="Nama" required>
+      <UInput v-model="form.name" placeholder="Nama kategori" class="w-full" />
+    </UFormField>
+  </AdminFormModal>
 
   <AdminDeleteConfirmModal
     v-model:open="isDeleteModalOpen"

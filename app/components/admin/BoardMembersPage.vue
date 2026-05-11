@@ -157,40 +157,33 @@ const columns: TableColumn<BoardMember>[] = [
       </template>
     </AdminDataTable>
 
-    <UModal
+    <AdminFormModal
       v-model:open="isModalOpen"
-      :title="editingId ? 'Edit Pengurus' : 'Tambah Pengurus'"
+      :is-edit="!!editingId"
+      entity-label="Pengurus"
+      :loading="saving"
+      @submit="save"
     >
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Nama" required>
-            <UInput v-model="form.name" class="w-full" />
-          </UFormField>
+      <UFormField label="Nama" required>
+        <UInput v-model="form.name" class="w-full" />
+      </UFormField>
 
-          <UFormField label="Peran" required>
-            <USelect v-model="form.role" :items="ROLES" class="w-full" />
-          </UFormField>
+      <UFormField label="Peran" required>
+        <USelect v-model="form.role" :items="ROLES" class="w-full" />
+      </UFormField>
 
-          <UFormField label="Foto (Opsional)">
-            <AdminImageUploadField
-              v-model="uploadPreview"
-              shape="circle"
-              @file="(f) => (uploadFile = f)"
-            />
-          </UFormField>
+      <UFormField label="Foto (Opsional)">
+        <AdminImageUploadField
+          v-model="uploadPreview"
+          shape="circle"
+          @file="(f) => (uploadFile = f)"
+        />
+      </UFormField>
 
-          <UFormField label="Urutan">
-            <UInput v-model="form.order" type="number" class="w-full" />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-          <UButton label="Simpan" :loading="saving" @click="save" />
-        </div>
-      </template>
-    </UModal>
+      <UFormField label="Urutan">
+        <UInput v-model="form.order" type="number" class="w-full" />
+      </UFormField>
+    </AdminFormModal>
 
     <AdminDeleteConfirmModal
       v-model:open="isDeleteModalOpen"

@@ -86,24 +86,20 @@ const columns: TableColumn<FAQ>[] = [
       </template>
     </AdminDataTable>
 
-    <UModal v-model:open="isModalOpen" :title="editingId ? 'Edit FAQ' : 'Tambah FAQ'">
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Pertanyaan" required>
-            <UInput v-model="form.question" class="w-full" />
-          </UFormField>
-          <UFormField label="Jawaban" required>
-            <UTextarea v-model="form.answer" class="w-full" :rows="4" />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-          <UButton label="Simpan" :loading="saving" @click="save" />
-        </div>
-      </template>
-    </UModal>
+    <AdminFormModal
+      v-model:open="isModalOpen"
+      :is-edit="!!editingId"
+      entity-label="FAQ"
+      :loading="saving"
+      @submit="save"
+    >
+      <UFormField label="Pertanyaan" required>
+        <UInput v-model="form.question" class="w-full" />
+      </UFormField>
+      <UFormField label="Jawaban" required>
+        <UTextarea v-model="form.answer" class="w-full" :rows="4" />
+      </UFormField>
+    </AdminFormModal>
 
     <AdminDeleteConfirmModal
       v-model:open="isDeleteModalOpen"

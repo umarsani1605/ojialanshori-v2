@@ -241,68 +241,47 @@ const columns: TableColumn<GalleryItem>[] = [
     </template>
   </AdminDataTable>
 
-  <UModal v-model:open="isUploadModalOpen" title="Upload Foto">
-    <template #body>
-      <div class="space-y-4">
-        <AdminImageUploadField
-          v-model="uploadPreview"
-          @file="(f) => (uploadFile = f)"
-        />
+  <AdminFormModal
+    v-model:open="isUploadModalOpen"
+    title="Upload Foto"
+    submit-label="Upload"
+    :loading="uploading"
+    @submit="doUpload"
+  >
+    <AdminImageUploadField
+      v-model="uploadPreview"
+      @file="(f) => (uploadFile = f)"
+    />
 
-        <UFormField label="Judul" required>
-          <UInput
-            v-model="uploadForm.title"
-            placeholder="Judul foto"
-            class="w-full"
-          />
-        </UFormField>
-      </div>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton
-          variant="ghost"
-          label="Batal"
-          @click="isUploadModalOpen = false"
-        />
-        <UButton
-          label="Upload"
-          icon="i-ph-upload"
-          :loading="uploading"
-          @click="doUpload"
-        />
-      </div>
-    </template>
-  </UModal>
+    <UFormField label="Judul" required>
+      <UInput
+        v-model="uploadForm.title"
+        placeholder="Judul foto"
+        class="w-full"
+      />
+    </UFormField>
+  </AdminFormModal>
 
-  <UModal v-model:open="isEditModalOpen" title="Edit Foto">
-    <template #body>
-      <div class="space-y-4">
-        <UFormField label="Judul" required>
-          <UInput v-model="editForm.title" class="w-full" />
-        </UFormField>
-        <UFormField label="Urutan" help="Urutan ditampilkan mulai dari 1.">
-          <UInput
-            v-model="editForm.order"
-            type="number"
-            min="1"
-            :max="items.length"
-            class="w-full"
-          />
-        </UFormField>
-      </div>
-    </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton
-          variant="ghost"
-          label="Batal"
-          @click="isEditModalOpen = false"
-        />
-        <UButton label="Simpan" :loading="saving" @click="saveEdit" />
-      </div>
-    </template>
-  </UModal>
+  <AdminFormModal
+    v-model:open="isEditModalOpen"
+    is-edit
+    title="Edit Foto"
+    :loading="saving"
+    @submit="saveEdit"
+  >
+    <UFormField label="Judul" required>
+      <UInput v-model="editForm.title" class="w-full" />
+    </UFormField>
+    <UFormField label="Urutan" help="Urutan ditampilkan mulai dari 1.">
+      <UInput
+        v-model="editForm.order"
+        type="number"
+        min="1"
+        :max="items.length"
+        class="w-full"
+      />
+    </UFormField>
+  </AdminFormModal>
 
   <AdminDeleteConfirmModal
     v-model:open="isDeleteModalOpen"

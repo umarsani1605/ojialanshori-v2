@@ -166,44 +166,37 @@ const columns: TableColumn<Testimonial>[] = [
       </template>
     </AdminDataTable>
 
-    <UModal
+    <AdminFormModal
       v-model:open="isModalOpen"
-      :title="editingId ? 'Edit Testimonial' : 'Tambah Testimonial'"
+      :is-edit="!!editingId"
+      entity-label="Testimonial"
+      :loading="saving"
+      @submit="save"
     >
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Nama" required>
-            <UInput v-model="form.name" class="w-full" />
-          </UFormField>
+      <UFormField label="Nama" required>
+        <UInput v-model="form.name" class="w-full" />
+      </UFormField>
 
-          <UFormField label="Peran/Judul" required>
-            <UInput v-model="form.title" class="w-full" />
-          </UFormField>
+      <UFormField label="Peran/Judul" required>
+        <UInput v-model="form.title" class="w-full" />
+      </UFormField>
 
-          <UFormField label="Kutipan" required>
-            <UTextarea v-model="form.content" class="w-full" :rows="4" />
-          </UFormField>
+      <UFormField label="Kutipan" required>
+        <UTextarea v-model="form.content" class="w-full" :rows="4" />
+      </UFormField>
 
-          <UFormField label="Foto (Opsional)">
-            <AdminImageUploadField
-              v-model="uploadPreview"
-              shape="circle"
-              @file="(f) => (uploadFile = f)"
-            />
-          </UFormField>
+      <UFormField label="Foto (Opsional)">
+        <AdminImageUploadField
+          v-model="uploadPreview"
+          shape="circle"
+          @file="(f) => (uploadFile = f)"
+        />
+      </UFormField>
 
-          <UFormField label="Urutan">
-            <UInput v-model="form.order" type="number" class="w-full" />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
-          <UButton label="Simpan" :loading="saving" @click="save" />
-        </div>
-      </template>
-    </UModal>
+      <UFormField label="Urutan">
+        <UInput v-model="form.order" type="number" class="w-full" />
+      </UFormField>
+    </AdminFormModal>
 
     <AdminDeleteConfirmModal
       v-model:open="isDeleteModalOpen"
