@@ -55,6 +55,7 @@ const {
 });
 
 const toast = useToast();
+const posthog = usePostHog();
 
 function handleEditorImagePrompt(editor: RichTextEditor) {
   if (!import.meta.client || uploadingEditorImage.value) return;
@@ -98,6 +99,11 @@ function handleEditorImagePrompt(editor: RichTextEditor) {
         icon: "i-ph-check",
       });
     } catch (error: unknown) {
+      posthog?.capture("upload.failed", {
+        endpoint: "/api/posts/upload/editor-image",
+        reason: errorMessage(error),
+        file_size: file.size,
+      });
       toast.add({
         title: "Gagal mengunggah gambar",
         description: errorMessage(error),

@@ -32,7 +32,9 @@ export default defineNuxtConfig({
       disable_session_recording: true,
     },
     serverConfig: {
-      enableExceptionAutocapture: true,
+      // Disabled — pakai custom plugin di server/plugins/posthog-error-context.ts
+      // yang filter 4xx + enrich konteks user.
+      enableExceptionAutocapture: false,
     },
   },
 

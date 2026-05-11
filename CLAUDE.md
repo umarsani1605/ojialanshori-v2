@@ -179,6 +179,30 @@ Untuk styling teks di komponen publik, pilih sesuai hirarki — jangan asal hard
 - `badgeColumn<T, V>({ accessorKey, colorMap, labelMap })` — kolom status badge.
 - Hindari boilerplate `resolveComponent('UButton')` + `h(UButton, ...)` saat 3 helper ini sudah cukup.
 
+### Error observability (PostHog)
+
+- Server exception auto-capture diatur oleh **custom Nitro plugin** di `server/plugins/posthog-error-context.ts`. Built-in `enableExceptionAutocapture` di-disable supaya tidak double-fire.
+- Plugin custom:
+  - **Filter 4xx** — `statusCode >= 400 && < 500` di-skip (expected client error, bukan bug).
+  - **Enrich**: tambah `user_id`, `user_role`, `path`, `method`, `status_code` ke properties exception.
+- Client autocapture (`capture_exceptions: true`) tetap aktif untuk JS error di browser.
+
+**Manual failure events** (hanya tracked saat gagal, bukan saat sukses):
+- `auth.login_failed` — properties: `identifier`, `reason`
+- `post.save_failed` — properties: `post_id`, `is_new`, `action` (optional: 'submit'), `reason`
+- `upload.failed` — properties: `endpoint`, `reason`, `file_size`
+
+**PII rules**:
+- ❌ `password`, `confirmPassword`, `oldPassword`, `newPassword` JANGAN masuk PostHog.
+- ✅ `email`, `user_id`, `role`, `path`, `method`, `status_code`, error message OK.
+- Body request content (post content, settings value) JANGAN di-capture mentah.
+
+**Saat menambah failure event baru**:
+1. Naming convention: `<area>.<action>_failed` (mis. `comment.submit_failed`).
+2. Hanya track failure, jangan track success.
+3. Properties cukup: `reason` (dari `errorMessage(error)`) + 1-2 context fields.
+4. Skip kalau 4xx (validasi gagal) sudah ditangani by `auth.login_failed` style — tracking semua validasi noise.
+
 ### Data fetching
 
 | Konteks | Composable |

@@ -15,6 +15,8 @@ type UsePostEditorUploadsOptions = {
 };
 
 export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
+  const posthog = usePostHog();
+
   async function handleCoverChange(file: File | null | undefined) {
     if (!file) return;
 
@@ -38,6 +40,11 @@ export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
         icon: "i-ph-check",
       });
     } catch (error: unknown) {
+      posthog?.capture("upload.failed", {
+        endpoint: "/api/posts/upload/cover",
+        reason: errorMessage(error),
+        file_size: file.size,
+      });
       options.toast.add({
         title: "Gagal mengunggah cover",
         description: errorMessage(error),
@@ -88,6 +95,11 @@ export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
           icon: "i-ph-check",
         });
       } catch (error: unknown) {
+        posthog?.capture("upload.failed", {
+          endpoint: "/api/posts/upload/editor-image",
+          reason: errorMessage(error),
+          file_size: file.size,
+        });
         options.toast.add({
           title: "Gagal mengunggah gambar",
           description: errorMessage(error),
@@ -106,12 +118,4 @@ export function usePostEditorUploads(options: UsePostEditorUploadsOptions) {
     handleCoverChange,
     promptEditorImageUpload,
   };
-}
-
-function errorMessage(error: unknown) {
-  return (
-    (error as { data?: { message?: string } }).data?.message ??
-    (error as Error).message ??
-    "Terjadi kesalahan."
-  );
 }

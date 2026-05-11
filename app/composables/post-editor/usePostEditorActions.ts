@@ -47,9 +47,9 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
   }: SaveDraftOptions = {}) {
     if (manageLoading) options.loadingAction.value = "save";
 
+    const postId = resolvedPostId.value;
     try {
       const payload = buildPayload(options.form);
-      const postId = resolvedPostId.value;
       const response = postId
         ? await $fetch<DraftResponse>(`/api/posts/${postId}`, {
             method: "PATCH",
@@ -82,6 +82,12 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
 
       return response.id;
     } catch (error: unknown) {
+      posthog?.capture("post.save_failed", {
+        post_id: postId,
+        is_new: !postId,
+        reason: errorMessage(error),
+      });
+
       if (!silent) {
         options.toast.add({
           title: "Gagal menyimpan draft",
@@ -138,6 +144,12 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
       });
       await navigateTo("/dashboard/posts?status=pending_review");
     } catch (error: unknown) {
+      posthog?.capture("post.save_failed", {
+        post_id: resolvedPostId.value,
+        is_new: false,
+        action: "submit",
+        reason: errorMessage(error),
+      });
       options.toast.add({
         title: "Gagal mengirim artikel",
         description: errorMessage(error),

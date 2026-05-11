@@ -4,6 +4,7 @@ import type { TableColumn } from "@nuxt/ui";
 import type { ActivityDto as Activity } from "~~/shared/types";
 
 const toast = useToast();
+const posthog = usePostHog();
 const { data, refresh } = useLazyFetch<{ data: Activity[] }>("/api/activities", {
   key: "admin-activities-list",
 });
@@ -87,6 +88,13 @@ async function save() {
     isModalOpen.value = false;
     await refresh();
   } catch (error: unknown) {
+    if (uploading.value) {
+      posthog?.capture("upload.failed", {
+        endpoint: "/api/activities/upload",
+        reason: errorMessage(error),
+        file_size: uploadFile.value?.size,
+      });
+    }
     uploading.value = false;
     toast.add({
       title: "Gagal menyimpan",

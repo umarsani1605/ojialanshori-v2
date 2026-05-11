@@ -4,6 +4,7 @@ import type { TableColumn } from "@nuxt/ui";
 import type { TestimonialDto as Testimonial } from "~~/shared/types";
 
 const toast = useToast();
+const posthog = usePostHog();
 const { data, refresh } = useLazyFetch<{ data: Testimonial[] }>(
   "/api/testimonials",
   { key: "admin-testimonials-list" },
@@ -95,6 +96,13 @@ async function save() {
     isModalOpen.value = false;
     await refresh();
   } catch (error: unknown) {
+    if (uploading.value) {
+      posthog?.capture("upload.failed", {
+        endpoint: "/api/testimonials/upload",
+        reason: errorMessage(error),
+        file_size: uploadFile.value?.size,
+      });
+    }
     uploading.value = false;
     toast.add({
       title: "Gagal menyimpan",

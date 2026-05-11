@@ -4,6 +4,7 @@ import type { SafeUser as User } from "~~/shared/types";
 
 const auth = useAuth();
 const toast = useToast();
+const posthog = usePostHog();
 
 const { data, refresh } = useLazyFetch<{ user: User }>("/api/profile", {
   key: "profile-self",
@@ -184,6 +185,11 @@ async function onFileChange(e: Event) {
     });
     await Promise.all([refresh(), auth.fetch()]);
   } catch (error: unknown) {
+    posthog?.capture("upload.failed", {
+      endpoint: "/api/profile/avatar",
+      reason: errorMessage(error),
+      file_size: file.size,
+    });
     toast.add({
       title: "Gagal upload avatar",
       description: errorMessage(error),

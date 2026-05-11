@@ -6,6 +6,7 @@ import type { BoardMemberDto as BoardMember } from "~~/shared/types";
 const ROLES = ["Penasehat", "Pengajar"];
 
 const toast = useToast();
+const posthog = usePostHog();
 const { data, refresh } = useLazyFetch<{ data: BoardMember[] }>(
   "/api/board-members",
   { key: "admin-board-members-list" },
@@ -84,6 +85,13 @@ async function save() {
     isModalOpen.value = false;
     await refresh();
   } catch (error: unknown) {
+    if (uploading.value) {
+      posthog?.capture("upload.failed", {
+        endpoint: "/api/board-members/upload",
+        reason: errorMessage(error),
+        file_size: uploadFile.value?.size,
+      });
+    }
     uploading.value = false;
     toast.add({
       title: "Gagal menyimpan",

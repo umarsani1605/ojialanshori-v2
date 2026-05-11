@@ -25,7 +25,7 @@ const state = reactive({
 
 const showPassword = ref(false);
 const loading = ref(false);
-const errorMessage = ref("");
+const loginError = ref("");
 
 const validate = (data: typeof state) => {
   const errors: { name: string; message: string }[] = [];
@@ -43,7 +43,7 @@ const validate = (data: typeof state) => {
 
 async function onSubmit() {
   loading.value = true;
-  errorMessage.value = "";
+  loginError.value = "";
   try {
     const response = await $fetch<LoginResponse>("/api/auth/login", {
       method: "POST",
@@ -60,10 +60,13 @@ async function onSubmit() {
     });
     posthog?.capture("user_logged_in", { role: response.user.role });
     await navigateTo(getRoleHomePath(response.user.role));
-  } catch (err: unknown) {
-    const fetchError = err as { data?: { message?: string } };
-    errorMessage.value =
-      fetchError.data?.message ?? "Terjadi kesalahan. Coba lagi.";
+  } catch (error: unknown) {
+    const reason = errorMessage(error, "Terjadi kesalahan. Coba lagi.");
+    loginError.value = reason;
+    posthog?.capture("auth.login_failed", {
+      identifier: state.identifier,
+      reason,
+    });
   } finally {
     loading.value = false;
   }
@@ -92,10 +95,10 @@ async function onSubmit() {
 
         <!-- Error alert -->
         <UAlert
-          v-if="errorMessage"
+          v-if="loginError"
           color="error"
           variant="soft"
-          :description="errorMessage"
+          :description="loginError"
           class="mb-4"
         />
 

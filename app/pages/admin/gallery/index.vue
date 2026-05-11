@@ -12,6 +12,7 @@ definePageMeta({
 })
 
 const toast = useToast();
+const posthog = usePostHog();
 
 const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>("/api/gallery", {
   key: "admin-gallery-list",
@@ -105,11 +106,14 @@ async function doUpload() {
     isUploadModalOpen.value = false;
     await refresh();
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Terjadi kesalahan.";
+    posthog?.capture("upload.failed", {
+      endpoint: "/api/gallery/upload",
+      reason: errorMessage(error),
+      file_size: uploadFile.value?.size,
+    });
     toast.add({
       title: "Gagal mengunggah",
-      description: message,
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });
