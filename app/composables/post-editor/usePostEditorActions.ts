@@ -38,6 +38,7 @@ type DraftResponse = {
 
 export function usePostEditorActions(options: UsePostEditorActionsOptions) {
   const resolvedPostId = computed(() => toValue(options.postId));
+  const posthog = usePostHog();
 
   async function saveDraft({
     silent = false,
@@ -71,6 +72,11 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
           title: "Draft disimpan",
           color: "success",
           icon: "i-ph-check",
+        });
+        posthog?.capture("post_draft_saved", {
+          post_id: response.id,
+          is_new: !postId,
+          post_type: toValue(options.effectivePostType),
         });
       }
 

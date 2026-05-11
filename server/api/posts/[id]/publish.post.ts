@@ -11,5 +11,19 @@ export default defineEventHandler(async (event) => {
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
-  return publishPostForActor(useDb(event), actor, postId, payload)
+  const result = await publishPostForActor(useDb(event), actor, postId, payload)
+
+  const sessionId = getHeader(event, 'x-posthog-session-id')
+  const distinctId = getHeader(event, 'x-posthog-distinct-id')
+  useServerPostHog().capture({
+    distinctId: distinctId ?? actor.email ?? 'anonymous',
+    event: 'post_published',
+    properties: {
+      $session_id: sessionId,
+      post_id: postId,
+      actor_role: actor.role,
+    },
+  })
+
+  return result
 })

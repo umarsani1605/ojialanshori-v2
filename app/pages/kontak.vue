@@ -36,6 +36,11 @@ useSeoMeta({
   title: "Kontak",
   description: "Informasi kontak dan lokasi Omah Ngaji Al-Anshori.",
 });
+
+const posthog = usePostHog();
+function trackWhatsapp(type: "putra" | "putri") {
+  posthog?.capture("whatsapp_contact_clicked", { contact_type: type });
+}
 </script>
 
 <template>
@@ -83,6 +88,7 @@ useSeoMeta({
                       target="_blank"
                       rel="noopener"
                       class="mt-1 inline-block transition-colors hover:text-brand-600"
+                      @click="trackWhatsapp('putra')"
                     >
                       {{ whatsappPutra }}
                     </a>
@@ -95,6 +101,7 @@ useSeoMeta({
                       target="_blank"
                       rel="noopener"
                       class="mt-1 inline-block transition-colors hover:text-brand-600"
+                      @click="trackWhatsapp('putri')"
                     >
                       {{ whatsappPutri }}
                     </a>

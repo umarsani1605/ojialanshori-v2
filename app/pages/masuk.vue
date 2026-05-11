@@ -7,6 +7,15 @@ definePageMeta({
 });
 
 const { fetch: refreshSession } = useUserSession();
+const posthog = usePostHog();
+
+type LoginResponse = {
+  user: {
+    fullname: string;
+    email: string;
+    role: string;
+  };
+};
 
 const state = reactive({
   identifier: "",
@@ -36,18 +45,20 @@ async function onSubmit() {
   loading.value = true;
   errorMessage.value = "";
   try {
-    const response = await $fetch<{ user: { role: string } }>(
-      "/api/auth/login",
-      {
-        method: "POST",
-        body: {
-          identifier: state.identifier,
-          password: state.password,
-          remember: state.remember,
-        },
+    const response = await $fetch<LoginResponse>("/api/auth/login", {
+      method: "POST",
+      body: {
+        identifier: state.identifier,
+        password: state.password,
+        remember: state.remember,
       },
-    );
+    });
     await refreshSession();
+    posthog?.identify(response.user.email, {
+      email: response.user.email,
+      fullname: response.user.fullname,
+    });
+    posthog?.capture("user_logged_in", { role: response.user.role });
     await navigateTo(getRoleHomePath(response.user.role));
   } catch (err: unknown) {
     const fetchError = err as { data?: { message?: string } };

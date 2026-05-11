@@ -11,5 +11,18 @@ export default defineEventHandler(async (event) => {
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
-  return submitPostForReview(useDb(event), actor, postId, payload)
+  const result = await submitPostForReview(useDb(event), actor, postId, payload)
+
+  const sessionId = getHeader(event, 'x-posthog-session-id')
+  const distinctId = getHeader(event, 'x-posthog-distinct-id')
+  useServerPostHog().capture({
+    distinctId: distinctId ?? actor.email ?? 'anonymous',
+    event: 'post_submitted_for_review',
+    properties: {
+      $session_id: sessionId,
+      post_id: postId,
+    },
+  })
+
+  return result
 })

@@ -28,5 +28,18 @@ export default defineEventHandler(async (event) => {
     textContent: `Halo ${result.authorName},\n\nArtikel "${result.postTitle}" membutuhkan revisi.\n\nEdit di: https://ojialanshori.com/dashboard/posts/${result.id}/edit`,
   })
 
+  const sessionId = getHeader(event, 'x-posthog-session-id')
+  const distinctId = getHeader(event, 'x-posthog-distinct-id')
+  useServerPostHog().capture({
+    distinctId: distinctId ?? actor.email ?? 'anonymous',
+    event: 'post_rejected',
+    properties: {
+      $session_id: sessionId,
+      post_id: result.id,
+      post_title: result.postTitle,
+      actor_role: actor.role,
+    },
+  })
+
   return { id: result.id, status: result.status }
 })

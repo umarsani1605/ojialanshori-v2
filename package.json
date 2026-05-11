@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1029.0",
+    "@posthog/nuxt": "^1.7.25",
+    "posthog-node": "^5.33.4",
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.6.1",
     "@nuxtjs/seo": "^5.1.3",

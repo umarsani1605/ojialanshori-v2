@@ -10,6 +10,18 @@ export default defineEventHandler(async (event) => {
 
   const user = await registerSantri(useDb(event), input)
 
+  const sessionId = getHeader(event, 'x-posthog-session-id')
+  const distinctId = getHeader(event, 'x-posthog-distinct-id')
+  useServerPostHog().capture({
+    distinctId: distinctId ?? user?.email ?? 'anonymous',
+    event: 'user_registered',
+    properties: {
+      $session_id: sessionId,
+      user_id: user?.id,
+      role: user?.role,
+    },
+  })
+
   return {
     user: {
       id: user?.id,

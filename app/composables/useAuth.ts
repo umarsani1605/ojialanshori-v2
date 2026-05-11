@@ -19,7 +19,15 @@ export function useAuth() {
     homePath: computed(() => getRoleHomePath(role.value)),
     profilePath: computed(() => getRoleProfilePath(role.value)),
     async logout() {
+      const currentUser = user.value
       await $fetch('/api/auth/logout', { method: 'POST' })
+      const posthog = usePostHog()
+      posthog?.capture('user_logged_out', {
+        email: currentUser?.email,
+        fullname: currentUser?.fullname,
+        role: currentUser?.role,
+      })
+      posthog?.reset()
       await clear()
       await navigateTo('/masuk')
     },
