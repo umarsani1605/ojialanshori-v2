@@ -176,6 +176,11 @@ export default defineAppConfig({
         footer: "justify-end",
       },
       variants: {
+        transition: {
+          true: {
+            content: "data-[state=open]:animate-[fade-in_200ms_ease-out] data-[state=closed]:animate-[fade-out_200ms_ease-in]",
+          },
+        },
         overlay: {
           true: {
             overlay: "bg-black/50",

@@ -1,32 +1,32 @@
 <script setup lang="ts">
 type GalleryItem = {
-  id: number
-  imagePath: string
-  order: number
-  title: string
-}
+  id: number;
+  imagePath: string;
+  order: number;
+  title: string;
+};
 
 const props = defineProps<{
-  activeIndex: number
-  items: GalleryItem[]
-  open: boolean
-}>()
+  activeIndex: number;
+  items: GalleryItem[];
+  open: boolean;
+}>();
 
 const emit = defineEmits<{
-  close: []
-  next: []
-  prev: []
-  'update:open': [value: boolean]
-}>()
+  close: [];
+  next: [];
+  prev: [];
+  "update:open": [value: boolean];
+}>();
 
-const activeItem = computed(() => props.items[props.activeIndex] ?? null)
-const hasMultipleItems = computed(() => props.items.length > 1)
+const activeItem = computed(() => props.items[props.activeIndex] ?? null);
+const hasMultipleItems = computed(() => props.items.length > 1);
 
 function handleOpenChange(value: boolean) {
-  emit('update:open', value)
+  emit("update:open", value);
 
   if (!value) {
-    emit('close')
+    emit("close");
   }
 }
 </script>
@@ -63,7 +63,9 @@ function handleOpenChange(value: boolean) {
           />
         </div>
 
-        <div class="flex flex-1 items-center justify-center gap-3 px-4 pb-6 md:gap-6 md:px-6">
+        <div
+          class="flex flex-1 items-center justify-center gap-3 px-4 pb-6 md:gap-6 md:px-6"
+        >
           <UButton
             v-if="hasMultipleItems"
             color="neutral"
@@ -74,7 +76,9 @@ function handleOpenChange(value: boolean) {
             @click="emit('prev')"
           />
 
-          <div class="flex w-full max-w-6xl flex-col items-center justify-center gap-4">
+          <div
+            class="flex w-full max-w-6xl flex-col items-center justify-center gap-4"
+          >
             <div class="overflow-hidden rounded-2xl bg-white/5">
               <img
                 v-if="activeItem"
@@ -84,7 +88,10 @@ function handleOpenChange(value: boolean) {
                 loading="eager"
               />
             </div>
-            <div v-if="hasMultipleItems" class="flex items-center gap-3 md:hidden">
+            <div
+              v-if="hasMultipleItems"
+              class="flex items-center gap-3 md:hidden"
+            >
               <UButton
                 color="neutral"
                 variant="ghost"

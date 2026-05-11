@@ -1,12 +1,222 @@
 <script setup lang="ts">
+import { h, resolveComponent } from "vue";
+import type { TableColumn } from "@nuxt/ui";
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
   requiredRole: 'admin',
   navbarTitle: 'Kategori',
 })
+
+type Category = {
+  id: number;
+  name: string;
+};
+
+const toast = useToast();
+
+const { data, refresh } = useLazyFetch<{ data: Category[] }>("/api/categories");
+const categories = computed(() => data.value?.data ?? []);
+const search = ref("");
+
+const filteredCategories = computed(() => {
+  const query = search.value.trim().toLowerCase();
+  if (!query) return categories.value;
+  return categories.value.filter((category) =>
+    category.name.toLowerCase().includes(query),
+  );
+});
+
+const isModalOpen = ref(false);
+const editingId = ref<number | null>(null);
+const form = reactive({ name: "" });
+const saving = ref(false);
+
+const isDeleteModalOpen = ref(false);
+const deletingId = ref<number | null>(null);
+const deleting = ref(false);
+
+function openCreate() {
+  editingId.value = null;
+  form.name = "";
+  isModalOpen.value = true;
+}
+
+function openEdit(category: Category) {
+  editingId.value = category.id;
+  form.name = category.name;
+  isModalOpen.value = true;
+}
+
+async function save() {
+  saving.value = true;
+  try {
+    const body = { name: form.name };
+    if (editingId.value !== null) {
+      await $fetch(`/api/categories/${editingId.value}`, {
+        method: "PATCH",
+        body,
+      });
+      toast.add({
+        title: "Kategori diperbarui",
+        color: "success",
+        icon: "i-ph-check-circle",
+      });
+    } else {
+      await $fetch("/api/categories", { method: "POST", body });
+      toast.add({
+        title: "Kategori ditambahkan",
+        color: "success",
+        icon: "i-ph-check-circle",
+      });
+    }
+    isModalOpen.value = false;
+    await refresh();
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Terjadi kesalahan.";
+    toast.add({
+      title: "Gagal menyimpan",
+      description: message,
+      color: "error",
+      icon: "i-ph-x-circle",
+    });
+  } finally {
+    saving.value = false;
+  }
+}
+
+function confirmDelete(id: number) {
+  deletingId.value = id;
+  isDeleteModalOpen.value = true;
+}
+
+async function doDelete() {
+  if (deletingId.value === null) return;
+  deleting.value = true;
+  try {
+    await $fetch(`/api/categories/${deletingId.value}`, { method: "DELETE" });
+    toast.add({
+      title: "Kategori dihapus",
+      color: "success",
+      icon: "i-ph-check-circle",
+    });
+    isDeleteModalOpen.value = false;
+    await refresh();
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Terjadi kesalahan.";
+    toast.add({
+      title: "Gagal menghapus",
+      description: message,
+      color: "error",
+      icon: "i-ph-x-circle",
+    });
+  } finally {
+    deleting.value = false;
+    deletingId.value = null;
+  }
+}
+
+const UButton = resolveComponent("UButton");
+
+const columns: TableColumn<Category>[] = [
+  {
+    accessorKey: "name",
+    header: "Nama",
+    cell: ({ row }) => h("span", { class: "font-medium" }, row.original.name),
+  },
+  {
+    accessorKey: "id",
+    header: "",
+    cell: ({ row }) =>
+      h("div", { class: "flex justify-end gap-2" }, [
+        h(UButton, {
+          size: "sm",
+          variant: "light",
+          label: "Edit",
+          icon: "i-ph-pencil-simple",
+          onClick: () => openEdit(row.original),
+        }),
+        h(UButton, {
+          size: "sm",
+          variant: "light",
+          color: "error",
+          label: "Hapus",
+          icon: "i-ph-trash",
+          onClick: () => confirmDelete(row.original.id),
+        }),
+      ]),
+  },
+];
 </script>
 
 <template>
-  <AdminCategoriesPage />
+  <AdminDataTable
+    :data="filteredCategories"
+    :columns="columns"
+    :index-column-size="44"
+  >
+    <template #toolbar-left>
+      <UInput
+        v-model="search"
+        placeholder="Cari kategori…"
+        icon="i-ph-magnifying-glass-bold"
+        class="w-56"
+      />
+    </template>
+    <template #toolbar-right>
+      <UButton
+        label="Tambah Kategori"
+        icon="i-ph-plus-bold"
+        @click="openCreate"
+      />
+    </template>
+  </AdminDataTable>
+
+  <UModal
+    v-model:open="isModalOpen"
+    :title="editingId ? 'Edit Kategori' : 'Tambah Kategori'"
+  >
+    <template #body>
+      <UFormField label="Nama" required>
+        <UInput
+          v-model="form.name"
+          placeholder="Nama kategori"
+          class="w-full"
+        />
+      </UFormField>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton variant="ghost" label="Batal" @click="isModalOpen = false" />
+        <UButton label="Simpan" :loading="saving" @click="save" />
+      </div>
+    </template>
+  </UModal>
+
+  <UModal v-model:open="isDeleteModalOpen" title="Hapus Kategori">
+    <template #body>
+      <p class="text-sm">
+        Apakah kamu yakin ingin menghapus kategori ini? Kategori tidak bisa
+        dihapus jika masih digunakan oleh artikel.
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton
+          variant="ghost"
+          label="Batal"
+          @click="isDeleteModalOpen = false"
+        />
+        <UButton
+          color="error"
+          label="Hapus"
+          :loading="deleting"
+          @click="doDelete"
+        />
+      </div>
+    </template>
+  </UModal>
 </template>
