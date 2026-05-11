@@ -2,13 +2,13 @@ import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { patchUser } from '#server/services/users/userService'
-import { validateDashboardUserUpdateBody, validateRouteIdParams } from '#server/utils/validation'
+import { requireId, zValidator } from '#server/utils/zod-validator'
+import { updateUserSchema } from '~~/shared/schemas'
 
 export default defineEventHandler(async (event) => {
   const actor = requireAdmin(event)
-  const { id: userId } = await getValidatedRouterParams(event, validateRouteIdParams)
-  if (!userId || userId <= 0) throw createError({ statusCode: 400, message: 'ID user tidak valid.' })
-  const updates = await readValidatedBody(event, validateDashboardUserUpdateBody)
+  const userId = requireId(event)
+  const updates = await readValidatedBody(event, zValidator(updateUserSchema))
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 

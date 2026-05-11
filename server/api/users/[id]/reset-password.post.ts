@@ -4,11 +4,11 @@ import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { resetUserPassword } from '#server/services/users/userService'
 import { findUserById } from '#server/repositories/users/userRepository'
-import { validateRouteIdParams } from '#server/utils/validation'
+import { requireId } from '#server/utils/zod-validator'
 
 export default defineEventHandler(async (event) => {
   const actor = requireAdmin(event)
-  const { id: userId } = await getValidatedRouterParams(event, validateRouteIdParams)
+  const userId = requireId(event)
 
   if (userId === actor.id) {
     throw createError({ statusCode: 403, message: 'Tidak bisa reset password sendiri. Gunakan halaman Profil.' })

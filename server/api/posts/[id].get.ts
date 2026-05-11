@@ -2,11 +2,11 @@ import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { getPostForActor } from '#server/services/posts/postService'
-import { validateRouteIdParams } from '#server/utils/validation'
+import { requireId } from '#server/utils/zod-validator'
 
 export default defineEventHandler(async (event) => {
   const actor = requireAuth(event)
-  const { id: postId } = await getValidatedRouterParams(event, validateRouteIdParams)
+  const postId = requireId(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 

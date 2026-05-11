@@ -2,12 +2,15 @@ import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireRole } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { submitPostForReview } from '#server/services/posts/postService'
-import { validateRouteIdParams, validateSantriPostBody } from '#server/utils/validation'
+import { parseSantriPostPayload } from '#server/utils/santriPostEditor'
+import { requireId, zValidator } from '#server/utils/zod-validator'
+import { santriPostSchema } from '~~/shared/schemas'
 
 export default defineEventHandler(async (event) => {
   const actor = requireRole(event, ['santri'])
-  const { id: postId } = await getValidatedRouterParams(event, validateRouteIdParams)
-  const payload = await readValidatedBody(event, validateSantriPostBody)
+  const postId = requireId(event)
+  const raw = await readValidatedBody(event, zValidator(santriPostSchema))
+  const payload = parseSantriPostPayload(raw)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 

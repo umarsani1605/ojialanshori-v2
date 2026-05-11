@@ -1,10 +1,10 @@
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
-import { validateSlugParams } from '#server/utils/validation'
+import { requireSlug } from '#server/utils/zod-validator'
 import { getPublicPost } from '#server/services/public/publicContentService'
 
 export default defineEventHandler(async (event) => {
-  const { slug } = await getValidatedRouterParams(event, validateSlugParams)
+  const slug = requireSlug(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 

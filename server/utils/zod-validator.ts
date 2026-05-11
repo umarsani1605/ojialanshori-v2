@@ -1,5 +1,6 @@
-import { createError } from 'h3'
+import { createError, getRouterParam, type H3Event } from 'h3'
 import type { z } from 'zod'
+import { routeIdSchema, routeSlugSchema } from '~~/shared/schemas'
 
 /**
  * Adapter Zod schema → h3 validator function untuk `readValidatedBody`.
@@ -27,4 +28,37 @@ export function zValidator<TSchema extends z.ZodTypeAny>(schema: TSchema) {
     }
     return parsed.data
   }
+}
+
+/**
+ * Extract & validate route param `id` (positive integer).
+ * Pakai di endpoint `/api/xxx/[id].(post|patch|delete)`.
+ */
+export function requireId(event: H3Event, paramName = 'id'): number {
+  const raw = getRouterParam(event, paramName)
+  const parsed = routeIdSchema.safeParse(raw)
+  if (!parsed.success) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid route param',
+      data: { message: `Param ${paramName} tidak valid.` },
+    })
+  }
+  return parsed.data
+}
+
+/**
+ * Extract & validate route param `slug` (non-empty string).
+ */
+export function requireSlug(event: H3Event, paramName = 'slug'): string {
+  const raw = getRouterParam(event, paramName)
+  const parsed = routeSlugSchema.safeParse(raw)
+  if (!parsed.success) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid route param',
+      data: { message: `Param ${paramName} tidak valid.` },
+    })
+  }
+  return parsed.data
 }

@@ -3,12 +3,13 @@ import { requireReviewer } from '#server/utils/guard'
 import { sendEmail } from '#server/utils/email'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { rejectPostForActor } from '#server/services/posts/postService'
-import { validateRejectWithContentBody, validateRouteIdParams } from '#server/utils/validation'
+import { requireId, zValidator } from '#server/utils/zod-validator'
+import { rejectWithContentSchema } from '~~/shared/schemas'
 
 export default defineEventHandler(async (event) => {
   const actor = requireReviewer(event)
-  const { id: postId } = await getValidatedRouterParams(event, validateRouteIdParams)
-  const payload = await readValidatedBody(event, validateRejectWithContentBody)
+  const postId = requireId(event)
+  const payload = await readValidatedBody(event, zValidator(rejectWithContentSchema))
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
