@@ -21,6 +21,7 @@ const slug = route.params.slug as string
 
 const { data, error } = await useFetch<PostDetailResponse>(`/api/public/posts/${slug}`, {
   key: `public-post-${slug}`,
+  default: () => null,
 })
 
 if (error.value?.statusCode === 404 || !data.value?.post) {
