@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
+import type { PageDto as PageItem } from "~~/shared/types";
 
 definePageMeta({
   layout: 'admin',
@@ -8,13 +9,6 @@ definePageMeta({
   requiredRole: 'admin',
   navbarTitle: 'Halaman Publik',
 })
-
-type PageItem = {
-  id: number;
-  title: string;
-  template: string;
-  updatedAt: string;
-};
 const { data } = useLazyFetch<{ data: PageItem[] }>("/api/pages", {
   key: "admin-pages-list",
 });

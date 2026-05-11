@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-
-type Testimonial = {
-  id: number;
-  name: string;
-  title: string;
-  content: string;
-  avatarPath: string | null;
-  order: number;
-};
+import type { TestimonialDto as Testimonial } from "~~/shared/types";
 
 const toast = useToast();
 const { data, refresh } = useLazyFetch<{ data: Testimonial[] }>(
@@ -102,11 +94,11 @@ async function save() {
     toast.add({ title: "Testimonial disimpan", color: "success", icon: "i-ph-check-circle" });
     isModalOpen.value = false;
     await refresh();
-  } catch (e: unknown) {
+  } catch (error: unknown) {
     uploading.value = false;
     toast.add({
       title: "Gagal menyimpan",
-      description: errorMessage(e),
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });
@@ -128,10 +120,10 @@ async function doDelete() {
     toast.add({ title: "Testimonial dihapus", color: "success", icon: "i-ph-check-circle" });
     isDeleteModalOpen.value = false;
     await refresh();
-  } catch (e: unknown) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal menghapus",
-      description: errorMessage(e),
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });

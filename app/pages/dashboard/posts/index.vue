@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
 import { h, resolveComponent } from "vue";
+import type { ApiList, DashboardPostRow as PostRow, PostStatus } from "~~/shared/types";
 
 definePageMeta({
   layout: "dashboard-santri",
@@ -8,22 +9,9 @@ definePageMeta({
   requiredRole: "santri",
 });
 
-type StatusFilter = "" | "published" | "pending_review" | "rejected" | "draft";
+type StatusFilter = "" | PostStatus;
 
-type PostRow = {
-  id: number;
-  title: string;
-  slug: string;
-  status: "draft" | "pending_review" | "published" | "rejected";
-  reviewNote: string | null;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt: string | null;
-  categoryName: string | null;
-  categoryType: "berita" | "pena_santri" | null;
-};
-
-type ListResponse = { data: PostRow[] };
+type ListResponse = ApiList<PostRow>;
 
 const toast = useToast();
 
@@ -133,7 +121,7 @@ async function confirmDelete() {
     deleteTarget.value = null;
     deleteModalOpen.value = false;
     await refresh();
-  } catch (error) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal menghapus artikel",
       description: errorMessage(error),

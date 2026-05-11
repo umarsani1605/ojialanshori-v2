@@ -1,16 +1,12 @@
 <script setup lang="ts">
+import type { SettingDto as Setting } from "~~/shared/types";
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
   requiredRole: 'admin',
   navbarTitle: 'Pengaturan',
 })
-
-type Setting = {
-  key: string;
-  value: string;
-  updatedAt: string;
-};
 
 const toast = useToast();
 
@@ -56,11 +52,10 @@ async function save() {
       icon: "i-ph-check-circle",
     });
     await refresh();
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : "Terjadi kesalahan.";
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal menyimpan",
-      description: msg,
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });

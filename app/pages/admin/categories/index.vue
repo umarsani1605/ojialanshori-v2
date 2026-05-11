@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
+import type { CategoryDto } from "~~/shared/types";
 
 definePageMeta({
   layout: 'admin',
@@ -9,10 +10,7 @@ definePageMeta({
   navbarTitle: 'Kategori',
 })
 
-type Category = {
-  id: number;
-  name: string;
-};
+type Category = Pick<CategoryDto, "id" | "name">;
 
 const toast = useToast();
 

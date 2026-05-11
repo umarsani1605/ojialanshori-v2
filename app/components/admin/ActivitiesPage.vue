@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-
-type Activity = {
-  id: number;
-  title: string;
-  description: string;
-  imagePath: string;
-  order: number;
-};
+import type { ActivityDto as Activity } from "~~/shared/types";
 
 const toast = useToast();
 const { data, refresh } = useLazyFetch<{ data: Activity[] }>("/api/activities", {
@@ -93,11 +86,11 @@ async function save() {
     toast.add({ title: "Kegiatan disimpan", color: "success", icon: "i-ph-check-circle" });
     isModalOpen.value = false;
     await refresh();
-  } catch (e: unknown) {
+  } catch (error: unknown) {
     uploading.value = false;
     toast.add({
       title: "Gagal menyimpan",
-      description: errorMessage(e),
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });
@@ -119,10 +112,10 @@ async function doDelete() {
     toast.add({ title: "Kegiatan dihapus", color: "success", icon: "i-ph-check-circle" });
     isDeleteModalOpen.value = false;
     await refresh();
-  } catch (e: unknown) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal menghapus",
-      description: errorMessage(e),
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });

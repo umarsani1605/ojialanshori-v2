@@ -1,23 +1,6 @@
 <script setup lang="ts">
 import type { TabsItem } from "@nuxt/ui";
-
-type User = {
-  id: number;
-  fullname: string;
-  nickname: string | null;
-  bio: string | null;
-  email: string;
-  role: "admin" | "reviewer" | "santri";
-  avatar: string | null;
-  phone: string | null;
-  university: string | null;
-  faculty: string | null;
-  major: string | null;
-  yearEnrolled: number | null;
-  yearStudy: number | null;
-  isActive: boolean;
-  createdAt: string;
-};
+import type { SafeUser as User } from "~~/shared/types";
 
 const auth = useAuth();
 const toast = useToast();
@@ -108,12 +91,8 @@ async function saveProfile() {
       icon: "i-ph-check",
     });
     await Promise.all([refresh(), auth.fetch()]);
-  } catch (err) {
-    profileError.value =
-      (err as { data?: { message?: string }; message?: string }).data
-        ?.message ??
-      (err as Error).message ??
-      "Gagal menyimpan perubahan.";
+  } catch (error: unknown) {
+    profileError.value = errorMessage(error, "Gagal menyimpan perubahan.");
   } finally {
     profileSaving.value = false;
   }
@@ -155,12 +134,8 @@ async function savePassword() {
     passwordForm.oldPassword = "";
     passwordForm.newPassword = "";
     passwordForm.confirmPassword = "";
-  } catch (err) {
-    passwordError.value =
-      (err as { data?: { message?: string }; message?: string }).data
-        ?.message ??
-      (err as Error).message ??
-      "Gagal mengganti password.";
+  } catch (error: unknown) {
+    passwordError.value = errorMessage(error, "Gagal mengganti password.");
   } finally {
     passwordSaving.value = false;
   }
@@ -208,14 +183,10 @@ async function onFileChange(e: Event) {
       icon: "i-ph-check",
     });
     await Promise.all([refresh(), auth.fetch()]);
-  } catch (err) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal upload avatar",
-      description:
-        (err as { data?: { message?: string }; message?: string }).data
-          ?.message ??
-        (err as Error).message ??
-        "Terjadi kesalahan.",
+      description: errorMessage(error),
       color: "error",
     });
   } finally {
@@ -233,14 +204,10 @@ async function deleteAvatar() {
       icon: "i-ph-check",
     });
     await Promise.all([refresh(), auth.fetch()]);
-  } catch (err) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal menghapus avatar",
-      description:
-        (err as { data?: { message?: string }; message?: string }).data
-          ?.message ??
-        (err as Error).message ??
-        "Terjadi kesalahan.",
+      description: errorMessage(error),
       color: "error",
     });
   } finally {

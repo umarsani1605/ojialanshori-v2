@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
 import { h, resolveComponent } from "vue";
+import type { AdminPost } from "~~/shared/types";
 
 definePageMeta({
   layout: "dashboard-santri",
@@ -8,14 +9,7 @@ definePageMeta({
   requiredRole: "reviewer",
 });
 
-type QueuePost = {
-  id: number;
-  title: string;
-  slug: string;
-  updatedAt: string;
-  author: { id: number; fullname: string };
-  category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
-};
+type QueuePost = Pick<AdminPost, "id" | "title" | "slug" | "updatedAt" | "author" | "category">;
 
 const PAGE_SIZE = 10;
 const page = ref(1);

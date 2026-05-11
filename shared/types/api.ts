@@ -164,5 +164,26 @@ export type SettingDto = {
   updatedAt: string
 }
 
+export type PageDto = {
+  id: number
+  title: string
+  template: string
+  meta: Record<string, unknown>
+  updatedAt: string
+}
+
+export type DashboardPostRow = {
+  id: number
+  title: string
+  slug: string
+  status: PostStatus
+  reviewNote: string | null
+  publishedAt: string | null
+  createdAt: string
+  updatedAt: string
+  categoryName: string | null
+  categoryType: CategoryType | null
+}
+
 export type ApiList<T> = { data: T[] }
 export type ApiItem<T> = { data: T }

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
+import type { GalleryItemDto as GalleryItem } from "~~/shared/types";
+import { MAX_GALLERY_ITEMS } from "~/constants/gallery";
 
 definePageMeta({
   layout: 'admin',
@@ -8,16 +10,6 @@ definePageMeta({
   requiredRole: 'admin',
   navbarTitle: 'Galeri',
 })
-
-type GalleryItem = {
-  id: number;
-  title: string;
-  imagePath: string;
-  order: number;
-  createdAt: string;
-};
-
-import { MAX_GALLERY_ITEMS } from "~/constants/gallery";
 
 const toast = useToast();
 

@@ -3,6 +3,7 @@ import { h, resolveComponent } from "vue";
 import type { DropdownMenuItem, TableColumn } from "@nuxt/ui";
 import type { RoleColor } from "~/constants/roleDisplay";
 import { roleColorMap, roleLabelMap } from "~/constants/roleDisplay";
+import type { Role, RoleFilter, SafeUser as User } from "~~/shared/types";
 
 definePageMeta({
   layout: 'admin',
@@ -10,27 +11,7 @@ definePageMeta({
   navbarTitle: 'Users',
 })
 
-type Role = "admin" | "reviewer" | "santri";
-type RoleFilter = Role | "all";
 type StatusFilter = "active" | "inactive" | "all";
-
-type User = {
-  id: number;
-  fullname: string;
-  nickname: string | null;
-  email: string;
-  role: Role;
-  avatar: string | null;
-  bio: string | null;
-  phone: string | null;
-  university: string | null;
-  faculty: string | null;
-  major: string | null;
-  yearEnrolled: number | null;
-  yearStudy: number | null;
-  isActive: boolean;
-  createdAt: string;
-};
 
 const auth = useAuth();
 const toast = useToast();
@@ -199,7 +180,7 @@ async function submitForm() {
     }
     formOpen.value = false;
     await refresh();
-  } catch (error) {
+  } catch (error: unknown) {
     formError.value = errorMessage(error);
   } finally {
     formSubmitting.value = false;
@@ -268,7 +249,7 @@ async function runConfirm() {
   try {
     await confirm.action();
     confirm.open = false;
-  } catch (error) {
+  } catch (error: unknown) {
     toast.add({
       title: "Gagal",
       description: errorMessage(error),
