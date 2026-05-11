@@ -1,6 +1,5 @@
 import { createError, type H3Event } from 'h3'
-
-export type Role = 'admin' | 'reviewer' | 'santri'
+import type { Role } from '~~/shared/types'
 
 type SessionUser = {
   id: number

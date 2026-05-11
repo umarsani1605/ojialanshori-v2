@@ -98,13 +98,9 @@ function handleEditorImagePrompt(editor: RichTextEditor) {
         icon: "i-ph-check",
       });
     } catch (error) {
-      const msg =
-        (error as { data?: { message?: string } }).data?.message ??
-        (error as Error).message ??
-        "Terjadi kesalahan.";
       toast.add({
         title: "Gagal mengunggah gambar",
-        description: msg,
+        description: errorMessage(error),
         color: "error",
         icon: "i-ph-warning-circle",
       });

@@ -107,6 +107,54 @@ Untuk styling teks di komponen publik, pilih sesuai hirarki — jangan asal hard
 
 ---
 
+## Pola Penulisan Kode
+
+### Shared types
+
+- Tipe yang dipakai client (page/komponen) **dan** server harus diletakkan di `shared/types/`.
+- Sumber kebenaran:
+  - `shared/types/db.ts` — derive dari Drizzle (`InferSelectModel<typeof tableName>`) untuk pemakaian server.
+  - `shared/types/api.ts` — bentuk yang dikirim API ke client (tanggal sebagai `string` ISO, tanpa kolom sensitif seperti `password`).
+- **Jangan deklarasi tipe entity (User, Post, Category, dll) inline di page.** Import dari `~~/shared/types`.
+- `Role`, `PostStatus`, `CategoryType`, `PageStatus`, `PasswordType` di-export juga dari `shared/types/db.ts` (re-export dari schema). Server-side code pakai dari sini, bukan redeklarasi.
+
+### Konstanta
+
+- Konstanta yang dipakai >1 file (status options, role options, limit, dll) harus di `app/constants/`.
+- Sudah ada: `postStatus.ts` (`POST_STATUS_LABEL_MAP`, `POST_STATUS_COLOR_MAP`, `POST_STATUS_OPTIONS`), `gallery.ts` (`MAX_GALLERY_ITEMS`), `roleDisplay.ts`.
+- Folder ini auto-import — cukup `import { POST_STATUS_OPTIONS } from "~/constants/postStatus"`.
+
+### Error handling di client
+
+- Gunakan `errorMessage(e)` dari `app/utils/error.ts` (auto-import) untuk ekstrak pesan error dari `$fetch` / `useFetch` / catch block.
+- **Jangan tulis pola panjang** `(error as { data?: { message?: string } }).data?.message ?? (error as Error).message ?? '...'` — pakai `errorMessage(e)`.
+- Pola toast error standar:
+  ```ts
+  toast.add({
+    title: "Gagal melakukan X",
+    description: errorMessage(e),
+    color: "error",
+    icon: "i-ph-x-circle",
+  });
+  ```
+
+### Error pages
+
+- `app/error.vue` menangani 404 dan 500 globally. Jangan buat halaman error custom per-route kecuali ada alasan khusus.
+
+### Data fetching (akan diperbarui di Fase 3)
+
+| Konteks | Composable |
+| --- | --- |
+| Public page yang butuh SEO (HTML harus berisi konten) | `useFetch` (blocking SSR) |
+| Admin/dashboard page (user sudah login, prioritas tampilan cepat) | `useLazyFetch` + loading state |
+| Mutation (POST/PATCH/DELETE) atau request di event handler | `$fetch` |
+| Refresh data setelah aksi | `await refresh()` atau `refreshNuxtData(key)` |
+
+- Setiap `useFetch`/`useLazyFetch` harus punya `key` eksplisit: `'{scope}-{resource}-{discriminator?}'`. Contoh: `'admin-stats'`, `'admin-users-list'`, `'public-gallery'`.
+
+---
+
 ## Database Instructions
 
 - **Dialect:** MySQL via NuxtHub (`hub.db: { dialect: 'mysql' }`)

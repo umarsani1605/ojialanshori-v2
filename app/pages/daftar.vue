@@ -212,7 +212,7 @@ async function onSubmit() {
             </UButton>
           </UForm>
 
-          <p class="text-sm text-center text-slate-500 mt-6">
+          <p class="text-sm text-center text-muted mt-6">
             Sudah punya akun?
             <NuxtLink
               to="/masuk"

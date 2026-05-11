@@ -37,7 +37,7 @@ const dateFormatted = computed(() =>
       />
       <div
         v-else
-        class="w-full h-full flex items-center justify-center text-slate-400"
+        class="w-full h-full flex items-center justify-center text-dimmed"
       >
         <UIcon name="i-ph-image" class="size-10" />
       </div>
@@ -47,7 +47,7 @@ const dateFormatted = computed(() =>
     >
       {{ post.title }}
     </h3>
-    <div class="text-base text-slate-500 mt-4">
+    <div class="text-base text-muted mt-4">
       <span>{{ post.authorName }} • {{ dateFormatted }}</span>
     </div>
   </NuxtLink>

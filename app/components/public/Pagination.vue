@@ -49,7 +49,7 @@ const pages = computed(() => {
     </NuxtLink>
 
     <template v-for="(p, i) in pages" :key="i">
-      <span v-if="p === '…'" class="px-3 py-2 text-sm text-slate-400">…</span>
+      <span v-if="p === '…'" class="px-3 py-2 text-sm text-dimmed">…</span>
       <NuxtLink
         v-else
         :to="pageHref(p as number)"

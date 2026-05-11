@@ -199,11 +199,7 @@ async function submitForm() {
     formOpen.value = false;
     await refresh();
   } catch (error) {
-    formError.value =
-      (error as { data?: { message?: string }; message?: string }).data
-        ?.message ??
-      (error as Error).message ??
-      "Terjadi kesalahan.";
+    formError.value = errorMessage(error);
   } finally {
     formSubmitting.value = false;
   }
@@ -274,11 +270,7 @@ async function runConfirm() {
   } catch (error) {
     toast.add({
       title: "Gagal",
-      description:
-        (error as { data?: { message?: string }; message?: string }).data
-          ?.message ??
-        (error as Error).message ??
-        "Terjadi kesalahan.",
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-warning-circle",
     });

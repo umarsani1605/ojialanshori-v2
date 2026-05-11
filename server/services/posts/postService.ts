@@ -31,7 +31,7 @@ import {
   ensureCategoryExists,
   type SantriPostPayload,
 } from '#server/utils/santriPostEditor'
-import type { Role } from '#server/utils/guard'
+import type { Role } from '~~/shared/types'
 
 export type Actor = {
   id: number

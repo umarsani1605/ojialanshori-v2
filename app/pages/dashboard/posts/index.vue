@@ -136,11 +136,7 @@ async function confirmDelete() {
   } catch (error) {
     toast.add({
       title: "Gagal menghapus artikel",
-      description:
-        (error as { data?: { message?: string }; message?: string }).data
-          ?.message ??
-        (error as Error).message ??
-        "Terjadi kesalahan.",
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-warning-circle",
     });
@@ -195,7 +191,7 @@ const columns: TableColumn<PostRow>[] = [
     cell: ({ row }) =>
       h(
         "span",
-        { class: "text-sm text-slate-500" },
+        { class: "text-sm text-muted" },
         formatDatetime(row.original.updatedAt),
       ),
   },

@@ -1,4 +1,4 @@
-import type { Role } from '#server/utils/guard'
+import type { Role } from '~~/shared/types'
 
 export function canManageUsers(role: Role): boolean {
   return role === 'admin'

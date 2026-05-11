@@ -17,7 +17,7 @@ type GalleryItem = {
   createdAt: string;
 };
 
-const MAX_GALLERY_ITEMS = 8;
+import { MAX_GALLERY_ITEMS } from "~/constants/gallery";
 
 const toast = useToast();
 

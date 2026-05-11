@@ -14,6 +14,7 @@ onMounted(() => {
 
 const { data: banner } = await useFetch<Banner | null>("/api/public/banner", {
   key: "public-banner",
+  default: () => null,
 });
 
 const visible = computed(() => !!banner.value && !dismissed.value);

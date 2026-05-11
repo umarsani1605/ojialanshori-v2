@@ -9,44 +9,17 @@ definePageMeta({
   navbarTitle: "Artikel",
 });
 
-type AdminPost = {
-  id: number;
-  title: string;
-  slug: string;
-  status: "draft" | "pending_review" | "published" | "rejected";
-  updatedAt: string;
-  publishedAt: string | null;
-  author: { id: number; fullname: string };
-  category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
-};
+import type { AdminPost, PostStatus } from "~~/shared/types";
 
-const STATUS_OPTIONS = [
-  { label: "Terbit", value: "published" },
-  { label: "Dalam Review", value: "pending_review" },
-  { label: "Draft", value: "draft" },
-  { label: "Ditolak", value: "rejected" },
-];
-
-const STATUS_COLOR: Record<
-  string,
-  "success" | "warning" | "neutral" | "error"
-> = {
-  published: "success",
-  pending_review: "warning",
-  draft: "neutral",
-  rejected: "error",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  published: "Terbit",
-  pending_review: "Dalam Review",
-  draft: "Draft",
-  rejected: "Ditolak",
-};
+import {
+  POST_STATUS_COLOR_MAP as STATUS_COLOR,
+  POST_STATUS_LABEL_MAP as STATUS_LABEL,
+  POST_STATUS_OPTIONS as STATUS_OPTIONS,
+} from "~/constants/postStatus";
 
 const PAGE_SIZE = 10;
 const page = ref(1);
-const statusFilter = ref("");
+const statusFilter = ref<PostStatus | undefined>(undefined);
 
 const toast = useToast();
 
@@ -90,11 +63,7 @@ async function doDelete() {
     isDeleteModalOpen.value = false;
     await refresh();
   } catch (e: unknown) {
-    const msg =
-      (e as { data?: { message?: string } }).data?.message ??
-      (e as Error).message ??
-      "Terjadi kesalahan.";
-    toast.add({ title: "Gagal menghapus", description: msg, color: "error", icon: "i-ph-x-circle" });
+    toast.add({ title: "Gagal menghapus", description: errorMessage(e), color: "error", icon: "i-ph-x-circle" });
   } finally {
     deleting.value = false;
     deletingId.value = null;

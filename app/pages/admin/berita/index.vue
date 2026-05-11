@@ -9,45 +9,17 @@ definePageMeta({
   navbarTitle: "Berita",
 });
 
-type AdminPost = {
-  id: number;
-  title: string;
-  slug: string;
-  featuredImage: string | null;
-  status: "draft" | "pending_review" | "published" | "rejected";
-  updatedAt: string;
-  publishedAt: string | null;
-  author: { id: number; fullname: string };
-  category: { id: number; name: string; type: "berita" | "pena_santri" } | null;
-};
+import type { AdminPost, PostStatus } from "~~/shared/types";
 
-const STATUS_OPTIONS = [
-  { label: "Terbit", value: "published" },
-  { label: "Dalam Review", value: "pending_review" },
-  { label: "Draft", value: "draft" },
-  { label: "Ditolak", value: "rejected" },
-];
-
-const STATUS_COLOR: Record<
-  string,
-  "success" | "warning" | "neutral" | "error"
-> = {
-  published: "success",
-  pending_review: "warning",
-  draft: "neutral",
-  rejected: "error",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  published: "Terbit",
-  pending_review: "Dalam Review",
-  draft: "Draft",
-  rejected: "Ditolak",
-};
+import {
+  POST_STATUS_COLOR_MAP as STATUS_COLOR,
+  POST_STATUS_LABEL_MAP as STATUS_LABEL,
+  POST_STATUS_OPTIONS as STATUS_OPTIONS,
+} from "~/constants/postStatus";
 
 const toast = useToast();
 const search = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<PostStatus | undefined>(undefined);
 
 const isFiltered = computed(() => search.value !== "" || statusFilter.value !== undefined);
 
@@ -106,14 +78,9 @@ async function doDelete() {
     isDeleteModalOpen.value = false;
     await refresh();
   } catch (error: unknown) {
-    const message =
-      (error as { data?: { message?: string } }).data?.message ??
-      (error as Error).message ??
-      "Terjadi kesalahan.";
-
     toast.add({
       title: "Gagal menghapus berita",
-      description: message,
+      description: errorMessage(error),
       color: "error",
       icon: "i-ph-x-circle",
     });

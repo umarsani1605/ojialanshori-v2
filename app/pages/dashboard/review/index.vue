@@ -66,7 +66,7 @@ const columns: TableColumn<QueuePost>[] = [
     cell: ({ row }) =>
       h(
         "span",
-        { class: "text-sm text-slate-500" },
+        { class: "text-sm text-muted" },
         formatDatetime(row.original.updatedAt),
       ),
   },

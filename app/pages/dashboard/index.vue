@@ -1,46 +1,15 @@
 <script setup lang="ts">
+import type {
+  PublicPostListItem as SantriFeedPost,
+  SantriDashboardStats,
+  SantriMyPost,
+} from "~~/shared/types";
+
 definePageMeta({
   layout: 'dashboard-santri',
   middleware: ['auth', 'role'],
   requiredRole: 'dashboard',
 })
-
-type SantriDashboardStats = {
-  total: number;
-  published: number;
-  pendingReview: number;
-  rejected: number;
-  queueCount?: number;
-  latestApprovedPost: {
-    id: number;
-    title: string;
-    slug: string;
-    publishedAt: string | Date | null;
-    categoryType: "berita" | "pena_santri";
-  } | null;
-};
-
-type SantriMyPost = {
-  id: number;
-  title: string;
-  slug: string;
-  status: "draft" | "pending_review" | "published" | "rejected";
-  publishedAt: string | Date | null;
-  createdAt: string | Date;
-  categoryName: string | null;
-};
-
-type SantriFeedPost = {
-  id: number;
-  title: string;
-  slug: string;
-  featuredImage: string | null;
-  publishedAt: string | Date | null;
-  createdAt: string | Date;
-  categoryName: string;
-  categoryType: "berita" | "pena_santri";
-  authorName: string;
-};
 
 const auth = useAuth();
 const greeting = ref("");

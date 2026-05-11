@@ -247,7 +247,7 @@ watch(
         <slot />
       </template>
       <template #footer>
-        <div class="flex items-center justify-center h-12 text-slate-400 text-sm mt-auto">
+        <div class="flex items-center justify-center h-12 text-dimmed text-sm mt-auto">
           Omah Ngaji Al-Anshori © {{ new Date().getFullYear() }}
         </div>
       </template>

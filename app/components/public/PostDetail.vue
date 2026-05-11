@@ -81,7 +81,7 @@ const shareButtons = computed(() => [
         <!-- Meta -->
         <p class="mt-4 text-sm text-muted">
           oleh {{ post.authorName }}
-          <span class="mx-2 text-slate-300">|</span>
+          <span class="mx-2 text-dimmed">|</span>
           {{ dateFormatted }}
         </p>
 
@@ -96,7 +96,7 @@ const shareButtons = computed(() => [
           />
           <div
             v-else
-            class="flex h-full w-full items-center justify-center text-slate-300"
+            class="flex h-full w-full items-center justify-center text-dimmed"
           >
             <UIcon name="i-ph-image" class="size-14" />
           </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { RoleColor } from "~/constants/roleDisplay";
 import { roleColorMap, roleLabelMap } from "~/constants/roleDisplay";
+import type { AdminDashboardStats } from "~~/shared/types";
 
 definePageMeta({
   layout: 'admin',
@@ -8,25 +9,6 @@ definePageMeta({
   requiredRole: 'admin',
   navbarTitle: 'Beranda',
 })
-
-type AdminDashboardStats = {
-  type: "global";
-  totalPosts: number;
-  publishedPosts: number;
-  pendingReviewPosts: number;
-  totalSantri: number;
-  totalGallery: number;
-  recentPendingPosts: Array<{
-    id: number;
-    title: string;
-    slug: string;
-    featuredImage: string | null;
-    createdAt: string;
-    author: {
-      fullname: string;
-    };
-  }>;
-};
 
 const auth = useAuth();
 const greeting = ref("");
@@ -95,7 +77,7 @@ const statItems = computed(() => [
 
     <template v-if="status === 'error'">
       <div class="flex flex-col items-center gap-3 py-12 text-center">
-        <p class="text-sm text-slate-500">Gagal memuat statistik.</p>
+        <p class="text-sm text-muted">Gagal memuat statistik.</p>
         <UButton size="sm" color="neutral" variant="outline" icon="i-ph-arrows-clockwise" @click="refresh()">
           Coba lagi
         </UButton>
@@ -117,8 +99,8 @@ const statItems = computed(() => [
 
         <div v-if="adminStats.recentPendingPosts.length === 0"
           class="flex flex-1 flex-col gap-2 items-center justify-center py-12 text-center">
-          <UIcon name="ph:folder-open-duotone" class="text-4xl text-slate-300" />
-          <p class="mt-4 text-sm text-slate-400">
+          <UIcon name="ph:folder-open-duotone" class="text-4xl text-dimmed" />
+          <p class="mt-4 text-sm text-dimmed">
             Tidak ada artikel yang menunggu review.
           </p>
         </div>
@@ -128,7 +110,7 @@ const statItems = computed(() => [
               <div class="h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-slate-100">
                 <img v-if="post.featuredImage" :src="post.featuredImage" :alt="post.title"
                   class="size-full object-cover group-hover:scale-103 transition-transform" />
-                <div v-else class="flex size-full items-center justify-center text-slate-300">
+                <div v-else class="flex size-full items-center justify-center text-dimmed">
                   <UIcon name="i-ph-image" class="text-xl" />
                 </div>
               </div>

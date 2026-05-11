@@ -27,7 +27,7 @@ const dateFormatted = computed(() =>
       />
       <div
         v-else
-        class="w-full h-full flex items-center justify-center text-slate-300"
+        class="w-full h-full flex items-center justify-center text-dimmed"
       >
         <UIcon name="ph:image" class="size-8" />
       </div>

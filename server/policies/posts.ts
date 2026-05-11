@@ -1,4 +1,4 @@
-import type { Role } from '#server/utils/guard'
+import type { Role } from '~~/shared/types'
 
 export type PostType = 'berita' | 'pena_santri'
 

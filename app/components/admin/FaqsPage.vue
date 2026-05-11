@@ -71,7 +71,7 @@ const UBadge = resolveComponent('UBadge')
 
 const columns: TableColumn<FAQ>[] = [
   { accessorKey: 'question', header: 'Pertanyaan', cell: ({ row }) => h('span', { class: 'font-medium' }, row.original.question) },
-  { accessorKey: 'answer', header: 'Jawaban', cell: ({ row }) => h('span', { class: 'text-muted-foreground line-clamp-2' }, row.original.answer) },
+  { accessorKey: 'answer', header: 'Jawaban', cell: ({ row }) => h('span', { class: 'text-muted line-clamp-2' }, row.original.answer) },
   {
     accessorKey: 'actions', header: '', cell: ({ row }) => h('div', { class: 'flex justify-end gap-2' }, [
       h(UButton, { size: 'sm', variant: 'ghost', icon: 'i-ph-pencil-simple', onClick: () => openEdit(row.original) }),
