@@ -167,7 +167,7 @@ const visibleGallery = computed(() => gallery.value?.slice(0, 8) ?? []);
 const galleryLightbox = useGalleryLightbox(visibleGallery);
 
 useSeoMeta({
-  title: () => `${siteName.value} — ${siteTagline.value}`,
+  title: () => siteTagline.value || 'Pesantren Mahasiswa Yogyakarta',
   description: () => heroDescription.value,
   ogTitle: () => `${siteName.value} — ${siteTagline.value}`,
   ogDescription: () => heroDescription.value,
