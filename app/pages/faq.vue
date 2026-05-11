@@ -26,7 +26,7 @@ const accordionItems = computed(() =>
 );
 
 useSeoMeta({
-  title: "Frequently Asked Questions",
+  title: "FAQ",
   description: "Pertanyaan yang sering diajukan tentang Omah Ngaji Al-Anshori.",
 });
 </script>
