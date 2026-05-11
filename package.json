@@ -14,6 +14,7 @@
     "migrate:users": "tsx scripts/migrate-users.ts",
     "migrate:media": "tsx scripts/migrate-media.ts",
     "migrate:gallery": "tsx scripts/migrate-gallery.ts",
+    "seed:pages": "tsx scripts/seed-pages.ts",
     "seed:demo": "tsx scripts/seed-demo-posts.ts",
     "test": "vitest"
   },

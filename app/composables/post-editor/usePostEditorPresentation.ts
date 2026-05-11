@@ -1,11 +1,11 @@
 import { computed, watch } from "vue";
 
 import type {
-  CategoryItem,
-  CategoryOption,
-  PostEditorForm,
-  PostStatus,
-  PostType,
+    CategoryItem,
+    CategoryOption,
+    PostEditorForm,
+    PostStatus,
+    PostType,
 } from "./types";
 
 type MaybeRef<T> = { value: T };
@@ -25,7 +25,9 @@ export function usePostEditorPresentation(
   const categories = computed<CategoryOption[]>(() => {
     const all = options.categoriesRaw.value ?? [];
     const filtered = options.effectivePostType.value
-      ? all.filter((category) => category.type === options.effectivePostType.value)
+      ? all.filter(
+          (category) => category.type === options.effectivePostType.value,
+        )
       : all;
 
     return filtered.map((category) => ({
@@ -64,7 +66,7 @@ export function usePostEditorPresentation(
     () =>
       ({
         draft: "Draft",
-        pending_review: "Dalam Ulasan",
+        pending_review: "Dalam Review",
         rejected: "Ditolak",
         published: "Terbit",
       })[options.currentStatus.value],
@@ -77,7 +79,11 @@ export function usePostEditorPresentation(
         pending_review: "warning",
         rejected: "error",
         published: "success",
-      })[options.currentStatus.value] as "neutral" | "warning" | "error" | "success",
+      })[options.currentStatus.value] as
+        | "neutral"
+        | "warning"
+        | "error"
+        | "success",
   );
 
   const backTo = computed(() => {

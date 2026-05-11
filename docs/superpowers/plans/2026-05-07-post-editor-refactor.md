@@ -693,7 +693,7 @@ export function usePostEditor(opts: { postId?: number }) {
     () =>
       ({
         draft: "Draft",
-        pending_review: "Dalam Ulasan",
+        pending_review: "Dalam Review",
         rejected: "Ditolak",
         published: "Terbit",
       })[currentStatus.value]
@@ -1405,7 +1405,7 @@ type AdminPost = {
 
 const STATUS_OPTIONS = [
   { label: "Terbit", value: "published" },
-  { label: "Dalam Ulasan", value: "pending_review" },
+  { label: "Dalam Review", value: "pending_review" },
   { label: "Draft", value: "draft" },
   { label: "Ditolak", value: "rejected" },
 ];
@@ -1419,7 +1419,7 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "neutral" | "error"> 
 
 const STATUS_LABEL: Record<string, string> = {
   published: "Terbit",
-  pending_review: "Dalam Ulasan",
+  pending_review: "Dalam Review",
   draft: "Draft",
   rejected: "Ditolak",
 };

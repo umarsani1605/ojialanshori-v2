@@ -6,7 +6,7 @@ import { requireRole } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 
 export default defineEventHandler(async (event) => {
-  const currentUser = requireRole(event, ['santri'])
+  const currentUser = requireRole(event, ['santri', 'reviewer'])
 
   if (!isMysqlConfigured(event)) {
     throw createDatabaseNotConfiguredError()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
+import { h, resolveComponent } from "vue";
 
 definePageMeta({
   layout: "dashboard-santri",
@@ -78,7 +78,7 @@ const tabs = computed(() => [
     slot: "published",
   },
   {
-    label: "Dalam Ulasan",
+    label: "Dalam Review",
     value: "pending_review",
     slot: "pending_review",
   },
@@ -102,7 +102,7 @@ function getStatusColor(status: PostRow["status"]) {
 function getStatusLabel(status: PostRow["status"]) {
   return {
     published: "Terbit",
-    pending_review: "Dalam Ulasan",
+    pending_review: "Dalam Review",
     rejected: "Ditolak",
     draft: "Draft",
   }[status];
@@ -230,10 +230,7 @@ const columns: TableColumn<PostRow>[] = [
 
 <template>
   <UContainer>
-    <UCard
-      class="flex flex-col min-h-[800px]"
-      :ui="{ body: 'pt-4! flex-1 flex flex-col' }"
-    >
+    <UCard class="flex flex-col min-h-[800px]" :ui="{ body: 'pt-4! flex-1 flex flex-col' }">
       <template #header>
         <div class="flex items-center justify-between gap-3">
           <h1 class="text-xl font-semibold">Artikel Saya</h1>
@@ -245,41 +242,20 @@ const columns: TableColumn<PostRow>[] = [
 
       <UTabs v-model="activeStatus" :items="tabs" variant="link" class="w-full">
         <template v-for="tab in tabs" :key="tab.slot" #[tab.slot]>
-          <div
-            v-if="status === 'pending'"
-            class="flex items-center justify-center py-16"
-          >
-            <UIcon
-              name="i-ph-spinner-gap"
-              class="text-2xl text-dimmed animate-spin"
-            />
+          <div v-if="status === 'pending'" class="flex items-center justify-center py-16">
+            <UIcon name="i-ph-spinner-gap" class="text-2xl text-dimmed animate-spin" />
           </div>
-          <div
-            v-else-if="postsForTab(tab.value).length === 0"
-            class="py-32 text-center text-sm text-dimmed"
-          >
-            <UIcon
-              name="i-ph-folder-open-duotone"
-              class="text-primary w-12 h-12 mb-4"
-            />
+          <div v-else-if="postsForTab(tab.value).length === 0" class="py-32 text-center text-sm text-dimmed">
+            <UIcon name="i-ph-folder-open-duotone" class="text-primary w-12 h-12 mb-4" />
             <div>Tidak ada artikel.</div>
           </div>
-          <UTable
-            v-else
-            :data="postsForTab(tab.value)"
-            :columns="columns"
-            :ui="{ base: 'min-w-full table-fixed overflow-clip' }"
-          />
+          <UTable v-else :data="postsForTab(tab.value)" :columns="columns"
+            :ui="{ base: 'min-w-full table-fixed overflow-clip' }" />
         </template>
       </UTabs>
 
-      <DashboardTablePagination
-        v-if="totalForTab(activeStatus) > 0"
-        class="mt-auto"
-        :page="page"
-        :total="totalForTab(activeStatus)"
-        @update:page="page = $event"
-      />
+      <DashboardTablePagination v-if="totalForTab(activeStatus) > 0" class="mt-auto" :page="page"
+        :total="totalForTab(activeStatus)" @update:page="page = $event" />
     </UCard>
   </UContainer>
 
@@ -292,14 +268,10 @@ const columns: TableColumn<PostRow>[] = [
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton
-          variant="outline"
-          :disabled="deleting"
-          @click="
-            deleteModalOpen = false;
-            deleteTarget = null;
-          "
-        >
+        <UButton variant="outline" :disabled="deleting" @click="
+          deleteModalOpen = false;
+        deleteTarget = null;
+        ">
           Batal
         </UButton>
         <UButton color="error" :loading="deleting" @click="confirmDelete">

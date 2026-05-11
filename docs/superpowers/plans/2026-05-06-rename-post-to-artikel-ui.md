@@ -17,7 +17,7 @@
 - Pertahankan status teknis `draft`, `pending_review`, `published`, `rejected`; yang berubah hanya label tampilannya.
 - Gunakan istilah final berikut untuk label status UI:
   - `published` -> `Terbit`
-  - `pending_review` -> `Dalam Ulasan`
+  - `pending_review` -> `Dalam Review`
   - `draft` -> `Draft`
   - `rejected` -> `Ditolak`
 
@@ -43,6 +43,7 @@
 ## Task 1: Ganti Terminologi UI `Post` -> `Artikel`
 
 **Files:**
+
 - Modify: `app/components/admin/AdminHomePage.vue`
 - Modify: `app/components/dashboard/DashboardHomePage.vue`
 - Modify: `app/components/dashboard/SantriPostEditor.vue`
@@ -55,7 +56,7 @@
 - [ ] Ubah semua label, heading, CTA, placeholder, empty state, modal title, dan toast yang masih memakai kata `Post` menjadi `Artikel`.
 - [ ] Terapkan wording final berikut pada titik yang sudah diverifikasi di repo:
   - `Post Terpublikasi` -> `Artikel Terbit`
-  - `Post Menunggu Review` -> `Artikel Dalam Ulasan`
+  - `Post Menunggu Review` -> `Artikel Dalam Review`
   - `Tidak ada post yang menunggu review.` -> `Tidak ada artikel yang menunggu review.`
   - `Total Post` -> `Total Artikel`
   - `Tulis Post` -> `Tulis Artikel`
@@ -84,6 +85,7 @@
 ## Task 2: Standarisasi Label Status UI
 
 **Files:**
+
 - Modify: `app/components/admin/AdminHomePage.vue`
 - Modify: `app/components/dashboard/DashboardHomePage.vue`
 - Modify: `app/components/dashboard/SantriPostEditor.vue`
@@ -93,24 +95,25 @@
 - [ ] Update mapping label di helper/computed tanpa mengganti nama fungsi atau key status:
   - `getPostStatusLabel()` di `app/components/dashboard/DashboardHomePage.vue`
     - `Published` -> `Terbit`
-    - `Pending Review` -> `Dalam Ulasan`
+    - `Pending Review` -> `Dalam Review`
     - `Rejected` dan `Draft` tetap seperti existing kecuali memang sudah sesuai target.
   - `statusLabel` di `app/components/dashboard/SantriPostEditor.vue`
     - `Terpublikasi` -> `Terbit`
-    - `Menunggu Review` -> `Dalam Ulasan`
+    - `Menunggu Review` -> `Dalam Review`
   - `getStatusLabel()` di `app/pages/dashboard/posts/index.vue`
     - `Published` -> `Terbit`
-    - `Pending Review` -> `Dalam Ulasan`
+    - `Pending Review` -> `Dalam Review`
     - `Rejected` dan `Draft` tidak diubah.
 - [ ] Sinkronkan semua label stat card, tab, dan badge yang masih memakai istilah lama:
   - `Terpublikasi` -> `Terbit`
-  - `Menunggu Review` -> `Dalam Ulasan`
+  - `Menunggu Review` -> `Dalam Review`
   - `Published` tab -> `Terbit`
-  - `Pending Review` tab -> `Dalam Ulasan`
+  - `Pending Review` tab -> `Dalam Review`
 
 ## Task 3: Verifikasi Scope dan Regression Check
 
 **Files:**
+
 - Verify only, no new files expected
 
 - [ ] Jalankan pencarian literal untuk memastikan tidak ada string target yang tertinggal di file scope:
@@ -129,15 +132,15 @@
 - [ ] Cek khusus elemen berikut:
   - Sidebar admin menampilkan `Review Artikel` dan `Semua Artikel`
   - Layout santri menampilkan `Artikel Saya` dan tombol `Tulis Artikel`
-  - Dashboard santri menampilkan `Total Artikel`, `Terbit`, dan `Dalam Ulasan`
+  - Dashboard santri menampilkan `Total Artikel`, `Terbit`, dan `Dalam Review`
   - Editor santri menampilkan placeholder baru dan toast baru
-  - Daftar artikel santri menampilkan tab `Terbit` dan `Dalam Ulasan`
+  - Daftar artikel santri menampilkan tab `Terbit` dan `Dalam Review`
   - Modal hapus menampilkan `Hapus Artikel?` dan toast hapus memakai istilah `Artikel`
 
 ## Notes
 
 - Di `app/pages/dashboard/posts/index.vue`, tombol CTA header sudah bertuliskan `Tulis Artikel`; tidak perlu perubahan tambahan di titik itu.
-- Perubahan `Artikel Terbit` dan `Artikel Dalam Ulasan` di admin home adalah hasil gabungan rename terminologi + standardisasi label status, dan harus diperlakukan sebagai wording final.
+- Perubahan `Artikel Terbit` dan `Artikel Dalam Review` di admin home adalah hasil gabungan rename terminologi + standardisasi label status, dan harus diperlakukan sebagai wording final.
 
 ## Self-Review
 

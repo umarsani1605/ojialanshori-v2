@@ -180,47 +180,26 @@ useSeoMeta({
     <!-- 1. Hero — green gradient + Arabic letter ornaments -->
     <section class="hero-gradient relative overflow-hidden text-white">
       <!-- Decorative ornaments — white Arabic letters & shapes on green bg -->
-      <img
-        src="/images/hero/hero-left-top.png"
-        alt=""
-        aria-hidden="true"
-        class="absolute top-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
-      />
-      <img
-        src="/images/hero/hero-left-bottom.png"
-        alt=""
-        aria-hidden="true"
-        class="absolute bottom-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
-      />
-      <img
-        src="/images/hero/hero-right-top.png"
-        alt=""
-        aria-hidden="true"
-        class="absolute top-12 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
-      />
-      <img
-        src="/images/hero/hero-right-bottom.png"
-        alt=""
-        aria-hidden="true"
-        class="absolute bottom-0 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
-      />
+      <img src="/images/hero/hero-left-top.png" alt="" aria-hidden="true"
+        class="absolute top-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none" />
+      <img src="/images/hero/hero-left-bottom.png" alt="" aria-hidden="true"
+        class="absolute bottom-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none" />
+      <img src="/images/hero/hero-right-top.png" alt="" aria-hidden="true"
+        class="absolute top-12 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none" />
+      <img src="/images/hero/hero-right-bottom.png" alt="" aria-hidden="true"
+        class="absolute bottom-0 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none" />
 
-      <UPageHero
-        orientation="horizontal"
-        reverse
-        class="relative z-10 py-10"
-        :ui="{
-          container: 'py-8 sm:py-14 lg:py-16 gap-12 lg:gap-16 items-center',
-          wrapper: 'items-start',
-          headline:
-            'text-xl font-semibold text-white/90 text-center md:text-left',
-          title:
-            'font-ui text-xl md:text-2xl lg:text-4xl font-extrabold text-white tracking-wide text-center md:text-left',
-          description:
-            'text-base md:text-lg text-white/85 max-w-xl leading-relaxed text-center md:text-left',
-          links: 'mt-2 justify-center md:justify-start',
-        }"
-      >
+      <UPageHero orientation="horizontal" reverse class="relative z-10 py-10" :ui="{
+        container: 'py-8 sm:py-14 lg:py-16 gap-12 lg:gap-16 items-center',
+        wrapper: 'items-start',
+        headline:
+          'text-lg md:text-xl font-semibold text-white/90 text-center md:text-left',
+        title:
+          'font-ui text-2xl lg:text-4xl font-extrabold text-white tracking-wide text-center md:text-left',
+        description:
+          'text-base md:text-lg text-white/85 max-w-xl leading-relaxed text-center md:text-left',
+        links: 'mt-2 justify-center md:justify-start',
+      }">
         <template #headline>
           <span>
             {{ siteTagline }}
@@ -233,23 +212,16 @@ useSeoMeta({
           {{ heroDescription }}
         </template>
         <template #links>
-          <UButton
-            href="/profil"
-            variant="ghost"
-            trailing-icon="i-ph-arrow-right"
-            class="px-3 py-2 rounded-xl text-white border border-white hover:text-primary hover:bg-white active:text-primary active:bg-white"
-          >
+          <UButton href="/profil" variant="ghost" trailing-icon="i-ph-arrow-right"
+            class="px-3 py-2 rounded-xl text-white border border-white hover:text-primary hover:bg-white active:text-primary active:bg-white">
             Kenali lebih dekat
           </UButton>
         </template>
 
         <!-- Default slot = the visual on the opposite side of text (logo) -->
         <div class="flex justify-start md:justify-center">
-          <img
-            src="/images/logo/logo_white.png"
-            alt="Omah Ngaji Al-Anshori"
-            class="max-w-sm object-contain"
-          />
+          <img src="/images/logo/logo_white.png" alt="Omah Ngaji Al-Anshori"
+            class="max-w-[180px] md:max-w-sm object-contain" />
         </div>
       </UPageHero>
     </section>
@@ -258,19 +230,11 @@ useSeoMeta({
     <section id="kenalan" class="py-10 md:py-16">
       <UContainer>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-          <div
-            v-for="feature in features"
-            :key="feature.title"
-            class="group flex flex-col items-center text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
-          >
+          <div v-for="feature in features" :key="feature.title"
+            class="group flex flex-col items-center text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300">
             <div
-              class="size-24 md:size-28 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
-            >
-              <img
-                :src="feature.image"
-                :alt="feature.title"
-                class="size-20 md:size-24 object-contain"
-              />
+              class="size-24 md:size-28 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+              <img :src="feature.image" :alt="feature.title" class="size-20 md:size-24 object-contain" />
             </div>
             <h4 class="text-base md:text-lg font-semibold">
               {{ feature.title }}
@@ -286,33 +250,19 @@ useSeoMeta({
         <h2 class="font-bold text-xl md:text-2xl tracking-wide mb-10 md:mb-14">
           Kata Alumni
         </h2>
-        <UCarousel
-          v-slot="{ item }"
-          :items="testimonials"
-          :autoplay="{ delay: 6000 }"
-          loop
-          arrows
-          dots
-          prev-icon="i-ph-caret-left"
-          next-icon="i-ph-caret-right"
-          :prev="{ variant: 'ghost', color: 'neutral' }"
-          :next="{ variant: 'ghost', color: 'neutral' }"
-          :ui="{
+        <UCarousel v-slot="{ item }" :items="testimonials" :autoplay="{ delay: 6000 }" loop arrows dots
+          prev-icon="i-ph-caret-left" next-icon="i-ph-caret-right" :prev="{ variant: 'ghost', color: 'neutral' }"
+          :next="{ variant: 'ghost', color: 'neutral' }" :ui="{
             root: 'group/testimonials relative',
             prev: 'absolute left-6! rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
             next: 'absolute right-6! rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
-          }"
-        >
+          }">
           <div class="max-w-3xl mx-auto px-4 text-center">
             <p class="text-base md:text-lg leading-relaxed mb-8">
               &ldquo;{{ item.quote }}&rdquo;
             </p>
-            <img
-              :src="item.avatar"
-              :alt="item.name"
-              class="size-16 rounded-full object-cover mx-auto mb-3"
-              loading="lazy"
-            />
+            <img :src="item.avatar" :alt="item.name" class="size-16 rounded-full object-cover mx-auto mb-3"
+              loading="lazy" />
             <p class="font-bold">
               {{ item.name }}
             </p>
@@ -329,32 +279,17 @@ useSeoMeta({
       <UContainer>
         <PublicSectionHeading title="Berita">
           <template #action>
-            <NuxtLink
-              to="/berita"
-              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
-            >
+            <NuxtLink to="/berita" class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors">
               Lainnya
               <UIcon name="i-ph-caret-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
 
-        <div
-          v-if="berita.data.length > 0"
-          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8"
-        >
-          <PublicPostCard
-            v-for="post in berita.data"
-            :key="post.id"
-            :post="post"
-            base-path="/berita"
-          />
+        <div v-if="berita.data.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <PublicPostCard v-for="post in berita.data" :key="post.id" :post="post" base-path="/berita" />
         </div>
-        <PublicEmptyState
-          v-else
-          title="Belum ada berita"
-          icon="i-ph-newspaper"
-        />
+        <PublicEmptyState v-else title="Belum ada berita" icon="i-ph-newspaper" />
       </UContainer>
     </section>
 
@@ -363,26 +298,16 @@ useSeoMeta({
       <UContainer>
         <PublicSectionHeading title="Pena Santri">
           <template #action>
-            <NuxtLink
-              to="/pena-santri"
-              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
-            >
+            <NuxtLink to="/pena-santri"
+              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors">
               Lainnya
               <UIcon name="i-ph-caret-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
 
-        <div
-          v-if="pena.data.length > 0"
-          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8"
-        >
-          <PublicPostCard
-            v-for="post in pena.data"
-            :key="post.id"
-            :post="post"
-            base-path="/pena-santri"
-          />
+        <div v-if="pena.data.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <PublicPostCard v-for="post in pena.data" :key="post.id" :post="post" base-path="/pena-santri" />
         </div>
         <PublicEmptyState v-else title="Belum ada karya" icon="i-ph-pen-nib" />
       </UContainer>
@@ -393,73 +318,42 @@ useSeoMeta({
       <UContainer>
         <PublicSectionHeading title="Galeri">
           <template #action>
-            <NuxtLink
-              to="/galeri"
-              class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors"
-            >
+            <NuxtLink to="/galeri" class="text-default hover:text-slate-800 flex items-center gap-2 transition-colors">
               Lainnya
               <UIcon name="i-ph-caret-right" class="size-4" />
             </NuxtLink>
           </template>
         </PublicSectionHeading>
 
-        <div
-          v-if="visibleGallery.length > 0"
-          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8"
-        >
-          <button
-            v-for="(item, index) in visibleGallery"
-            :key="item.id"
-            type="button"
+        <div v-if="visibleGallery.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <button v-for="(item, index) in visibleGallery" :key="item.id" type="button"
             class="aspect-3/2 rounded-2xl overflow-hidden bg-slate-100 group relative text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            :aria-label="`Lihat foto ${item.title}`"
-            @click="galleryLightbox.open(index)"
-          >
-            <img
-              :src="item.imagePath"
-              :alt="item.title"
-              loading="lazy"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
+            :aria-label="`Lihat foto ${item.title}`" @click="galleryLightbox.open(index)">
+            <img :src="item.imagePath" :alt="item.title" loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             <div
-              class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-4 py-3 text-sm font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
-            >
+              class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-4 py-3 text-sm font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
               {{ item.title }}
             </div>
           </button>
         </div>
-        <PublicEmptyState
-          v-else
-          title="Belum ada foto"
-          description="Galeri foto kegiatan akan tampil di sini."
-          icon="i-ph-image"
-        />
+        <PublicEmptyState v-else title="Belum ada foto" description="Galeri foto kegiatan akan tampil di sini."
+          icon="i-ph-image" />
       </UContainer>
     </section>
 
-    <PublicGalleryLightbox
-      v-model:open="galleryLightbox.isOpen.value"
-      :items="visibleGallery"
-      :active-index="galleryLightbox.activeIndex.value"
-      @close="galleryLightbox.close"
-      @prev="galleryLightbox.prev"
-      @next="galleryLightbox.next"
-    />
+    <PublicGalleryLightbox v-model:open="galleryLightbox.isOpen.value" :items="visibleGallery"
+      :active-index="galleryLightbox.activeIndex.value" @close="galleryLightbox.close" @prev="galleryLightbox.prev"
+      @next="galleryLightbox.next" />
 
     <!-- 7. Instagram -->
     <section class="py-10 md:py-16">
       <UContainer>
         <PublicSectionHeading title="Instagram" />
-        <a
-          :href="instagramUrl"
-          target="_blank"
-          rel="noopener"
-          class="group flex flex-col md:flex-row gap-6 items-center justify-between text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300"
-        >
+        <a :href="instagramUrl" target="_blank" rel="noopener"
+          class="group flex flex-col md:flex-row gap-6 items-center justify-between text-center p-6 rounded-2xl border border-slate-200 bg-white hover:shadow-sm hover:-translate-y-2 transition-all duration-300">
           <div class="flex items-start gap-5">
-            <div
-              class="size-16 rounded-2xl flex items-center justify-center shrink-0 text-slate-600"
-            >
+            <div class="size-16 rounded-2xl flex items-center justify-center shrink-0 text-slate-600">
               <UIcon name="i-ph-instagram-logo" class="size-full" />
             </div>
             <div class="text-left">
@@ -470,8 +364,7 @@ useSeoMeta({
             </div>
           </div>
           <div
-            class="font-semibold bg-brand-500 text-white group-hover:bg-brand-600 px-4 py-1.5 rounded-lg transition-colors"
-          >
+            class="font-semibold bg-brand-500 text-white group-hover:bg-brand-600 px-4 py-1.5 rounded-lg transition-colors">
             Ikuti Kami
           </div>
         </a>
@@ -484,12 +377,8 @@ useSeoMeta({
         <PublicSectionHeading title="Youtube" />
 
         <div class="aspect-video rounded-2xl overflow-hidden bg-slate-100">
-          <iframe
-            :src="youtubeEmbedUrl"
-            title="YouTube video Omah Ngaji Al-Anshori"
-            class="w-full h-full"
-            frameborder="0"
-            allow="
+          <iframe :src="youtubeEmbedUrl" title="YouTube video Omah Ngaji Al-Anshori" class="w-full h-full"
+            frameborder="0" allow="
               accelerometer;
               autoplay;
               clipboard-write;
@@ -497,10 +386,7 @@ useSeoMeta({
               gyroscope;
               picture-in-picture;
               web-share;
-            "
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-          />
+            " referrerpolicy="strict-origin-when-cross-origin" allowfullscreen />
         </div>
       </UContainer>
     </section>
