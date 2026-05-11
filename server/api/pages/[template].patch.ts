@@ -3,8 +3,10 @@ import { pages } from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
+import { defineValidatedHandler } from '#server/utils/validated-handler'
+import { updatePageSchema } from '#server/schemas'
 
-export default defineEventHandler(async (event) => {
+export default defineValidatedHandler(updatePageSchema, async (event, body) => {
   requireAdmin(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
@@ -12,29 +14,22 @@ export default defineEventHandler(async (event) => {
   const template = getRouterParam(event, 'template')
   if (!template) throw createError({ statusCode: 400, statusMessage: 'Template required' })
 
-  const body = await readBody(event)
-  if (!body || !body.meta) {
-     throw createError({ statusCode: 400, statusMessage: 'Body must contain meta' })
-  }
-
   const db = useDb(event)
-  
-  // Upsert pattern (update if exists, insert if not). 
-  // Since pages are fixed, we'll try to find it first.
+
+  // Upsert: update kalau sudah ada, insert kalau belum.
   const existingPage = await db.query.pages.findFirst({
     where: eq(pages.template, template),
   })
 
   if (existingPage) {
     await db.update(pages)
-      .set({ 
+      .set({
         title: body.title || existingPage.title,
-        meta: body.meta, 
-        updatedAt: new Date() 
+        meta: body.meta,
+        updatedAt: new Date(),
       })
       .where(eq(pages.template, template))
   } else {
-    // If it didn't exist in DB yet, create it.
     await db.insert(pages).values({
       title: body.title || template,
       template: template,

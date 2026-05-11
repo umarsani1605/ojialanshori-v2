@@ -2,10 +2,11 @@ import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { updateOwnProfile } from '#server/services/profile/profileService'
+import { defineValidatedHandler } from '#server/utils/validated-handler'
+import { updateProfileSchema } from '#server/schemas'
 
-export default defineEventHandler(async (event) => {
+export default defineValidatedHandler(updateProfileSchema, async (event, body) => {
   const actor = requireAuth(event)
-  const body = await readBody(event)
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
