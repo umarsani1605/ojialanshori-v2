@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 
 type Activity = {
@@ -130,47 +130,21 @@ async function doDelete() {
   }
 }
 
-const UButton = resolveComponent("UButton");
-
 const columns: TableColumn<Activity>[] = [
   { accessorKey: "order", header: "Urutan" },
-  {
+  imageColumn<Activity>({
     accessorKey: "imagePath",
-    header: "Foto",
-    cell: ({ row }) =>
-      h("img", {
-        src: row.original.imagePath,
-        alt: row.original.title,
-        class: "h-24 w-auto rounded-2xl object-cover",
-      }),
-  },
+    alt: (row) => row.title,
+  }),
   {
     accessorKey: "title",
     header: "Judul",
     cell: ({ row }) => h("span", { class: "font-medium" }, row.original.title),
   },
-  {
-    accessorKey: "actions",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex justify-end gap-2" }, [
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          label: "Edit",
-          icon: "i-ph-pencil-simple",
-          onClick: () => openEdit(row.original),
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          label: "Hapus",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<Activity>({
+    onEdit: (row) => openEdit(row),
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 

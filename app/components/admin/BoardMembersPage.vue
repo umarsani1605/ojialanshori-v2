@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 
 type BoardMember = {
@@ -129,53 +129,24 @@ async function doDelete() {
   }
 }
 
-const UButton = resolveComponent("UButton");
-const UAvatar = resolveComponent("UAvatar");
-
 const columns: TableColumn<BoardMember>[] = [
   { accessorKey: "order", header: "Urutan" },
-  {
+  imageColumn<BoardMember>({
     accessorKey: "avatarPath",
-    header: "Foto",
-    cell: ({ row }) => {
-      if (row.original.avatarPath) {
-        return h("img", {
-          src: row.original.avatarPath,
-          alt: row.original.name,
-          class: "h-24 w-auto rounded-2xl object-cover",
-        });
-      }
-      return h(UAvatar, { alt: row.original.name, size: "md" });
-    },
-  },
+    alt: (row) => row.name,
+    shape: "circle",
+    fallbackIcon: "i-ph-user",
+  }),
   {
     accessorKey: "name",
     header: "Nama",
     cell: ({ row }) => h("span", { class: "font-medium" }, row.original.name),
   },
   { accessorKey: "role", header: "Peran" },
-  {
-    accessorKey: "actions",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex justify-end gap-2" }, [
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          label: "Edit",
-          icon: "i-ph-pencil-simple",
-          onClick: () => openEdit(row.original),
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          label: "Hapus",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<BoardMember>({
+    onEdit: (row) => openEdit(row),
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 

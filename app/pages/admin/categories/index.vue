@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 
 definePageMeta({
@@ -121,36 +121,16 @@ async function doDelete() {
   }
 }
 
-const UButton = resolveComponent("UButton");
-
 const columns: TableColumn<Category>[] = [
   {
     accessorKey: "name",
     header: "Nama",
     cell: ({ row }) => h("span", { class: "font-medium" }, row.original.name),
   },
-  {
-    accessorKey: "id",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex justify-end gap-2" }, [
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          label: "Edit",
-          icon: "i-ph-pencil-simple",
-          onClick: () => openEdit(row.original),
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          label: "Hapus",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<Category>({
+    onEdit: (row) => openEdit(row),
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 

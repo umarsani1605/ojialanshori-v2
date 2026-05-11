@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 
 definePageMeta({
@@ -208,52 +208,21 @@ async function doDelete() {
   }
 }
 
-const UButton = resolveComponent("UButton");
-
 const columns: TableColumn<GalleryItem>[] = [
-  {
-    accessorKey: "order",
-    header: "Urutan",
-    size: 56,
-  },
-  {
+  { accessorKey: "order", header: "Urutan", size: 56 },
+  imageColumn<GalleryItem>({
     accessorKey: "imagePath",
-    header: "Foto",
-    size: 150,
-    cell: ({ row }) =>
-      h("img", {
-        src: row.original.imagePath,
-        alt: row.original.title,
-        class: "h-24 w-32 rounded-xl object-cover",
-      }),
-  },
+    alt: (row) => row.title,
+  }),
   {
     accessorKey: "title",
     header: "Judul",
     cell: ({ row }) => h("span", { class: "font-medium" }, row.original.title),
   },
-  {
-    accessorKey: "id",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex justify-end gap-2" }, [
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          label: "Edit",
-          icon: "i-ph-pencil-simple",
-          onClick: () => openEdit(row.original),
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          label: "Hapus",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<GalleryItem>({
+    onEdit: (row) => openEdit(row),
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 

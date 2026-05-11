@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 
 definePageMeta({
   layout: "admin",
@@ -91,74 +91,33 @@ async function doDelete() {
   }
 }
 
-const UBadge = resolveComponent("UBadge");
-const UButton = resolveComponent("UButton");
-
 const columns: TableColumn<AdminPost>[] = [
-  {
+  imageColumn<AdminPost>({
     accessorKey: "featuredImage",
     header: "Gambar",
-    cell: ({ row }) => {
-      const src = row.original.featuredImage;
-      return src
-        ? h("img", {
-          src,
-          class: "h-24 w-32 rounded-xl object-cover bg-elevated shrink-0",
-        })
-        : h("div", {
-          class:
-            "h-24 w-32 rounded-xl bg-elevated flex items-center justify-center shrink-0",
-        }, h(resolveComponent("UIcon"), { name: "i-ph-image", class: "size-5 text-dimmed" }));
-    },
-  },
+    alt: (row) => row.title,
+  }),
   {
     accessorKey: "title",
     header: "Judul",
     cell: ({ row }) =>
       h("span", { class: "font-medium line-clamp-2" }, row.original.title),
   },
-  {
+  badgeColumn<AdminPost, PostStatus>({
     accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) =>
-      h(UBadge, {
-        label: STATUS_LABEL[row.original.status] ?? row.original.status,
-        color: STATUS_COLOR[row.original.status] ?? "neutral",
-        variant: "subtle",
-      }),
-  },
+    colorMap: STATUS_COLOR,
+    labelMap: STATUS_LABEL,
+  }),
   {
     accessorKey: "updatedAt",
     header: "Diperbarui",
     cell: ({ row }) =>
-      h(
-        "span",
-        { class: "text-muted text-sm" },
-        formatDatetime(row.original.updatedAt),
-      ),
+      h("span", { class: "text-muted text-sm" }, formatDatetime(row.original.updatedAt)),
   },
-  {
-    accessorKey: "id",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex gap-1 justify-end" }, [
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          label: "Edit",
-          icon: "i-ph-pencil-simple",
-          to: `/admin/berita/${row.original.id}/edit`,
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          label: "Hapus",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<AdminPost>({
+    editTo: (row) => `/admin/berita/${row.id}/edit`,
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 

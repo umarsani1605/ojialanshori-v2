@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 
 type Testimonial = {
@@ -139,57 +139,24 @@ async function doDelete() {
   }
 }
 
-const UButton = resolveComponent("UButton");
-const UAvatar = resolveComponent("UAvatar");
-const UBadge = resolveComponent("UBadge");
-
 const columns: TableColumn<Testimonial>[] = [
-  {
-    accessorKey: "order",
-    header: "Urutan",
-  },
-  {
+  { accessorKey: "order", header: "Urutan" },
+  imageColumn<Testimonial>({
     accessorKey: "avatarPath",
-    header: "Foto",
-    cell: ({ row }) => {
-      if (row.original.avatarPath) {
-        return h("img", {
-          src: row.original.avatarPath,
-          alt: row.original.name,
-          class: "size-16 rounded-full object-cover",
-        });
-      }
-      return h(UAvatar, { alt: row.original.name, size: "md" });
-    },
-  },
+    alt: (row) => row.name,
+    shape: "circle",
+    fallbackIcon: "i-ph-user",
+  }),
   {
     accessorKey: "name",
     header: "Nama",
     cell: ({ row }) => h("span", { class: "font-medium" }, row.original.name),
   },
   { accessorKey: "title", header: "Prestasi" },
-  {
-    accessorKey: "actions",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex justify-end gap-2" }, [
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          label: "Edit",
-          icon: "i-ph-pencil-simple",
-          onClick: () => openEdit(row.original),
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          label: "Hapus",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<Testimonial>({
+    onEdit: (row) => openEdit(row),
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 

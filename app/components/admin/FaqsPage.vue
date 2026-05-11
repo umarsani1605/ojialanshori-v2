@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
+import { h } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 
 type FAQ = { id: number, question: string, answer: string }
@@ -68,18 +68,13 @@ async function doDelete() {
   }
 }
 
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-
 const columns: TableColumn<FAQ>[] = [
   { accessorKey: 'question', header: 'Pertanyaan', cell: ({ row }) => h('span', { class: 'font-medium' }, row.original.question) },
   { accessorKey: 'answer', header: 'Jawaban', cell: ({ row }) => h('span', { class: 'text-muted line-clamp-2' }, row.original.answer) },
-  {
-    accessorKey: 'actions', header: '', cell: ({ row }) => h('div', { class: 'flex justify-end gap-2' }, [
-      h(UButton, { size: 'sm', variant: 'ghost', icon: 'i-ph-pencil-simple', onClick: () => openEdit(row.original) }),
-      h(UButton, { size: 'sm', variant: 'ghost', color: 'error', icon: 'i-ph-trash', onClick: () => confirmDelete(row.original.id) }),
-    ]),
-  },
+  actionsColumn<FAQ>({
+    onEdit: (row) => openEdit(row),
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ]
 </script>
 

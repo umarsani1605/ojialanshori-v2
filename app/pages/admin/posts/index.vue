@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
-import { h, resolveComponent } from "vue";
+import { h } from "vue";
 
 definePageMeta({
   layout: "admin",
@@ -71,9 +71,6 @@ async function doDelete() {
   }
 }
 
-const UBadge = resolveComponent("UBadge");
-const UButton = resolveComponent("UButton");
-
 const columns: TableColumn<AdminPost>[] = [
   {
     id: "index",
@@ -97,16 +94,11 @@ const columns: TableColumn<AdminPost>[] = [
     header: "Penulis",
     cell: ({ row }) => h("span", {}, row.original.author.fullname),
   },
-  {
+  badgeColumn<AdminPost, PostStatus>({
     accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) =>
-      h(UBadge, {
-        label: STATUS_LABEL[row.original.status] ?? row.original.status,
-        color: STATUS_COLOR[row.original.status] ?? "neutral",
-        variant: "subtle",
-      }),
-  },
+    colorMap: STATUS_COLOR,
+    labelMap: STATUS_LABEL,
+  }),
   {
     accessorKey: "category",
     header: "Kategori",
@@ -129,30 +121,13 @@ const columns: TableColumn<AdminPost>[] = [
         }),
       ),
   },
-  {
-    accessorKey: "id",
-    header: "",
-    cell: ({ row }) =>
-      h("div", { class: "flex gap-1 justify-end" }, [
-        h(UButton, {
-          size: "sm",
-          color: "neutral",
-          variant: "light",
-          icon: "i-ph-pencil-simple",
-          to:
-            row.original.category?.type === "berita"
-              ? `/admin/berita/${row.original.id}/edit`
-              : `/admin/pena-santri/${row.original.id}/edit`,
-        }),
-        h(UButton, {
-          size: "sm",
-          variant: "light",
-          color: "error",
-          icon: "i-ph-trash",
-          onClick: () => confirmDelete(row.original.id),
-        }),
-      ]),
-  },
+  actionsColumn<AdminPost>({
+    editTo: (row) =>
+      row.category?.type === "berita"
+        ? `/admin/berita/${row.id}/edit`
+        : `/admin/pena-santri/${row.id}/edit`,
+    onDelete: (row) => confirmDelete(row.id),
+  }),
 ];
 </script>
 
