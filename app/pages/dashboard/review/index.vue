@@ -17,6 +17,9 @@ const page = ref(1);
 const { data, status } = useLazyFetch<{ data: QueuePost[] }>("/api/posts", {
   key: "dashboard-review-queue",
   default: () => ({ data: [] }),
+  query: {
+    scope: "review",
+  },
 });
 
 const posts = computed(() => data.value?.data ?? []);

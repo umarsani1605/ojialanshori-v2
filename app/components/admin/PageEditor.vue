@@ -49,7 +49,11 @@ async function save() {
         meta: meta.value,
       },
     });
-    toast.add({ title: "Perubahan disimpan", color: "success", icon: "i-ph-check-circle" });
+    toast.add({
+      title: "Perubahan disimpan",
+      color: "success",
+      icon: "i-ph-check-circle",
+    });
     await refresh();
   } catch (error: unknown) {
     toast.add({
@@ -120,7 +124,7 @@ async function save() {
           <USeparator />
           <div class="space-y-6">
             <div class="text-lg font-semibold">Kata Alumni</div>
-            <AdminTestimonialsPage />
+            <AdminTestimonialsPage :card="false" />
           </div>
         </div>
       </UCard>
@@ -147,7 +151,7 @@ async function save() {
           <USeparator />
           <div class="space-y-6">
             <div class="text-lg font-semibold">Pengurus</div>
-            <AdminBoardMembersPage />
+            <AdminBoardMembersPage :card="false" />
           </div>
         </div>
       </UCard>
@@ -156,15 +160,15 @@ async function save() {
       <UCard v-else-if="template === 'activities'">
         <div class="space-y-6">
           <div class="text-lg font-semibold">Program</div>
-          <AdminActivitiesPage />
+          <AdminActivitiesPage :card="false" />
         </div>
       </UCard>
 
       <!-- FAQ Template Form -->
-      <UCard v-else-if="template === 'faqs'">
+      <UCard v-else-if="template === 'faq'">
         <div class="space-y-6">
           <div class="text-lg font-semibold">Daftar Tanya-Jawab</div>
-          <AdminFaqsPage />
+          <AdminFaqsPage :card="false" />
         </div>
       </UCard>
 

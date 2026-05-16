@@ -1,5 +1,6 @@
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
+import { markMutated, PublicCacheScopes } from '#server/utils/publicCache'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { zValidator } from '#server/utils/zod-validator'
 import { updateSettingsSchema } from '~~/shared/schemas'
@@ -12,5 +13,6 @@ export default defineEventHandler(async (event) => {
 
   const { updates } = await readValidatedBody(event, zValidator(updateSettingsSchema))
   await updateSettings(useDb(event), updates)
+  await markMutated(PublicCacheScopes.settings)
   return { success: true }
 })

@@ -4,8 +4,12 @@ import type * as schema from '#server/db/schema'
 import type { CategoryType } from '#server/db/schema'
 import { getBannerConfig, type BannerConfig } from '#server/services/banners/bannerService'
 import {
+  getPublicActivities,
+  getPublicBoardMembers,
   getPublicFaqs,
   getPublicGallery,
+  getPublicPageMeta,
+  getPublicPageMetaAll,
   getPublicPostBySlug,
   getPublicPostListing,
   getPublicSettings,
@@ -59,6 +63,22 @@ export function getPublicFaqList(db: Database) {
 
 export function getPublicTestimonialList(db: Database) {
   return getPublicTestimonials(db)
+}
+
+export function getPublicBoardMemberList(db: Database) {
+  return getPublicBoardMembers(db)
+}
+
+export function getPublicActivityList(db: Database) {
+  return getPublicActivities(db)
+}
+
+export function getPublicPageByTemplate(db: Database, template: string) {
+  return getPublicPageMeta(db, template)
+}
+
+export function listPublicPageTemplates(db: Database) {
+  return getPublicPageMetaAll(db)
 }
 
 export async function getPublicPost(db: Database, slug: string) {

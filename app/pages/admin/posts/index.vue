@@ -16,11 +16,9 @@ import {
   POST_STATUS_LABEL_MAP as STATUS_LABEL,
   POST_STATUS_OPTIONS as STATUS_OPTIONS,
 } from "~/constants/postStatus";
-
 const PAGE_SIZE = 10;
 const page = ref(1);
 const statusFilter = ref<PostStatus | undefined>(undefined);
-
 const toast = useToast();
 
 const { data, status, refresh } = useLazyFetch<{ data: AdminPost[] }>(
@@ -35,11 +33,12 @@ const filteredPosts = computed(() => {
   return posts.value.filter((p) => p.status === statusFilter.value);
 });
 
-const total = computed(() => filteredPosts.value.length);
+const sortedPosts = computed(() => [...filteredPosts.value]);
+const total = computed(() => sortedPosts.value.length);
 
 const paginatedPosts = computed(() => {
   const start = (page.value - 1) * PAGE_SIZE;
-  return filteredPosts.value.slice(start, start + PAGE_SIZE);
+  return sortedPosts.value.slice(start, start + PAGE_SIZE);
 });
 
 watch(statusFilter, () => {
@@ -76,6 +75,25 @@ const columns: TableColumn<AdminPost>[] = [
     id: "index",
     header: "No",
     size: 56,
+    minSize: 56,
+    maxSize: 56,
+    meta: {
+      class: {
+        td: "align-top",
+      },
+      style: {
+        th: {
+          width: "56px",
+          minWidth: "56px",
+          maxWidth: "56px",
+        },
+        td: {
+          width: "56px",
+          minWidth: "56px",
+          maxWidth: "56px",
+        },
+      },
+    },
     cell: ({ row }) =>
       h(
         "span",
@@ -86,13 +104,30 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "title",
     header: "Judul",
+    meta: {
+      class: {
+        th: "w-[28rem]",
+        td: "w-[28rem] align-top",
+      },
+    },
     cell: ({ row }) =>
-      h("span", { class: "font-medium line-clamp-2" }, row.original.title),
+      h(
+        "div",
+        { class: "min-w-0 max-w-[28rem] whitespace-normal break-words" },
+        [h("span", { class: "font-medium line-clamp-2" }, row.original.title)],
+      ),
   },
   {
     accessorKey: "author",
     header: "Penulis",
-    cell: ({ row }) => h("span", {}, row.original.author.fullname),
+    size: 180,
+    meta: {
+      class: {
+        th: "w-[180px]",
+        td: "w-[180px] align-top",
+      },
+    },
+    cell: ({ row }) => h("span", { class: "whitespace-normal break-words" }, row.original.author.fullname),
   },
   badgeColumn<AdminPost, PostStatus>({
     accessorKey: "status",
@@ -102,18 +137,34 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "category",
     header: "Kategori",
+    size: 180,
+    meta: {
+      class: {
+        th: "w-[180px]",
+        td: "w-[180px] align-top",
+      },
+    },
     cell: ({ row }) =>
       row.original.category
-        ? h("span", {}, row.original.category.name)
+        ? h("span", { class: "whitespace-normal break-words" }, row.original.category.name)
         : h("span", { class: "text-muted" }, "—"),
   },
   {
     accessorKey: "updatedAt",
     header: "Diperbarui",
+    size: 140,
+    minSize: 140,
+    maxSize: 140,
+    meta: {
+      class: {
+        th: "w-[140px]",
+        td: "w-[140px] align-top",
+      },
+    },
     cell: ({ row }) =>
       h(
         "span",
-        { class: "text-muted text-sm" },
+        { class: "text-muted text-sm whitespace-nowrap" },
         new Date(row.original.updatedAt).toLocaleDateString("id-ID", {
           day: "numeric",
           month: "short",

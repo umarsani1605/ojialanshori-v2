@@ -12,6 +12,8 @@ const props = withDefaults(
     showIndex?: boolean;
     indexColumnSize?: number;
     defaultPageSize?: number;
+    card?: boolean;
+    paginated?: boolean;
   }>(),
   {
     search: undefined,
@@ -20,7 +22,26 @@ const props = withDefaults(
     showIndex: true,
     indexColumnSize: 56,
     defaultPageSize: 10,
+    card: true,
+    paginated: true,
   },
+);
+
+const cardClass = computed(() =>
+  props.card
+    ? "flex flex-col min-h-[850px] overflow-auto"
+    : "flex flex-col",
+);
+
+const cardUi = computed(() =>
+  props.card
+    ? { body: "flex-1", footer: "mt-auto" }
+    : {
+        root: "border-0 ring-0 rounded-none shadow-none bg-transparent",
+        header: "!px-0 !pt-0 !pb-4 sm:!px-0 sm:!pt-0 sm:!pb-4 !border-0",
+        body: "!p-0 sm:!p-0 flex-1",
+        footer: "!px-0 !pb-0 !pt-4 sm:!px-0 sm:!pb-0 sm:!pt-4 !border-0 mt-auto",
+      },
 );
 
 const emit = defineEmits<{
@@ -37,6 +58,7 @@ const pagination = ref({
 });
 
 const paginatedData = computed(() => {
+  if (!props.paginated) return props.data;
   const start = pagination.value.pageIndex * pagination.value.pageSize;
   return props.data.slice(start, start + pagination.value.pageSize);
 });
@@ -53,6 +75,23 @@ const displayColumns = computed<TableColumn<T>[]>(() => {
       size: props.indexColumnSize,
       minSize: props.indexColumnSize,
       maxSize: props.indexColumnSize,
+      meta: {
+        class: {
+          td: "align-top",
+        },
+        style: {
+          th: {
+            width: `${props.indexColumnSize}px`,
+            minWidth: `${props.indexColumnSize}px`,
+            maxWidth: `${props.indexColumnSize}px`,
+          },
+          td: {
+            width: `${props.indexColumnSize}px`,
+            minWidth: `${props.indexColumnSize}px`,
+            maxWidth: `${props.indexColumnSize}px`,
+          },
+        },
+      },
       cell: ({ row }) =>
         h(
           "span",
@@ -104,10 +143,7 @@ defineExpose({
 </script>
 
 <template>
-  <UCard
-    class="flex flex-col min-h-[850px] overflow-auto"
-    :ui="{ body: 'flex-1', footer: 'mt-auto' }"
-  >
+  <UCard :class="cardClass" :ui="cardUi">
     <template
       v-if="
         $slots.toolbar ||
@@ -140,7 +176,11 @@ defineExpose({
         :data="paginatedData"
         :columns="displayColumns"
         :loading="loading"
-        :ui="{ tbody: '[&>tr]:hover:bg-elevated/50 [&>tr]:transition-colors' }"
+        :ui="{
+          base: 'min-w-full table-fixed',
+          tbody: '[&>tr]:hover:bg-elevated/50 [&>tr]:transition-colors',
+          td: 'align-top',
+        }"
         v-bind="$attrs"
       >
         <template
@@ -153,10 +193,10 @@ defineExpose({
       </UTable>
     </div>
 
-    <template #footer>
+    <template v-if="paginated || $slots.footer" #footer>
       <slot name="footer" :pagination="pagination" />
       <div
-        v-if="!$slots.footer"
+        v-if="!$slots.footer && paginated"
         class="flex flex-col sm:flex-row items-center justify-between gap-3"
       >
         <div class="flex items-center gap-3">

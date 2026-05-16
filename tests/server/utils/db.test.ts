@@ -50,6 +50,9 @@ describe('server db utility', () => {
     const firstDb = { kind: 'db-1' }
     const secondDb = { kind: 'db-2' }
 
+    Object.assign(firstPool, { on: vi.fn() })
+    Object.assign(secondPool, { on: vi.fn() })
+
     createPool
       .mockReturnValueOnce(firstPool)
       .mockReturnValueOnce(secondPool)
@@ -74,8 +77,16 @@ describe('server db utility', () => {
     expect(useDb(secondEvent)).toBe(secondDb)
 
     expect(createPool).toHaveBeenCalledTimes(2)
-    expect(createPool).toHaveBeenNthCalledWith(1, 'mysql://user:pass@localhost:3306/oji_first')
-    expect(createPool).toHaveBeenNthCalledWith(2, 'mysql://user:pass@localhost:3306/oji_second')
+    expect(createPool).toHaveBeenNthCalledWith(1, {
+      uri: 'mysql://user:pass@localhost:3306/oji_first',
+      timezone: '+07:00',
+      dateStrings: true,
+    })
+    expect(createPool).toHaveBeenNthCalledWith(2, {
+      uri: 'mysql://user:pass@localhost:3306/oji_second',
+      timezone: '+07:00',
+      dateStrings: true,
+    })
     expect(drizzle).toHaveBeenCalledTimes(2)
     expect(drizzle).toHaveBeenNthCalledWith(1, {
       client: firstPool,

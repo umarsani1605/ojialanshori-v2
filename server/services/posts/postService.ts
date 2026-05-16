@@ -40,6 +40,8 @@ export type Actor = {
   role: Role
 }
 
+type PostListScope = 'mine' | 'review'
+
 type ReviewPayload = {
   title?: string
   content?: string
@@ -53,7 +55,20 @@ type RejectPayload = ReviewPayload & {
   reviewNote: string
 }
 
-export async function listPostsForActor(db: Database, actor: Actor, status?: PostStatus) {
+export async function listPostsForActor(
+  db: Database,
+  actor: Actor,
+  status?: PostStatus,
+  scope?: PostListScope,
+) {
+  if (scope === 'review') {
+    if (actor.role !== 'admin' && actor.role !== 'reviewer') {
+      throw createError({ statusCode: 403, message: 'Forbidden' })
+    }
+
+    return { data: await listPostsForReview(db) }
+  }
+
   if (actor.role === 'admin') {
     const rows = await db
       .select({
@@ -101,9 +116,6 @@ export async function listPostsForActor(db: Database, actor: Actor, status?: Pos
       })),
     }
   }
-  if (actor.role === 'reviewer') {
-    return { data: await listPostsForReview(db) }
-  }
   return listOwnPenaSantriPosts(db, actor.id, status)
 }
 
@@ -132,10 +144,10 @@ export async function createPostForActor(
 ) {
   assertDraftPayload(payload)
 
-  await ensureCategoryExists(db, payload.categoryId)
+  const categoryId = await resolveCategoryIdForPayload(db, actor, payload)
 
-  const categoryType = payload.categoryId
-    ? await getCategoryType(db, payload.categoryId)
+  const categoryType = categoryId
+    ? await getCategoryType(db, categoryId)
     : actor.role === 'admin' ? 'berita' : 'pena_santri'
 
   if (!canCreatePost(actor.role, categoryType)) {
@@ -149,7 +161,7 @@ export async function createPostForActor(
     content: payload.content,
     excerpt: payload.excerpt,
     featuredImage: payload.featuredImage,
-    categoryId: payload.categoryId,
+    categoryId,
     authorId: actor.id,
     status: 'draft',
   })
@@ -179,7 +191,9 @@ export async function updatePostForActor(
     throw createError({ statusCode: 403, message: 'Post yang sedang direview tidak bisa diedit.' })
   }
 
-  await ensureCategoryExists(db, payload.categoryId)
+  const categoryId = await resolveCategoryIdForPayload(db, actor, payload)
+  const shouldResetToDraft = categoryType === 'pena_santri' && post.author.id === actor.id && actor.role !== 'admin'
+  const nextStatus = shouldResetToDraft ? 'draft' : post.status
 
   const slug = await generateUniquePostSlug(db, payload.title, postId)
   await updatePost(db, postId, {
@@ -188,13 +202,13 @@ export async function updatePostForActor(
     content: payload.content,
     excerpt: payload.excerpt,
     featuredImage: payload.featuredImage,
-    categoryId: payload.categoryId,
-    ...(actor.role === 'santri' ? { status: 'draft', reviewNote: null } : {}),
+    categoryId,
+    ...(shouldResetToDraft ? { status: 'draft', reviewNote: null } : {}),
   })
 
   await syncPostTags(db, postId, payload.tags)
 
-  return { id: postId, status: post.status }
+  return { id: postId, status: nextStatus }
 }
 
 export async function deletePostForActor(db: Database, actor: Actor, postId: number) {
@@ -356,12 +370,13 @@ export async function publishPostForActor(
     throw createError({ statusCode: 403, message: 'Kamu hanya bisa mempublish post milikmu sendiri.' })
   }
 
+  const categoryId = await resolveCategoryIdForPayload(db, actor, payload)
   const now = new Date()
   await updatePost(db, postId, {
     title: payload.title,
     content: payload.content,
     excerpt: payload.excerpt,
-    categoryId: payload.categoryId,
+    categoryId,
     featuredImage: payload.featuredImage,
     status: 'published',
     publishedAt: now,
@@ -380,4 +395,62 @@ async function getCategoryType(db: Database, categoryId: number) {
     columns: { type: true },
   })
   return cat?.type ?? 'pena_santri'
+}
+
+async function resolveCategoryIdForPayload(
+  db: Database,
+  actor: Actor,
+  payload: SantriPostPayload,
+) {
+  await ensureCategoryExists(db, payload.categoryId)
+
+  if (payload.postType !== 'berita') {
+    return payload.categoryId
+  }
+
+  if (payload.categoryId) {
+    const categoryType = await getCategoryType(db, payload.categoryId)
+    if (categoryType !== 'berita') {
+      throw createError({
+        statusCode: 400,
+        message: 'Kategori untuk berita harus bertipe berita.',
+      })
+    }
+
+    return payload.categoryId
+  }
+
+  if (actor.role !== 'admin') {
+    return payload.categoryId
+  }
+
+  const beritaCategories = await db
+    .select({
+      id: schema.categories.id,
+      name: schema.categories.name,
+      slug: schema.categories.slug,
+    })
+    .from(schema.categories)
+    .where(eq(schema.categories.type, 'berita'))
+
+  if (beritaCategories.length === 0) {
+    throw createError({
+      statusCode: 400,
+      message: 'Kategori berita default belum tersedia.',
+    })
+  }
+
+  const canonicalCategory = beritaCategories.find(category => category.slug === 'berita')
+  if (canonicalCategory) {
+    return canonicalCategory.id
+  }
+
+  if (beritaCategories.length === 1) {
+    return beritaCategories[0]!.id
+  }
+
+  throw createError({
+    statusCode: 400,
+    message: 'Kategori berita default ambigu. Gunakan slug `berita` untuk kategori berita utama.',
+  })
 }

@@ -7,6 +7,24 @@ export function getR2PublicUrl(event: H3Event, key: string) {
   return `https://${cfg.public.r2PublicDomain}/${key}`
 }
 
+/**
+ * Ekstrak storage key dari path yang tersimpan di DB.
+ * Mendukung dua format:
+ *   - Legacy: `/images/{key}` (diproxy via server route)
+ *   - Baru:   `https://{r2PublicDomain}/{key}` (langsung ke R2 custom domain)
+ * Return `null` jika bukan path yang dikelola R2 (mis. URL eksternal).
+ */
+export function getR2KeyFromPath(event: H3Event, path: string | null | undefined): string | null {
+  if (!path) return null
+  if (path.startsWith('/images/')) return path.replace(/^\/images\//, '')
+  const cfg = useRuntimeConfig(event)
+  const domain = cfg.public.r2PublicDomain
+  if (!domain) return null
+  const prefix = `https://${domain}/`
+  if (path.startsWith(prefix)) return path.slice(prefix.length)
+  return null
+}
+
 async function getClient(event: H3Event) {
   const cfg = getR2MediaConfig(event)
   if (!cfg) {

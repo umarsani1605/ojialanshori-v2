@@ -1,4 +1,5 @@
 import { isMysqlConfigured, useDb } from '#server/utils/db'
+import { emailService, fireEmail } from '#server/utils/email'
 import { requireRole } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { submitPostForReview } from '#server/services/posts/postService'
@@ -15,6 +16,16 @@ export default defineEventHandler(async (event) => {
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
   const result = await submitPostForReview(useDb(event), actor, postId, payload)
+
+  fireEmail(
+    event,
+    emailService.sendPostSubmitted(event, {
+      to: actor.email,
+      authorName: actor.fullname,
+      postTitle: payload.title,
+    }),
+    'sendPostSubmitted',
+  )
 
   const sessionId = getHeader(event, 'x-posthog-session-id')
   const distinctId = getHeader(event, 'x-posthog-distinct-id')

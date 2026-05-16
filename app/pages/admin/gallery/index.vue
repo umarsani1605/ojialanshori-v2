@@ -5,18 +5,21 @@ import type { GalleryItemDto as GalleryItem } from "~~/shared/types";
 import { MAX_GALLERY_ITEMS } from "~/constants/gallery";
 
 definePageMeta({
-  layout: 'admin',
-  middleware: ['auth', 'role'],
-  requiredRole: 'admin',
-  navbarTitle: 'Galeri',
-})
+  layout: "admin",
+  middleware: ["auth", "role"],
+  requiredRole: "admin",
+  navbarTitle: "Galeri",
+});
 
 const toast = useToast();
 const posthog = usePostHog();
 
-const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>("/api/gallery", {
-  key: "admin-gallery-list",
-});
+const { data, refresh } = useLazyFetch<{ data: GalleryItem[] }>(
+  "/api/gallery",
+  {
+    key: "admin-gallery-list",
+  },
+);
 const items = computed(() => data.value?.data ?? []);
 const isGalleryFull = computed(() => items.value.length >= MAX_GALLERY_ITEMS);
 
@@ -205,7 +208,19 @@ async function doDelete() {
 }
 
 const columns: TableColumn<GalleryItem>[] = [
-  { accessorKey: "order", header: "Urutan", size: 56 },
+  {
+    accessorKey: "order",
+    header: "Urutan",
+    size: 72,
+    minSize: 72,
+    maxSize: 72,
+    meta: {
+      class: {
+        th: "w-[72px]",
+        td: "w-[72px] align-top",
+      },
+    },
+  },
   imageColumn<GalleryItem>({
     accessorKey: "imagePath",
     alt: (row) => row.title,
@@ -237,7 +252,7 @@ const columns: TableColumn<GalleryItem>[] = [
         <p v-if="isGalleryFull" class="text-sm">Maksimal 8 foto.</p>
         <UButton
           label="Upload Foto"
-          icon="i-ph-upload-bold"
+          icon="i-ph-upload-simple-bold"
           :disabled="isGalleryFull"
           @click="openUpload"
         />

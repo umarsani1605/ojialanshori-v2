@@ -157,6 +157,7 @@ export const santriPostSchema = z.object({
   excerpt: nullableString(),
   featuredImage: nullableString(),
   categoryId: nullableNumber(),
+  postType: categoryTypeSchema.optional(),
   tags: z.array(z.string()).optional(),
 })
 
@@ -179,6 +180,7 @@ export const rejectWithContentSchema = reviewActionSchema.extend({
 
 export const adminPostsQuerySchema = z.object({
   status: postStatusSchema.optional(),
+  scope: z.enum(['mine', 'review']).optional(),
 })
 
 export const publicPostsQuerySchema = z.object({

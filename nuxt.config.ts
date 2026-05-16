@@ -89,6 +89,21 @@ export default defineNuxtConfig({
     '/dashboard/**': { robots: false },
     '/masuk': { robots: false },
     '/daftar': { robots: false },
+    '/_nuxt/**': {
+      headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+    },
+    '/_ipx/**': {
+      headers: { 'cache-control': 'public, max-age=2592000' },
+    },
+    '/images/**': {
+      headers: { 'cache-control': 'public, max-age=2592000' },
+    },
+    // Public API: server-side cache via defineCachedEventHandler tetap aktif,
+    // tapi paksa browser revalidate setiap request supaya navigasi client
+    // tidak menampilkan data stale dari browser cache.
+    '/api/public/**': {
+      headers: { 'cache-control': 'no-cache, must-revalidate' },
+    },
   },
 
   robots: {
@@ -97,6 +112,7 @@ export default defineNuxtConfig({
 
   sitemap: {
     exclude: ['/admin/**', '/dashboard/**', '/masuk', '/daftar'],
+    sources: ['/api/__sitemap__/urls'],
   },
 
   seo: {
@@ -126,6 +142,10 @@ export default defineNuxtConfig({
     },
     brevoApiKey:
       process.env.NUXT_BREVO_API_KEY || process.env.BREVO_API_KEY || "",
+    emailFromName:
+      process.env.NUXT_EMAIL_FROM_NAME || "Omah Ngaji Al-Anshori",
+    emailFromAddress:
+      process.env.NUXT_EMAIL_FROM_ADDRESS || "noreply@ojialanshori.com",
     mysqlUrl: process.env.NUXT_MYSQL_URL || process.env.MYSQL_URL || "",
     r2AccessKeyId:
       process.env.NUXT_R2_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || "",
@@ -161,5 +181,6 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    build: { target: 'esnext' },
   },
 });

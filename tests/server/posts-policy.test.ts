@@ -154,7 +154,9 @@ describe('canDeletePost', () => {
     expect(canDeletePost('santri', 'pena_santri', 5, 99)).toBe(false)
   })
 
-  it('reviewer cannot delete any post', () => {
-    expect(canDeletePost('reviewer', 'pena_santri', 1, 1)).toBe(false)
+  it('reviewer can delete own pena_santri post only', () => {
+    expect(canDeletePost('reviewer', 'pena_santri', 1, 1)).toBe(true)
+    expect(canDeletePost('reviewer', 'pena_santri', 1, 2)).toBe(false)
+    expect(canDeletePost('reviewer', 'berita', 1, 1)).toBe(false)
   })
 })

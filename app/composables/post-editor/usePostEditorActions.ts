@@ -49,7 +49,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
 
     const postId = resolvedPostId.value;
     try {
-      const payload = buildPayload(options.form);
+      const payload = buildPayload(options.form, options.effectivePostType.value);
       const response = postId
         ? await $fetch<DraftResponse>(`/api/posts/${postId}`, {
             method: "PATCH",
@@ -107,7 +107,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
     options.loadingAction.value = "send";
 
     try {
-      const payload = buildPayload(options.form);
+      const payload = buildPayload(options.form, options.effectivePostType.value);
       const resolvedId = await resolveDraftId(payload);
 
       if (!resolvedId) return;
@@ -170,7 +170,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
     try {
       await $fetch(`/api/posts/${postId}/approve`, {
         method: "POST",
-        body: buildPayload(options.form),
+        body: buildPayload(options.form, options.effectivePostType.value),
       });
 
       await refreshNuxtData("admin-layout-stats");
@@ -213,7 +213,7 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
         method: "POST",
         body: {
           reviewNote: options.reviewNote.value,
-          ...buildPayload(options.form),
+          ...buildPayload(options.form, options.effectivePostType.value),
         },
       });
 
@@ -256,13 +256,14 @@ export function usePostEditorActions(options: UsePostEditorActionsOptions) {
   };
 }
 
-function buildPayload(form: PostEditorForm) {
+function buildPayload(form: PostEditorForm, postType?: PostType) {
   return {
     title: form.title.trim(),
     content: form.content,
     excerpt: form.excerpt.trim() || null,
     categoryId: form.categoryId ?? null,
     featuredImage: form.featuredImage,
+    ...(postType ? { postType } : {}),
   };
 }
 

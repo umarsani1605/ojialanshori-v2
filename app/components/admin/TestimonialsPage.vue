@@ -3,6 +3,8 @@ import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { TestimonialDto as Testimonial } from "~~/shared/types";
 
+withDefaults(defineProps<{ card?: boolean }>(), { card: true });
+
 const toast = useToast();
 const posthog = usePostHog();
 const { data, refresh } = useLazyFetch<{ data: Testimonial[] }>(
@@ -164,7 +166,7 @@ const columns: TableColumn<Testimonial>[] = [
 
 <template>
   <div>
-    <AdminDataTable :data="testimonials" :columns="columns" :show-index="false">
+    <AdminDataTable :data="testimonials" :columns="columns" :show-index="false" :card="card" :paginated="false">
       <template #toolbar-right>
         <UButton
           label="Tambah Testimonial"

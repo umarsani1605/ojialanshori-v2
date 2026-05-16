@@ -38,9 +38,14 @@ function isActive(to: string) {
       class="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-6 md:px-8 lg:px-10"
     >
       <NuxtLink to="/" class="flex items-center gap-3 shrink-0">
-        <img
+        <NuxtImg
           src="/images/logo/logo.png"
           alt="Omah Ngaji Al-Anshori"
+          width="76"
+          height="48"
+          format="webp"
+          loading="eager"
+          fetchpriority="high"
           class="h-12 w-auto object-contain"
         />
       </NuxtLink>

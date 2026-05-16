@@ -55,6 +55,51 @@ export async function getPublicFaqs(db: Database) {
     .orderBy(schema.faqs.order, schema.faqs.id)
 }
 
+export async function getPublicBoardMembers(db: Database) {
+  return db.select({
+    id: schema.boardMembers.id,
+    name: schema.boardMembers.name,
+    role: schema.boardMembers.role,
+    avatarPath: schema.boardMembers.avatarPath,
+    order: schema.boardMembers.order,
+  })
+    .from(schema.boardMembers)
+    .orderBy(schema.boardMembers.role, schema.boardMembers.order, schema.boardMembers.id)
+}
+
+export async function getPublicActivities(db: Database) {
+  return db.select({
+    id: schema.activities.id,
+    title: schema.activities.title,
+    description: schema.activities.description,
+    imagePath: schema.activities.imagePath,
+    order: schema.activities.order,
+  })
+    .from(schema.activities)
+    .orderBy(schema.activities.order, schema.activities.id)
+}
+
+export async function getPublicPageMeta(db: Database, template: string) {
+  const rows = await db.select({
+    title: schema.pages.title,
+    meta: schema.pages.meta,
+    updatedAt: schema.pages.updatedAt,
+  })
+    .from(schema.pages)
+    .where(eq(schema.pages.template, template))
+    .limit(1)
+
+  return rows[0] ?? null
+}
+
+export async function getPublicPageMetaAll(db: Database) {
+  return db.select({
+    template: schema.pages.template,
+    updatedAt: schema.pages.updatedAt,
+  })
+    .from(schema.pages)
+}
+
 export async function getPublicTestimonials(db: Database) {
   return db.select({
     id: schema.testimonials.id,

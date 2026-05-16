@@ -136,7 +136,6 @@ const columns: TableColumn<Category>[] = [
   <AdminDataTable
     :data="filteredCategories"
     :columns="columns"
-    :index-column-size="44"
   >
     <template #toolbar-left>
       <UInput

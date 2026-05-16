@@ -1,5 +1,5 @@
 import { isMysqlConfigured, useDb } from '#server/utils/db'
-import { sendEmail } from '#server/utils/email'
+import { emailService } from '#server/utils/email'
 import { requireAdmin } from '#server/utils/guard'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { resetUserPassword } from '#server/services/users/userService'
@@ -23,12 +23,10 @@ export default defineEventHandler(async (event) => {
   const newPassword = generatePassword(12)
   await resetUserPassword(db, actor, userId, newPassword)
 
-  await sendEmail(event, {
+  await emailService.sendPasswordReset(event, {
     to: target.email,
-    toName: target.fullname,
-    subject: 'Reset Password Akun Omah Ngaji Al-Anshori',
-    textContent: `Halo ${target.fullname},\n\nPassword akun kamu telah direset oleh administrator.\nPassword baru kamu: ${newPassword}\n\nSilakan login dengan password baru dan segera ganti password di halaman Profil.\n\nOmah Ngaji Al-Anshori`,
-    htmlContent: `<p>Halo <b>${target.fullname}</b>,</p><p>Password akun kamu telah direset oleh administrator.<br>Password baru kamu: <code>${newPassword}</code></p><p>Silakan login dengan password baru dan segera ganti password di halaman Profil.</p><p>Omah Ngaji Al-Anshori</p>`,
+    name: target.fullname,
+    newPassword,
   })
 
   return { success: true, email: target.email }

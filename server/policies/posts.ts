@@ -16,6 +16,7 @@ export function canEditPost(role: Role, type: PostType, authorId: number, actorI
 export function canDeletePost(role: Role, type: PostType, authorId: number, actorId: number): boolean {
   if (type === 'berita') return role === 'admin'
   if (role === 'admin') return true
+  if (role === 'reviewer') return authorId === actorId
   return role === 'santri' && authorId === actorId
 }
 

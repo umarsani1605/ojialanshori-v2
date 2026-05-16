@@ -194,12 +194,12 @@ const columns: TableColumn<PostRow>[] = [
       const actions = [
         h(UButton, {
           to: `/dashboard/posts/${post.id}/edit`,
-          icon: "ph:pencil-simple",
+          icon: "i-ph-pencil-simple",
           variant: "light",
           size: "sm",
         }),
         h(UButton, {
-          icon: "ph:trash",
+          icon: "i-ph-trash",
           variant: "light",
           color: "error",
           size: "sm",

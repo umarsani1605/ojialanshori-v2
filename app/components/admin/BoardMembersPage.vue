@@ -3,6 +3,8 @@ import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { BoardMemberDto as BoardMember } from "~~/shared/types";
 
+withDefaults(defineProps<{ card?: boolean }>(), { card: true });
+
 const ROLES = ["Penasehat", "Pengajar"];
 
 const toast = useToast();
@@ -155,7 +157,7 @@ const columns: TableColumn<BoardMember>[] = [
 
 <template>
   <div>
-    <AdminDataTable :data="members" :columns="columns" :show-index="false">
+    <AdminDataTable :data="members" :columns="columns" :show-index="false" :card="card" :paginated="false">
       <template #toolbar-right>
         <UButton
           label="Tambah Pengurus"

@@ -1,4 +1,4 @@
-import { putR2 } from '~~/server/utils/r2Storage'
+import { putR2, getR2PublicUrl } from '~~/server/utils/r2Storage'
 import { requireAdmin } from '#server/utils/guard'
 
 const MAX_SIZE = 5 * 1024 * 1024
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
 
   const ext = EXT_MAP[mime]!
   const storageKey = `activities/${Date.now()}.${ext}`
-  const publicPath = `/images/${storageKey}`
+  const publicPath = getR2PublicUrl(event, storageKey)
 
   await putR2(event, storageKey, new Blob([file.data as any], { type: mime }), { contentType: mime })
 

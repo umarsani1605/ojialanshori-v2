@@ -65,25 +65,25 @@ const statItems = computed(() => [
   {
     label: "Total Artikel",
     value: santriStats.value?.total ?? 0,
-    icon: "ph:note-pencil-duotone",
+    icon: "i-ph-note-pencil-duotone",
     color: "blue" as const,
   },
   {
     label: "Terbit",
     value: santriStats.value?.published ?? 0,
-    icon: "ph:check-circle-duotone",
+    icon: "i-ph-check-circle-duotone",
     color: "green" as const,
   },
   {
     label: "Dalam Review",
     value: santriStats.value?.pendingReview ?? 0,
-    icon: "ph:clock-duotone",
+    icon: "i-ph-clock-duotone",
     color: "amber" as const,
   },
   {
     label: "Ditolak",
     value: santriStats.value?.rejected ?? 0,
-    icon: "ph:x-circle-duotone",
+    icon: "i-ph-x-circle-duotone",
     color: "red" as const,
   },
 ]);
@@ -215,7 +215,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
 
     <template v-else>
       <div v-if="auth.isReviewer.value" class="flex flex-col md:flex-row items-stretch gap-6">
-        <AppStatCard label="Perlu Review" :value="santriStats?.queueCount ?? 0" icon="ph:clock-countdown-duotone"
+        <AppStatCard label="Perlu Review" :value="santriStats?.queueCount ?? 0" icon="i-ph-clock-countdown-duotone"
           color="orange" :wrap="false" class="md:w-52 md:shrink-0" />
         <div class="h-px md:h-auto md:w-px bg-slate-200 self-stretch shrink-0" />
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4 flex-1">

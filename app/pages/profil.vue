@@ -1,45 +1,76 @@
 <script setup lang="ts">
-const tentang = [
-  "Omah Ngaji Al-Anshori berdiri pada Juli 2015. Sebagai wadah khusus mahasiswa, Omah Ngaji Al-Anshori ingin menjadi wadah yang mampu memadukan dimensi positif perguruan tinggi dengan dimensi positif Pendidikan Islam, yang akan menjadi penempaan kepribadian dan moral berdasarkan nilai-nilai Islam Ahlussunnah Wal Jamaah.",
-  "Omah Ngaji Al-Anshori harus berjuang untuk bertahan dengan sumber daya yang terbatas di tahun-tahun awal. Banyak tantangan silih berganti yang harus dilewati dan dihadapi. Namun, dengan kegigihan dan tekad yang kuat serta doa semua yang terlibat, menjadikan Omah Ngaji Al-Anshori mampu bertahan dan berkembang baik secara kuantitas maupun kualitas.",
-  "Perkembangan itu terlihat dari semakin tertata dan terstrukturnya kegiatan di Omah Ngaji Al-Anshori, diantaranya: mengaji Al-Quran, mengaji kitab, diskusi tematik hingga kegiatan amaliyah penunjang lainnya. Harapannya, kegiatan di Omah Ngaji Al-Anshori dapat mencetak kader yang cakap secara intelektual maupun spiritual dan berdaya guna bagi masyarakat.",
-  "Berlandaskan kekeluargaan dan semangat perjuangan tinggi untuk membumikan Islam Rahmatan Lil ‘Alamin, Omah Ngaji Al-Anshori bertekad untuk selalu berproses dan berprogress.",
-];
+type PageMetaResponse = {
+  title: string;
+  meta: Record<string, any>;
+  updatedAt: string | null;
+};
 
-const visi = "Membumikan Islam Sebagai Rahmat Semesta Alam";
+type BoardMember = {
+  id: number;
+  name: string;
+  role: string;
+  avatarPath: string | null;
+  order: number;
+};
 
-const misi = [
-  "Mengadakan kajian keagamaan yang bersumber dari Al-Qur’an dan Hadits",
-  "Menyeimbangkan nilai intelektualisme dan agama",
-  "Mengistiqomahkan silaturahmi dengan para ulama dan kyai",
-  "Mengedepankan nilai persaudaraan dan kebersamaan",
-];
+const [{ data: page }, { data: members }] = await Promise.all([
+  useFetch<PageMetaResponse>("/api/public/pages/profile", {
+    key: "public-page-profile",
+    default: () => ({ title: "Profil", meta: {}, updatedAt: null }),
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+  }),
+  useFetch<BoardMember[]>("/api/public/board-members", {
+    key: "public-board-members",
+    default: () => [],
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+  }),
+]);
 
-const penasehat = [
-  { name: "K.H. Abdul Karim Ahmad", image: "/images/profil/gus-karim.jpg" },
-  { name: "Kiai Anshori Syukri", image: "/images/profil/kyai-anshori.jpg" },
-];
+function toLines(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v).trim()).filter(Boolean);
+  }
+  const raw = String(value ?? "").trim();
+  if (!raw) return [];
+  return raw
+    .split(/\n{2,}|\r?\n/g)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
 
-const pengajar = [
-  { name: "M. Tohir Rosyid, S.Si", image: "/images/profil/tohir.png" },
-  {
-    name: "Dr. Faizatul Anshoriah, S.Sos., M.Si.",
-    image: "/images/profil/faiz.png",
-  },
-  { name: "Dr. Arifuddin, Lc., M.A.", image: "/images/profil/arifuddin.png" },
-  { name: "Abdul Halim, S.Th.I., M.Hum.", image: "/images/profil/halim.png" },
-  { name: "Andi Alfan Qodri, S.Si.", image: "/images/profil/alfan.png" },
-  { name: "Ahmad Multazam, S.Hum.", image: "/images/profil/multazam.png" },
-];
+const overviewParagraphs = computed(() =>
+  toLines(page.value?.meta?.overview),
+);
+const visi = computed(() => String(page.value?.meta?.vision ?? "").trim());
+const misiItems = computed(() => toLines(page.value?.meta?.mission));
+
+const penasehat = computed(() =>
+  (members.value ?? []).filter((m) => m.role === "Penasehat"),
+);
+const pengajar = computed(() =>
+  (members.value ?? []).filter((m) => m.role === "Pengajar"),
+);
+
+const seoTitle = computed(
+  () => page.value?.title || "Profil — Omah Ngaji Al-Anshori",
+);
+const seoDescription = computed(() => {
+  const fromMeta = String(page.value?.meta?.description ?? "").trim();
+  if (fromMeta) return fromMeta;
+  const firstParagraph = overviewParagraphs.value[0];
+  return (
+    firstParagraph ||
+    "Selayang pandang, visi, misi, dan struktur pengurus Omah Ngaji Al-Anshori — asrama mahasiswa berbasis pesantren di Surakarta."
+  );
+});
 
 useSeoMeta({
-  title: "Profil — Omah Ngaji Al-Anshori",
-  description:
-    "Selayang pandang, visi, misi, dan struktur pengurus Omah Ngaji Al-Anshori — asrama mahasiswa berbasis pesantren di Surakarta.",
-  ogTitle: "Profil — Omah Ngaji Al-Anshori",
-  ogDescription:
-    "Selayang pandang, visi, misi, dan struktur pengurus Omah Ngaji Al-Anshori.",
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
   ogImage: "/images/logo/logo.png",
+  twitterCard: "summary_large_image",
 });
 </script>
 
@@ -47,60 +78,54 @@ useSeoMeta({
   <div class="bg-slate-50">
     <UContainer class="py-12 md:py-16">
       <!-- Selayang Pandang -->
-      <section class="mb-16">
+      <section v-if="overviewParagraphs.length > 0" class="mb-16">
         <PublicSectionHeading title="Selayang Pandang" />
         <div class="space-y-4 text-base leading-relaxed text-slate-700">
-          <p v-for="(p, idx) in tentang" :key="idx">
-            {{ p }}
-          </p>
+          <p v-for="(p, idx) in overviewParagraphs" :key="idx">{{ p }}</p>
         </div>
       </section>
 
       <!-- Visi -->
-      <section class="mb-16">
+      <section v-if="visi" class="mb-16">
         <PublicSectionHeading title="Visi" />
-        <p class="text-base text-slate-700">
-          {{ visi }}
-        </p>
+        <p class="text-base text-slate-700">{{ visi }}</p>
       </section>
 
       <!-- Misi -->
-      <section class="mb-16">
+      <section v-if="misiItems.length > 0" class="mb-16">
         <PublicSectionHeading title="Misi" />
         <ol class="space-y-2 text-base text-slate-700">
-          <li v-for="(item, idx) in misi" :key="idx">
+          <li v-for="(item, idx) in misiItems" :key="idx">
             {{ idx + 1 }}. {{ item }}
           </li>
         </ol>
       </section>
 
       <!-- Struktur Pengurus -->
-      <section>
+      <section v-if="penasehat.length > 0 || pengajar.length > 0">
         <PublicSectionHeading title="Struktur Pengurus" />
 
-        <!-- Penasehat -->
-        <div class="mb-12">
+        <div v-if="penasehat.length > 0" class="mb-12">
           <h3 class="font-bold text-lg mb-8">Penasehat:</h3>
           <div
             class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-10 text-left"
           >
             <PublicProfileFigure
               v-for="person in penasehat"
-              :key="person.name"
-              :image="person.image"
+              :key="person.id"
+              :image="person.avatarPath || '/images/placeholder.png'"
               :name="person.name"
             />
           </div>
         </div>
 
-        <!-- Pengajar -->
-        <div>
+        <div v-if="pengajar.length > 0">
           <h3 class="font-bold text-lg mb-8">Pengajar:</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-10">
             <PublicProfileFigure
               v-for="person in pengajar"
-              :key="person.name"
-              :image="person.image"
+              :key="person.id"
+              :image="person.avatarPath || '/images/placeholder.png'"
               :name="person.name"
             />
           </div>

@@ -1,8 +1,7 @@
-import { computed, ref, toValue, watch } from "vue";
+import { computed, toValue, watch } from "vue";
 
 import type {
   EditorPost,
-  PostDataSource,
   PostEditorForm,
   PostEditorStateRefs,
   ReactiveValue,
@@ -13,7 +12,6 @@ import type {
 type UsePostEditorContextOptions = {
   postId?: ReactiveValue<number | undefined>;
   postType?: PostType;
-  initialPost?: PostDataSource;
   form: PostEditorForm;
   state: Pick<
     PostEditorStateRefs,
@@ -28,20 +26,25 @@ type CategoryItem = {
   type: string;
 };
 
+export function shouldUseAdminCategorySource(isAdmin: boolean) {
+  return isAdmin;
+}
+
 export function usePostEditorContext(options: UsePostEditorContextOptions) {
   const auth = useAuth();
+  const requestFetch = useRequestFetch();
   const resolvedPostId = computed(() => toValue(options.postId));
-  const { data: categoriesRaw } = useAsyncData<CategoryItem[]>(
+  const categoriesAsync = useAsyncData<CategoryItem[]>(
     "post-editor-categories",
     async () => {
-      if (auth.canReview.value) {
-        const response = await $fetch<{ data: CategoryItem[] }>(
+      if (shouldUseAdminCategorySource(auth.isAdmin.value)) {
+        const response = await requestFetch<{ data: CategoryItem[] }>(
           "/api/categories",
         );
         return response.data;
       }
 
-      const response = await $fetch<{ categories: CategoryItem[] }>(
+      const response = await requestFetch<{ categories: CategoryItem[] }>(
         "/api/posts/meta",
       );
       return response.categories;
@@ -49,50 +52,55 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
     { default: () => [] as CategoryItem[] },
   );
 
-  const postData = ref<EditorPost | null>(options.initialPost ?? null);
-  const postStatus = ref<"idle" | "pending" | "success" | "error">(
-    options.initialPost === undefined ? "idle" : "success",
+  const shouldFetchPost = computed(
+    () => resolvedPostId.value !== undefined,
   );
 
-  if (options.initialPost === undefined) {
-    const postDataKey = computed(
-      () => `post-editor-${resolvedPostId.value ?? "new"}`,
-    );
+  const postDataKey = computed(() =>
+    shouldFetchPost.value ? `post-editor-${resolvedPostId.value}` : "post-editor-idle",
+  );
 
-    const { data, status } = useAsyncData<EditorPost | null>(
-      postDataKey,
-      async () => {
-        const postId = resolvedPostId.value;
-        if (!postId) return null;
+  const postAsync = useAsyncData<EditorPost | null>(
+    postDataKey,
+    async () => {
+      const postId = resolvedPostId.value;
+      if (!postId) {
+        throw createError({
+          statusCode: 400,
+          message: "Id post tidak ditemukan.",
+        });
+      }
 
-        const response = await $fetch<{ data: EditorPost }>(
-          `/api/posts/${postId}`,
-        );
-        return response.data;
-      },
-      {
-        immediate: resolvedPostId.value !== undefined,
-        default: () => null,
-        watch: [resolvedPostId],
-      },
-    );
+      const response = await requestFetch<{ data: EditorPost }>(
+        `/api/posts/${postId}`,
+      );
+      return response.data;
+    },
+    {
+      immediate: shouldFetchPost.value,
+      default: () => null,
+      watch: [resolvedPostId],
+    },
+  );
 
-    watch(
-      data,
-      (post) => {
-        postData.value = post ?? null;
-      },
-      { immediate: true },
-    );
+  const { data: categoriesRaw } = categoriesAsync;
+  const { data: postData, status: postStatus } = postAsync;
 
-    watch(
-      status,
-      (value) => {
-        postStatus.value = value;
-      },
-      { immediate: true },
-    );
+  function populateForm(post: EditorPost | null) {
+    if (!post) return;
+
+    options.form.title = post.title;
+    options.form.content = post.content;
+    options.form.excerpt = post.excerpt ?? "";
+    options.form.categoryId = post.categoryId ?? undefined;
+    options.form.featuredImage = post.featuredImage;
+    options.state.currentStatus.value = post.status;
+    options.state.existingReviewNote.value = post.reviewNote;
+    options.state.reviewerName.value = post.reviewer?.fullname ?? null;
   }
+
+  populateForm(postData.value);
+  watch(postData, populateForm);
 
   const effectivePostType = computed<PostType | undefined>(
     () =>
@@ -121,22 +129,9 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
       effectivePostType.value === "pena_santri",
   );
 
-  watch(
-    postData,
-    (post) => {
-      if (!post) return;
-
-      options.form.title = post.title;
-      options.form.content = post.content;
-      options.form.excerpt = post.excerpt ?? "";
-      options.form.categoryId = post.categoryId ?? undefined;
-      options.form.featuredImage = post.featuredImage;
-      options.state.currentStatus.value = post.status;
-      options.state.existingReviewNote.value = post.reviewNote;
-      options.state.reviewerName.value = post.reviewer?.fullname ?? null;
-    },
-    { immediate: true },
-  );
+  const ready = Promise.all([categoriesAsync, postAsync]).then(() => {
+    populateForm(postData.value);
+  });
 
   return {
     auth,
@@ -147,5 +142,6 @@ export function usePostEditorContext(options: UsePostEditorContextOptions) {
     isOwnPost,
     showBeritaActions,
     showReviewActions,
+    ready,
   };
 }

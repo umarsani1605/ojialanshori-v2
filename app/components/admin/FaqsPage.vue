@@ -4,6 +4,8 @@ import type { TableColumn } from '@nuxt/ui'
 
 import type { FaqDto as FAQ } from '~~/shared/types'
 
+withDefaults(defineProps<{ card?: boolean }>(), { card: true })
+
 const toast = useToast()
 const { data, refresh } = useLazyFetch<{ data: FAQ[] }>('/api/faqs', {
   key: 'admin-faqs-list',
@@ -69,8 +71,32 @@ async function doDelete() {
 }
 
 const columns: TableColumn<FAQ>[] = [
-  { accessorKey: 'question', header: 'Pertanyaan', cell: ({ row }) => h('span', { class: 'font-medium' }, row.original.question) },
-  { accessorKey: 'answer', header: 'Jawaban', cell: ({ row }) => h('span', { class: 'text-muted line-clamp-2' }, row.original.answer) },
+  {
+    accessorKey: 'question',
+    header: 'Pertanyaan',
+    size: 360,
+    meta: {
+      style: {
+        th: { width: '360px', maxWidth: '360px' },
+        td: { width: '360px', maxWidth: '360px' },
+      },
+    },
+    cell: ({ row }) =>
+      h('span', { class: 'font-medium block whitespace-normal break-words' }, row.original.question),
+  },
+  {
+    accessorKey: 'answer',
+    header: 'Jawaban',
+    size: 520,
+    meta: {
+      style: {
+        th: { width: '520px', maxWidth: '520px' },
+        td: { width: '520px', maxWidth: '520px' },
+      },
+    },
+    cell: ({ row }) =>
+      h('span', { class: 'text-muted line-clamp-3 block whitespace-normal break-words' }, row.original.answer),
+  },
   actionsColumn<FAQ>({
     onEdit: (row) => openEdit(row),
     onDelete: (row) => confirmDelete(row.id),
@@ -80,7 +106,7 @@ const columns: TableColumn<FAQ>[] = [
 
 <template>
   <div>
-    <AdminDataTable :data="faqs" :columns="columns">
+    <AdminDataTable :data="faqs" :columns="columns" :card="card" :paginated="false">
       <template #toolbar-right>
         <UButton label="Tambah FAQ" icon="i-ph-plus-bold" @click="openCreate" />
       </template>

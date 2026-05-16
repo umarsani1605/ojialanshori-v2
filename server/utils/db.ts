@@ -15,6 +15,8 @@ const globalForDb = globalThis as unknown as {
   _db?: Database
 }
 
+const DB_TIMEZONE_OFFSET = '+07:00'
+
 export function isMysqlConfigured(event: H3Event) {
   return hasMysqlRuntimeConfig(event)
 }
@@ -24,7 +26,17 @@ export function useDbClient(event: H3Event) {
     return globalForDb._dbClient
   }
 
-  globalForDb._dbClient = mysql.createPool(requireMysqlUrl(event))
+  const pool = mysql.createPool({
+    uri: requireMysqlUrl(event),
+    timezone: DB_TIMEZONE_OFFSET,
+    dateStrings: true,
+  })
+
+  pool.on('connection', (connection) => {
+    connection.query(`SET time_zone = '${DB_TIMEZONE_OFFSET}'`)
+  })
+
+  globalForDb._dbClient = pool
 
   return globalForDb._dbClient
 }

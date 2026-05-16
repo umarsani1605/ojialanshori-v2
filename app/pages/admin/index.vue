@@ -40,25 +40,25 @@ const statItems = computed(() => [
   {
     label: "Total Artikel",
     value: adminStats.value?.totalPosts ?? 0,
-    icon: "ph:article-duotone",
+    icon: "i-ph-article-duotone",
     color: "blue" as const,
   },
   {
     label: "Artikel Terbit",
     value: adminStats.value?.publishedPosts ?? 0,
-    icon: "ph:check-circle-duotone",
+    icon: "i-ph-check-circle-duotone",
     color: "green" as const,
   },
   {
     label: "Artikel dalam Review",
     value: adminStats.value?.pendingReviewPosts ?? 0,
-    icon: "ph:clock-duotone",
+    icon: "i-ph-clock-duotone",
     color: "amber" as const,
   },
   {
     label: "Total Santri",
     value: adminStats.value?.totalSantri ?? 0,
-    icon: "ph:users-duotone",
+    icon: "i-ph-users-duotone",
     color: "purple" as const,
   },
 ]);
@@ -99,7 +99,7 @@ const statItems = computed(() => [
 
         <div v-if="adminStats.recentPendingPosts.length === 0"
           class="flex flex-1 flex-col gap-2 items-center justify-center py-12 text-center">
-          <UIcon name="ph:folder-open-duotone" class="text-4xl text-dimmed" />
+          <UIcon name="i-ph-folder-open-duotone" class="text-4xl text-dimmed" />
           <p class="mt-4 text-sm text-dimmed">
             Tidak ada artikel yang menunggu review.
           </p>

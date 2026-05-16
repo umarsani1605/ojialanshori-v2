@@ -10,7 +10,6 @@ import { usePostEditorMetrics } from "./post-editor/usePostEditorMetrics";
 import { usePostEditorPresentation } from "./post-editor/usePostEditorPresentation";
 import type {
   LoadingAction,
-  PostDataSource,
   PostEditorForm,
   PostStatus,
   ReactiveValue,
@@ -18,10 +17,9 @@ import type {
 } from "./post-editor/types";
 import { usePostEditorUploads } from "./post-editor/usePostEditorUploads";
 
-export function usePostEditor(opts: {
+export async function usePostEditor(opts: {
   postId?: ReactiveValue<number | undefined>;
   postType?: PostType;
-  initialPost?: PostDataSource;
 }) {
   const toast = useToast();
   const router = useRouter();
@@ -66,7 +64,6 @@ export function usePostEditor(opts: {
   const context = usePostEditorContext({
     postId: opts.postId,
     postType: opts.postType,
-    initialPost: opts.initialPost,
     form,
     state: {
       currentStatus,
@@ -125,6 +122,10 @@ export function usePostEditor(opts: {
     Emoji,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
   ];
+
+  if (import.meta.server) {
+    await context.ready;
+  }
 
   return {
     form,

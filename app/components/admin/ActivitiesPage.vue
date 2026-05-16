@@ -3,6 +3,8 @@ import { h } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { ActivityDto as Activity } from "~~/shared/types";
 
+withDefaults(defineProps<{ card?: boolean }>(), { card: true });
+
 const toast = useToast();
 const posthog = usePostHog();
 const { data, refresh } = useLazyFetch<{ data: Activity[] }>("/api/activities", {
@@ -153,7 +155,7 @@ const columns: TableColumn<Activity>[] = [
 
 <template>
   <div>
-    <AdminDataTable :data="activities" :columns="columns" :show-index="false">
+    <AdminDataTable :data="activities" :columns="columns" :show-index="false" :card="card" :paginated="false">
       <template #toolbar-right>
         <UButton
           label="Tambah Kegiatan"

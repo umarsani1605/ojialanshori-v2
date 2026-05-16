@@ -26,10 +26,25 @@ withDefaults(
         maxWidthClass,
       ]"
     >
+      <NuxtImg
+        v-if="isManagedImage(image)"
+        :src="image"
+        :alt="alt ?? name"
+        width="220"
+        height="220"
+        format="webp"
+        loading="lazy"
+        class="h-full w-full"
+        :class="imageClass"
+      />
       <img
+        v-else
         :src="image"
         :alt="alt ?? name"
         loading="lazy"
+        decoding="async"
+        width="220"
+        height="220"
         class="h-full w-full"
         :class="imageClass"
       />

@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { testimonials } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
+import { markMutated, PublicCacheScopes } from '#server/utils/publicCache'
 import { zValidator } from '#server/utils/zod-validator'
 import { updateTestimonialSchema } from '~~/shared/schemas'
 
@@ -12,6 +13,8 @@ export default defineEventHandler(async (event) => {
   const db = useDb(event)
 
   await db.update(testimonials).set(body).where(eq(testimonials.id, id))
+
+  await markMutated(PublicCacheScopes.testimonials)
 
   return { success: true }
 })

@@ -169,8 +169,9 @@ watch(
     }">
       <template #header="{ collapsed }">
         <div class="flex items-center h-14 w-full" :class="collapsed ? 'justify-center' : 'px-4'">
-          <NuxtLink :to="auth.homePath.value" class="flex items-center justify-center w-full">
-            <img v-if="!collapsed" src="/images/logo/logo_admin.png" alt="Omah Ngaji" class="h-16 w-auto" />
+          <NuxtLink :to="auth.homePath.value" class="flex min-w-0 items-center justify-center w-full">
+            <img v-if="!collapsed" src="/images/logo/logo_admin.png" alt="Omah Ngaji"
+              class="block h-auto max-h-12 w-full max-w-[11.5rem] object-contain sm:max-h-16 sm:max-w-[13.5rem]" />
             <img v-else src="/images/logo/logo_small.png" alt="Omah Ngaji" class="h-8 w-auto" />
           </NuxtLink>
         </div>
@@ -244,11 +245,11 @@ watch(
       </template>
 
       <template #body>
-        <slot />
-      </template>
-      <template #footer>
-        <div class="flex items-center justify-center h-12 text-dimmed text-sm mt-auto">
-          Omah Ngaji Al-Anshori © {{ new Date().getFullYear() }}
+        <div>
+          <slot />
+          <div class="mt-6 flex items-center justify-center pb-2 text-sm text-dimmed">
+            Omah Ngaji Al-Anshori © {{ new Date().getFullYear() }}
+          </div>
         </div>
       </template>
     </UDashboardPanel>

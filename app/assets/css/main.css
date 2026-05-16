@@ -43,7 +43,7 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     letter-spacing: -0.02em;
   }
 }
@@ -57,7 +57,7 @@
 }
 
 .font-ui {
-  font-family: var(--font-ui);
+  font-family: var(--font-sans);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

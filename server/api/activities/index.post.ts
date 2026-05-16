@@ -1,6 +1,7 @@
 import { activities } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
+import { markMutated, PublicCacheScopes } from '#server/utils/publicCache'
 import { zValidator } from '#server/utils/zod-validator'
 import { upsertActivitySchema } from '~~/shared/schemas'
 
@@ -15,6 +16,8 @@ export default defineEventHandler(async (event) => {
     imagePath: body.imagePath,
     order: body.order ?? 0,
   })
+
+  await markMutated(PublicCacheScopes.activities)
 
   return { data: { id: result.insertId } }
 })

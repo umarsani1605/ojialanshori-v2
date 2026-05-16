@@ -53,6 +53,7 @@ describe("usePostEditorActions", () => {
         excerpt: "Ringkasan",
         categoryId: 4,
         featuredImage: "/cover.jpg",
+        postType: "pena_santri",
       },
     });
     expect(router.replace).toHaveBeenCalledWith("/dashboard/posts/77/edit");
@@ -118,6 +119,7 @@ describe("usePostEditorActions", () => {
             excerpt: "Ringkasan",
             categoryId: 4,
             featuredImage: "/cover.jpg",
+            postType: "berita",
           },
         },
       ],
@@ -131,11 +133,43 @@ describe("usePostEditorActions", () => {
             excerpt: "Ringkasan",
             categoryId: 4,
             featuredImage: "/cover.jpg",
+            postType: "berita",
           },
         },
       ],
     ]);
     expect(mockNavigateTo).toHaveBeenCalledWith("/admin/berita");
+  });
+
+  it("omits postType when the editor context has no resolved post type yet", async () => {
+    mockFetch.mockResolvedValueOnce({ id: 88, status: "draft" });
+
+    const state = createBaseState();
+    const actions = usePostEditorActions({
+      authCanReview: computed(() => false),
+      effectivePostType: computed(() => undefined),
+      postId: undefined,
+      form: state.form,
+      reviewNote: state.reviewNote,
+      loadingAction: state.loadingAction,
+      currentStatus: state.currentStatus,
+      existingReviewNote: state.existingReviewNote,
+      toast,
+      router,
+    });
+
+    await actions.saveDraft();
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/posts", {
+      method: "POST",
+      body: {
+        title: "Judul Draft",
+        content: "<p>isi</p>",
+        excerpt: "Ringkasan",
+        categoryId: 4,
+        featuredImage: "/cover.jpg",
+      },
+    });
   });
 });
 

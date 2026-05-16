@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import type { EditorToolbarItem } from "@nuxt/ui";
 import { toRef } from "vue";
-import type { EditorPost } from "~/composables/post-editor/types";
 
 const props = defineProps<{
   postId?: number;
   postType?: "berita" | "pena_santri";
-  initialPost?: EditorPost | null;
 }>();
 
 type RichTextEditor = {
@@ -21,6 +19,9 @@ type RichTextEditor = {
   isActive: (name: string) => boolean;
   isEditable: boolean;
 };
+
+const toast = useToast();
+const posthog = usePostHog();
 
 const {
   form,
@@ -48,14 +49,10 @@ const {
   sendPost,
   approve,
   reject,
-} = usePostEditor({
+} = await usePostEditor({
   postId: toRef(props, "postId"),
   postType: props.postType,
-  initialPost: props.initialPost,
 });
-
-const toast = useToast();
-const posthog = usePostHog();
 
 function handleEditorImagePrompt(editor: RichTextEditor) {
   if (!import.meta.client || uploadingEditorImage.value) return;

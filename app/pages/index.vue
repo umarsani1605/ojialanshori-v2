@@ -38,79 +38,87 @@ const features = [
   { image: "/images/icons/icon-2.png", title: "Kegiatan Seru Lainnya" },
 ];
 
-const testimonials = [
-  {
-    name: "Asmaul Khusna, S.Pd.",
-    role: "Penerima Beasiswa LPDP Magister Program Monash University",
-    avatar: "/images/testimonials/khusna.jpg",
-    quote:
-      "Omah Ngaji adalah rumah kedua bagi Khusna. Tempat dimana Khusna bertumbuh, belajar mengaji dan nilai-nilai kehidupan. Omah ngaji itu ‘adem’, erat dengan rasa kekeluargaannya. Terutama, bapak dan ibu yang senantiasa membimbing dengan penuh kasih, serta teman-teman yang saling mendukung, membuat Omah Ngaji menjadi support system terbesar bagi Khusna.",
-  },
-  {
-    name: "Putri Lestari, S.Pd.",
-    role: "Penerima Beasiswa LPDP MSc Social Anthropology, The University of Edinburgh",
-    avatar: "/images/testimonials/putri.jpg",
-    quote:
-      "Di sela-sela kesibukan dalam aktivitas kemahasiswaan, Omah Ngaji merupakan oase bagi saya selama di Solo. Saya tidak sekadar mengaji namun juga diberi ruang mengasah nalar berpikir melalui diskusi dan pelatihan untuk meningkatkan skill. Tidak berhenti pada ilmu praktis, saya juga belajar tentang kebermanfaatan di sini. Banyak kenangan dan kebersamaan bersama guru dan sahabat yang tidak hanya terpatri dalam memori, namun juga memberikan hikmah dalam kehidupan saya.",
-  },
-  {
-    name: "Eka Wulan Safriani, S.Pd.",
-    role: "Penerima Beasiswa LPDP Magister Program UPI",
-    avatar: "/images/testimonials/eka.jpg",
-    quote:
-      "Bagi saya omah ngaji bukan hanya sekedar tempat melepas istirahat dari padatnya aktivitas kampus, tapi lebih dari itu. Omah ngaji menjadi sebuah rumah untuk menimba ilmu agama, rumah untuk membuka wawasan, rumah untuk tumbuh bersama, bahkan selama saya di Omah Ngaji, saya menemukan figure-figure yang membuat saya terdorong dan termotivasi untuk terus berprestasi di akademik dan aktif terlibat kegiatan sosial di masyarakat. Bahkan ada satu nilai dari omah ngaji yang terus saya pegang sampai sekarang, yakni ilmu dan adab.",
-  },
-];
+type PageMetaResponse = {
+  title: string;
+  meta: Record<string, any>;
+  updatedAt: string | null;
+};
+
+type TestimonialDto = {
+  id: number;
+  name: string;
+  title: string;
+  content: string;
+  avatarPath: string | null;
+  order: number;
+};
 
 const [
   { data: settings },
-  { data: berita, error: beritaError },
-  { data: pena, error: penaError },
+  { data: page },
+  { data: testimonials },
   { data: gallery },
 ] = await Promise.all([
   useFetch<Record<string, string>>("/api/public/settings", {
     key: "public-settings",
     default: () => ({}),
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
   }),
-  useFetch<PostListingResponse>("/api/public/posts", {
-    key: "home-posts-berita",
-    query: {
-      type: "berita",
-      page: 1,
-      limit: 4,
-    },
-    default: () => ({
-      data: [],
-      pagination: {
-        page: 1,
-        limit: 4,
-        total: 0,
-        totalPages: 1,
-      },
-    }),
+  useFetch<PageMetaResponse>("/api/public/pages/home", {
+    key: "public-page-home",
+    default: () => ({ title: "Beranda", meta: {}, updatedAt: null }),
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
   }),
-  useFetch<PostListingResponse>("/api/public/posts", {
-    key: "home-posts-pena",
-    query: {
-      type: "pena_santri",
-      page: 1,
-      limit: 4,
-    },
-    default: () => ({
-      data: [],
-      pagination: {
-        page: 1,
-        limit: 4,
-        total: 0,
-        totalPages: 1,
-      },
-    }),
+  useFetch<TestimonialDto[]>("/api/public/testimonials", {
+    key: "public-testimonials",
+    default: () => [],
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
   }),
   useFetch<GalleryItem[]>("/api/public/gallery", {
     key: "home-gallery",
     default: () => [],
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
   }),
 ]);
+
+const maxNews = computed(() => {
+  const raw = Number(page.value?.meta?.maxNews);
+  return Number.isFinite(raw) && raw > 0 ? Math.min(12, raw) : 4;
+});
+const maxPena = computed(() => {
+  const raw = Number(page.value?.meta?.maxPena);
+  return Number.isFinite(raw) && raw > 0 ? Math.min(12, raw) : 4;
+});
+
+const [{ data: berita, error: beritaError }, { data: pena, error: penaError }] =
+  await Promise.all([
+    useFetch<PostListingResponse>("/api/public/posts", {
+      key: "home-posts-berita",
+      query: {
+        type: "berita",
+        page: 1,
+        limit: maxNews,
+      },
+      default: () => ({
+        data: [],
+        pagination: { page: 1, limit: 4, total: 0, totalPages: 1 },
+      }),
+      getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+    }),
+    useFetch<PostListingResponse>("/api/public/posts", {
+      key: "home-posts-pena",
+      query: {
+        type: "pena_santri",
+        page: 1,
+        limit: maxPena,
+      },
+      default: () => ({
+        data: [],
+        pagination: { page: 1, limit: 4, total: 0, totalPages: 1 },
+      }),
+      getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+    }),
+  ]);
 
 if (beritaError.value) {
   throw createError({
@@ -129,14 +137,21 @@ if (penaError.value) {
 }
 
 const siteName = computed(
-  () => settings.value?.site_name ?? "Omah Ngaji Al-Anshori",
+  () =>
+    String(page.value?.meta?.title ?? "").trim() ||
+    settings.value?.site_name ||
+    "Omah Ngaji Al-Anshori",
 );
 const siteTagline = computed(
-  () => settings.value?.site_tagline ?? "Asrama Mahasiswa",
+  () =>
+    String(page.value?.meta?.subtitle ?? "").trim() ||
+    settings.value?.site_tagline ||
+    "Asrama Mahasiswa",
 );
 const heroDescription = computed(
   () =>
-    settings.value?.hero_description ??
+    String(page.value?.meta?.description ?? "").trim() ||
+    settings.value?.hero_description ||
     "Omah Ngaji Al-Anshori adalah asrama mahasiswa yang bertujuan untuk mengembangkan karakter dan spiritualitas mahasiswa.",
 );
 
@@ -167,42 +182,39 @@ const visibleGallery = computed(() => gallery.value?.slice(0, 8) ?? []);
 const galleryLightbox = useGalleryLightbox(visibleGallery);
 
 useSeoMeta({
-  title: () => siteTagline.value || 'Pesantren Mahasiswa Yogyakarta',
+  title: () => siteTagline.value || "Pesantren Mahasiswa Surakarta",
   description: () => heroDescription.value,
   ogTitle: () => `${siteName.value} — ${siteTagline.value}`,
   ogDescription: () => heroDescription.value,
-  ogImage: () => settings.value?.og_image ?? "/images/logo/logo.png",
+  ogImage: () =>
+    String(page.value?.meta?.ogImage ?? "").trim() ||
+    settings.value?.og_image ||
+    "/images/logo/logo.png",
+  twitterCard: "summary_large_image",
 });
+
 </script>
 
 <template>
   <div class="font-sans">
-    <!-- 1. Hero — green gradient + Arabic letter ornaments -->
+    <!-- 1. Hero — green gradient + Arabic letter ornaments (CSS bg, not LCP) -->
     <section class="hero-gradient relative overflow-hidden text-white">
-      <!-- Decorative ornaments — white Arabic letters & shapes on green bg -->
-      <img
-        src="/images/hero/hero-left-top.png"
-        alt=""
+      <!-- Decorative ornaments via CSS background — keluar dari kandidat LCP -->
+      <div
         aria-hidden="true"
-        class="absolute top-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
+        class="hero-ornament hero-ornament-lt absolute top-0 left-0 w-32 md:w-52 aspect-square opacity-90 pointer-events-none"
       />
-      <img
-        src="/images/hero/hero-left-bottom.png"
-        alt=""
+      <div
         aria-hidden="true"
-        class="absolute bottom-0 left-0 w-32 md:w-52 opacity-90 pointer-events-none select-none"
+        class="hero-ornament hero-ornament-lb absolute bottom-0 left-0 w-32 md:w-52 aspect-square opacity-90 pointer-events-none"
       />
-      <img
-        src="/images/hero/hero-right-top.png"
-        alt=""
+      <div
         aria-hidden="true"
-        class="absolute top-12 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
+        class="hero-ornament hero-ornament-rt absolute top-12 right-0 w-44 md:w-72 aspect-square opacity-90 pointer-events-none"
       />
-      <img
-        src="/images/hero/hero-right-bottom.png"
-        alt=""
+      <div
         aria-hidden="true"
-        class="absolute bottom-0 right-0 w-44 md:w-72 opacity-90 pointer-events-none select-none"
+        class="hero-ornament hero-ornament-rb absolute bottom-0 right-0 w-44 md:w-72 aspect-square opacity-90 pointer-events-none"
       />
 
       <UPageHero
@@ -245,9 +257,16 @@ useSeoMeta({
 
         <!-- Default slot = the visual on the opposite side of text (logo) -->
         <div class="flex justify-start md:justify-center">
-          <img
+          <NuxtImg
             src="/images/logo/logo_white.png"
             alt="Omah Ngaji Al-Anshori"
+            width="500"
+            height="316"
+            sizes="sm:180px md:384px"
+            format="webp"
+            loading="eager"
+            fetchpriority="high"
+            preload
             class="max-w-[180px] md:max-w-sm object-contain"
           />
         </div>
@@ -266,9 +285,13 @@ useSeoMeta({
             <div
               class="size-24 md:size-28 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
             >
-              <img
+              <NuxtImg
                 :src="feature.image"
                 :alt="feature.title"
+                width="96"
+                height="96"
+                format="webp"
+                loading="lazy"
                 class="size-20 md:size-24 object-contain"
               />
             </div>
@@ -281,7 +304,7 @@ useSeoMeta({
     </section>
 
     <!-- 3. Kata Alumni -->
-    <section class="bg-[#f9fafb] py-10 md:py-16">
+    <section v-if="testimonials.length > 0" class="bg-[#f9fafb] py-10 md:py-16">
       <UContainer>
         <h2 class="font-bold text-xl md:text-2xl tracking-wide mb-10 md:mb-14">
           Kata Alumni
@@ -303,23 +326,35 @@ useSeoMeta({
             next: 'absolute right-6! rounded-full opacity-0 pointer-events-none transition-opacity duration-200 group-hover/testimonials:opacity-100 group-hover/testimonials:pointer-events-auto group-focus-within/testimonials:opacity-100 group-focus-within/testimonials:pointer-events-auto',
           }"
         >
-          <div class="max-w-3xl mx-auto px-4 text-center">
-            <p class="text-base md:text-lg leading-relaxed mb-8">
-              &ldquo;{{ item.quote }}&rdquo;
-            </p>
-            <img
-              :src="item.avatar"
+          <figure class="max-w-3xl mx-auto px-4 text-center">
+            <blockquote class="text-base md:text-lg leading-relaxed mb-8">
+              &ldquo;{{ item.content }}&rdquo;
+            </blockquote>
+            <NuxtImg
+              v-if="isManagedImage(item.avatarPath)"
+              :src="item.avatarPath"
               :alt="item.name"
-              class="size-16 rounded-full object-cover mx-auto mb-3"
+              width="64"
+              height="64"
+              format="webp"
               loading="lazy"
+              class="size-16 rounded-full object-cover mx-auto mb-3"
             />
-            <p class="font-bold">
-              {{ item.name }}
-            </p>
-            <p class="text-sm text-dimmed mt-1">
-              {{ item.role }}
-            </p>
-          </div>
+            <img
+              v-else-if="item.avatarPath"
+              :src="item.avatarPath"
+              :alt="item.name"
+              loading="lazy"
+              decoding="async"
+              width="64"
+              height="64"
+              class="size-16 rounded-full object-cover mx-auto mb-3"
+            />
+            <figcaption>
+              <p class="font-bold">{{ item.name }}</p>
+              <p class="text-sm text-dimmed mt-1">{{ item.title }}</p>
+            </figcaption>
+          </figure>
         </UCarousel>
       </UContainer>
     </section>
@@ -409,6 +444,7 @@ useSeoMeta({
               :src="item.imagePath"
               :alt="item.title"
               loading="lazy"
+              decoding="async"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div
@@ -500,5 +536,25 @@ useSeoMeta({
 <style scoped>
 .hero-gradient {
   background: linear-gradient(180deg, #88de87 0%, #29c4a9 100%);
+}
+.hero-ornament {
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+.hero-ornament-lt {
+  background-image: url("/images/hero/hero-left-top.png");
+  background-position: top left;
+}
+.hero-ornament-lb {
+  background-image: url("/images/hero/hero-left-bottom.png");
+  background-position: bottom left;
+}
+.hero-ornament-rt {
+  background-image: url("/images/hero/hero-right-top.png");
+  background-position: top right;
+}
+.hero-ornament-rb {
+  background-image: url("/images/hero/hero-right-bottom.png");
+  background-position: bottom right;
 }
 </style>

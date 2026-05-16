@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import type { MySql2Database } from 'drizzle-orm/mysql2'
 
 import type { CategoryType } from '~~/server/db/schema'
@@ -16,12 +16,14 @@ export type SantriPostPayload = {
   excerpt: string | null
   featuredImage: string | null
   categoryId: number | null
+  postType: CategoryType | null
   tags: string[]
 }
 
 type Database = MySql2Database<typeof schema>
 
 const ALLOWED_CATEGORY_TYPES = ['berita', 'pena_santri'] as const satisfies CategoryType[]
+const DASHBOARD_EDITOR_CATEGORY_TYPE = 'pena_santri' as const satisfies CategoryType
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -71,6 +73,9 @@ export function parseSantriPostPayload(body: unknown): SantriPostPayload {
   const categoryId = typeof body.categoryId === 'number' && Number.isInteger(body.categoryId)
     ? body.categoryId
     : null
+  const postType = body.postType === 'berita' || body.postType === 'pena_santri'
+    ? body.postType
+    : null
 
   return {
     title,
@@ -78,6 +83,7 @@ export function parseSantriPostPayload(body: unknown): SantriPostPayload {
     excerpt,
     featuredImage,
     categoryId,
+    postType,
     tags: sanitizeTags(body.tags),
   }
 }
@@ -125,7 +131,6 @@ export async function getSantriEditorCategories(
       type: schema.categories.type,
     })
     .from(schema.categories)
-    .where(inArray(schema.categories.type, ALLOWED_CATEGORY_TYPES))
-    .orderBy(schema.categories.type, schema.categories.name)
+    .where(eq(schema.categories.type, DASHBOARD_EDITOR_CATEGORY_TYPE))
+    .orderBy(schema.categories.name)
 }
-

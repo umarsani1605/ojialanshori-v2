@@ -11,5 +11,5 @@ export default defineEventHandler(async (event) => {
 
   if (!isMysqlConfigured(event)) throw createDatabaseNotConfiguredError()
 
-  return listPostsForActor(useDb(event), actor, query.status)
+  return listPostsForActor(useDb(event), actor, query.status, query.scope)
 })

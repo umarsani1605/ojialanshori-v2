@@ -1,4 +1,4 @@
-import { putR2, deleteR2 } from '~~/server/utils/r2Storage'
+import { putR2, deleteR2, getR2PublicUrl, getR2KeyFromPath } from '~~/server/utils/r2Storage'
 
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAuth } from '#server/utils/guard'
@@ -33,14 +33,14 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb(event)
   const existing = await findProfileById(db, actor.id)
-  const oldPath = existing?.avatar
-  if (oldPath?.startsWith('/images/')) {
-    try { await deleteR2(event, oldPath.replace(/^\/images\//, '')) } catch {}
+  const oldKey = getR2KeyFromPath(event, existing?.avatar)
+  if (oldKey) {
+    try { await deleteR2(event, oldKey) } catch {}
   }
 
   const ext = EXT_MAP[mime]!
   const storageKey = `avatars/${actor.id}/${Date.now()}.${ext}`
-  const publicPath = `/images/${storageKey}`
+  const publicPath = getR2PublicUrl(event, storageKey)
 
   await putR2(event, storageKey, file.data, { contentType: mime })
   await setProfileAvatar(db, actor.id, publicPath)

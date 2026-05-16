@@ -4,11 +4,11 @@ import type { TableColumn } from "@nuxt/ui";
 import type { PageDto as PageItem } from "~~/shared/types";
 
 definePageMeta({
-  layout: 'admin',
-  middleware: ['auth', 'role'],
-  requiredRole: 'admin',
-  navbarTitle: 'Halaman Publik',
-})
+  layout: "admin",
+  middleware: ["auth", "role"],
+  requiredRole: "admin",
+  navbarTitle: "Halaman Publik",
+});
 const { data } = useLazyFetch<{ data: PageItem[] }>("/api/pages", {
   key: "admin-pages-list",
 });
@@ -30,8 +30,6 @@ const columns: TableColumn<PageItem>[] = [
         h(
           UButton,
           {
-            size: "sm",
-            color: "neutral",
             variant: "light",
             icon: "i-ph-pencil-simple",
             to: `/admin/pages/${row.original.template}`,
@@ -44,5 +42,5 @@ const columns: TableColumn<PageItem>[] = [
 </script>
 
 <template>
-  <AdminDataTable :data="pages" :columns="columns" :index-column-size="44" />
+  <AdminDataTable :data="pages" :columns="columns" :paginated="false" />
 </template>

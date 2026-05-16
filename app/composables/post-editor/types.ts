@@ -39,8 +39,6 @@ export type EditorPost = {
   } | null;
 };
 
-export type PostDataSource = EditorPost | null | undefined;
-
 export type CategoryItem = {
   id: number;
   name: string;

@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { pages } from '#server/db/schema'
 import { isMysqlConfigured, useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
+import { markMutated, PublicCacheScopes } from '#server/utils/publicCache'
 import { createDatabaseNotConfiguredError } from '#server/utils/runtime'
 import { zValidator } from '#server/utils/zod-validator'
 import { updatePageSchema } from '~~/shared/schemas'
@@ -37,6 +38,8 @@ export default defineEventHandler(async (event) => {
       meta: body.meta,
     })
   }
+
+  await markMutated(PublicCacheScopes.page(template))
 
   return { success: true }
 })

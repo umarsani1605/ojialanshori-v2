@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { faqs } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
+import { markMutated, PublicCacheScopes } from '#server/utils/publicCache'
 import { zValidator } from '#server/utils/zod-validator'
 import { updateFaqSchema } from '~~/shared/schemas'
 
@@ -15,6 +16,8 @@ export default defineEventHandler(async (event) => {
     .update(faqs)
     .set({ ...body, updatedAt: new Date() })
     .where(eq(faqs.id, id))
+
+  await markMutated(PublicCacheScopes.faqs)
 
   return { success: true }
 })

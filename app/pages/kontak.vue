@@ -4,6 +4,7 @@ const { data: settings } = await useFetch<Record<string, string>>(
   {
     key: "public-settings",
     default: () => ({}),
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
   },
 );
 

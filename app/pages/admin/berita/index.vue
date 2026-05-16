@@ -16,11 +16,9 @@ import {
   POST_STATUS_LABEL_MAP as STATUS_LABEL,
   POST_STATUS_OPTIONS as STATUS_OPTIONS,
 } from "~/constants/postStatus";
-
 const toast = useToast();
 const search = ref("");
 const statusFilter = ref<PostStatus | undefined>(undefined);
-
 const isFiltered = computed(() => search.value !== "" || statusFilter.value !== undefined);
 
 function resetFilters() {
@@ -100,8 +98,18 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "title",
     header: "Judul",
+    meta: {
+      class: {
+        th: "w-[36rem]",
+        td: "w-[36rem] align-top",
+      },
+    },
     cell: ({ row }) =>
-      h("span", { class: "font-medium line-clamp-2" }, row.original.title),
+      h(
+        "div",
+        { class: "min-w-0 max-w-[36rem] whitespace-normal break-words" },
+        [h("span", { class: "font-medium line-clamp-2" }, row.original.title)],
+      ),
   },
   badgeColumn<AdminPost, PostStatus>({
     accessorKey: "status",
@@ -111,8 +119,17 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "updatedAt",
     header: "Diperbarui",
+    size: 180,
+    minSize: 180,
+    maxSize: 180,
+    meta: {
+      class: {
+        th: "w-[180px]",
+        td: "w-[180px] align-top",
+      },
+    },
     cell: ({ row }) =>
-      h("span", { class: "text-muted text-sm" }, formatDatetime(row.original.updatedAt)),
+      h("span", { class: "text-muted text-sm whitespace-nowrap" }, formatDatetime(row.original.updatedAt)),
   },
   actionsColumn<AdminPost>({
     editTo: (row) => `/admin/berita/${row.id}/edit`,

@@ -21,13 +21,11 @@ import {
   POST_STATUS_LABEL_MAP as STATUS_LABEL,
   POST_STATUS_OPTIONS as STATUS_OPTIONS,
 } from "~/constants/postStatus";
-
 const toast = useToast();
 const search = ref("");
 const statusFilter = ref<PostStatus | undefined>(undefined);
 const authorFilter = ref<string | undefined>(undefined);
 const categoryFilter = ref<string | undefined>(undefined);
-
 const isFiltered = computed(
   () =>
     search.value !== "" ||
@@ -156,13 +154,37 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "title",
     header: "Judul",
+    meta: {
+      class: {
+        th: "w-[32rem]",
+        td: "w-[32rem] align-top",
+      },
+    },
     cell: ({ row }) =>
-      h("span", { class: "font-medium line-clamp-2" }, row.original.title),
+      h(
+        "div",
+        { class: "min-w-0 max-w-[32rem] whitespace-normal break-words" },
+        [h("span", { class: "font-medium line-clamp-4" }, row.original.title)],
+      ),
   },
   {
     accessorKey: "author",
     header: "Penulis",
-    cell: ({ row }) => h("span", {}, row.original.author.fullname),
+    size: 180,
+    minSize: 180,
+    maxSize: 180,
+    meta: {
+      class: {
+        th: "w-[180px]",
+        td: "w-[180px] align-top",
+      },
+    },
+    cell: ({ row }) =>
+      h(
+        "span",
+        { class: "whitespace-normal break-words" },
+        row.original.author.fullname,
+      ),
   },
   badgeColumn<AdminPost, PostStatus>({
     accessorKey: "status",
@@ -172,16 +194,42 @@ const columns: TableColumn<AdminPost>[] = [
   {
     accessorKey: "category",
     header: "Kategori",
+    size: 180,
+    minSize: 180,
+    maxSize: 180,
+    meta: {
+      class: {
+        th: "w-[180px]",
+        td: "w-[180px] align-top",
+      },
+    },
     cell: ({ row }) =>
       row.original.category
-        ? h("span", {}, row.original.category.name)
+        ? h(
+            "span",
+            { class: "whitespace-normal break-words" },
+            row.original.category.name,
+          )
         : h("span", { class: "text-muted" }, "Belum dipilih"),
   },
   {
     accessorKey: "updatedAt",
     header: "Diperbarui",
+    size: 180,
+    minSize: 180,
+    maxSize: 180,
+    meta: {
+      class: {
+        th: "w-[180px]",
+        td: "w-[180px] align-top",
+      },
+    },
     cell: ({ row }) =>
-      h("span", { class: "text-muted text-sm" }, formatDatetime(row.original.updatedAt)),
+      h(
+        "span",
+        { class: "text-muted text-sm whitespace-nowrap" },
+        formatDatetime(row.original.updatedAt),
+      ),
   },
   actionsColumn<AdminPost>({
     editTo: (row) => `/admin/pena-santri/${row.id}/edit`,
@@ -191,20 +239,54 @@ const columns: TableColumn<AdminPost>[] = [
 </script>
 
 <template>
-  <AdminDataTable v-model:search="search" :data="filteredPosts" :columns="columns" :loading="status === 'pending'"
-    search-placeholder="Cari judul artikel…">
+  <AdminDataTable
+    v-model:search="search"
+    :data="filteredPosts"
+    :columns="columns"
+    :loading="status === 'pending'"
+    search-placeholder="Cari judul artikel…"
+  >
     <template #toolbar-left>
-      <USelect v-model="authorFilter" :items="authorOptions" value-key="value" label-key="label"
-        placeholder="Semua penulis" class="w-48" />
-      <USelect v-model="categoryFilter" :items="categoryOptions" value-key="value" label-key="label"
-        placeholder="Semua kategori" class="w-48" />
-      <USelect v-model="statusFilter" :items="STATUS_OPTIONS" value-key="value" label-key="label"
-        placeholder="Semua status" class="w-48" />
-      <UButton v-if="isFiltered" variant="link" color="neutral" icon="i-ph-x" label="Reset" @click="resetFilters" />
+      <USelect
+        v-model="authorFilter"
+        :items="authorOptions"
+        value-key="value"
+        label-key="label"
+        placeholder="Semua penulis"
+        class="w-48"
+      />
+      <USelect
+        v-model="categoryFilter"
+        :items="categoryOptions"
+        value-key="value"
+        label-key="label"
+        placeholder="Semua kategori"
+        class="w-48"
+      />
+      <USelect
+        v-model="statusFilter"
+        :items="STATUS_OPTIONS"
+        value-key="value"
+        label-key="label"
+        placeholder="Semua status"
+        class="w-48"
+      />
+      <UButton
+        v-if="isFiltered"
+        variant="link"
+        color="neutral"
+        icon="i-ph-x"
+        label="Reset"
+        @click="resetFilters"
+      />
     </template>
 
     <template #toolbar-right>
-      <UButton label="Tulis Artikel" icon="i-ph-plus-bold" to="/admin/pena-santri/create" />
+      <UButton
+        label="Tulis Artikel"
+        icon="i-ph-plus-bold"
+        to="/admin/pena-santri/create"
+      />
     </template>
 
     <template #empty>

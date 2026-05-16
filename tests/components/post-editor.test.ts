@@ -83,6 +83,7 @@ mockNuxtImport('navigateTo', () => vi.fn())
 
 vi.mock('~/app/composables/useAuth', () => ({
   useAuth: () => ({
+    isAdmin: computed(() => false),
     canReview: computed(() => false),
     user: ref({
       id: 99,

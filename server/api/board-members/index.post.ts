@@ -1,6 +1,7 @@
 import { boardMembers } from '#server/db/schema'
 import { useDb } from '#server/utils/db'
 import { requireAdmin } from '#server/utils/guard'
+import { markMutated, PublicCacheScopes } from '#server/utils/publicCache'
 import { zValidator } from '#server/utils/zod-validator'
 import { upsertBoardMemberSchema } from '~~/shared/schemas'
 
@@ -15,6 +16,8 @@ export default defineEventHandler(async (event) => {
     avatarPath: body.avatarPath ?? null,
     order: body.order ?? 0,
   })
+
+  await markMutated(PublicCacheScopes.boardMembers)
 
   return { data: { id: result.insertId } }
 })

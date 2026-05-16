@@ -4,10 +4,24 @@ type FaqItem = {
   answer: string;
 };
 
-const { data: faqs, error } = await useFetch<FaqItem[]>("/api/public/faqs", {
-  key: "public-faqs",
-  default: () => [],
-});
+type PageMetaResponse = {
+  title: string;
+  meta: Record<string, any>;
+  updatedAt: string | null;
+};
+
+const [{ data: faqs, error }, { data: page }] = await Promise.all([
+  useFetch<FaqItem[]>("/api/public/faqs", {
+    key: "public-faqs",
+    default: () => [],
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+  }),
+  useFetch<PageMetaResponse>("/api/public/pages/faq", {
+    key: "public-page-faq",
+    default: () => ({ title: "FAQ", meta: {}, updatedAt: null }),
+    getCachedData: (key, nuxtApp) => nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+  }),
+]);
 
 if (error.value) {
   throw createError({
@@ -25,9 +39,20 @@ const accordionItems = computed(() =>
   })),
 );
 
+const seoTitle = computed(() => page.value?.title || "FAQ");
+const seoDescription = computed(
+  () =>
+    String(page.value?.meta?.description ?? "").trim() ||
+    "Pertanyaan yang sering diajukan tentang Omah Ngaji Al-Anshori.",
+);
+
 useSeoMeta({
-  title: "FAQ",
-  description: "Pertanyaan yang sering diajukan tentang Omah Ngaji Al-Anshori.",
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogImage: "/images/logo/logo.png",
+  twitterCard: "summary_large_image",
 });
 </script>
 

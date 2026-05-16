@@ -6,15 +6,16 @@ import { roleColorMap, roleLabelMap } from "~/constants/roleDisplay";
 import type { Role, RoleFilter, SafeUser as User } from "~~/shared/types";
 
 definePageMeta({
-  layout: 'admin',
-  middleware: ['auth', 'role'],
-  navbarTitle: 'Users',
-})
+  layout: "admin",
+  middleware: ["auth", "role"],
+  navbarTitle: "Users",
+});
 
 type StatusFilter = "active" | "inactive" | "all";
 
 const auth = useAuth();
 const toast = useToast();
+const posthog = usePostHog();
 
 const filters = reactive({
   role: "all" as RoleFilter,
@@ -24,9 +25,7 @@ const filters = reactive({
 
 const isFiltered = computed(
   () =>
-    filters.role !== "all" ||
-    filters.status !== "all" ||
-    filters.search !== "",
+    filters.role !== "all" || filters.status !== "all" || filters.search !== "",
 );
 
 function resetFilters() {
@@ -68,6 +67,8 @@ const formMode = ref<"create" | "edit">("create");
 const formTarget = ref<User | null>(null);
 const formSubmitting = ref(false);
 const formError = ref<string | null>(null);
+const avatarFile = ref<File | null>(null);
+const avatarUploading = ref(false);
 
 const form = reactive({
   fullname: "",
@@ -78,12 +79,11 @@ const form = reactive({
   password: "",
   avatar: "",
   phone: "",
-  yearEnrolled: "",
-  yearStudy: "",
+  yearEnrolled: undefined as number | undefined,
+  yearStudy: undefined as number | undefined,
   university: "",
   faculty: "",
   major: "",
-  isActive: true,
 });
 
 function resetForm() {
@@ -95,12 +95,12 @@ function resetForm() {
   form.password = "";
   form.avatar = "";
   form.phone = "";
-  form.yearEnrolled = "";
-  form.yearStudy = "";
+  form.yearEnrolled = undefined;
+  form.yearStudy = undefined;
   form.university = "";
   form.faculty = "";
   form.major = "";
-  form.isActive = true;
+  avatarFile.value = null;
   formError.value = null;
 }
 
@@ -122,43 +122,67 @@ function openEdit(user: User) {
   form.password = "";
   form.avatar = user.avatar ?? "";
   form.phone = user.phone ?? "";
-  form.yearEnrolled = user.yearEnrolled ? String(user.yearEnrolled) : "";
-  form.yearStudy = user.yearStudy ? String(user.yearStudy) : "";
+  form.yearEnrolled = user.yearEnrolled ?? undefined;
+  form.yearStudy = user.yearStudy ?? undefined;
   form.university = user.university ?? "";
   form.faculty = user.faculty ?? "";
   form.major = user.major ?? "";
-  form.isActive = user.isActive;
+  avatarFile.value = null;
   formError.value = null;
   formOpen.value = true;
 }
 
-function buildPayload() {
+function buildPayload(avatar: string | null) {
   return {
     fullname: form.fullname,
     nickname: form.nickname || null,
     bio: form.bio || null,
     email: form.email,
     role: form.role,
-    avatar: form.avatar || null,
+    avatar,
     phone: form.phone || null,
-    yearEnrolled: form.yearEnrolled || null,
-    yearStudy: form.yearStudy || null,
+    yearEnrolled: form.yearEnrolled ?? null,
+    yearStudy: form.yearStudy ?? null,
     university: form.university || null,
     faculty: form.faculty || null,
     major: form.major || null,
-    isActive: form.isActive,
   };
+}
+
+function removeAvatar() {
+  form.avatar = "";
+  avatarFile.value = null;
 }
 
 async function submitForm() {
   formError.value = null;
   formSubmitting.value = true;
   try {
+    let avatarPath = form.avatar || null;
+
+    if (avatarFile.value) {
+      avatarUploading.value = true;
+      const formData = new FormData();
+      formData.append("image", avatarFile.value);
+
+      const { path } = await $fetch<{ path: string }>(
+        "/api/users/upload-avatar",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      avatarPath = path;
+      form.avatar = path;
+      avatarUploading.value = false;
+    }
+
     if (formMode.value === "create") {
       await $fetch("/api/users", {
         method: "POST",
         body: {
-          ...buildPayload(),
+          ...buildPayload(avatarPath),
           password: form.password,
         },
       });
@@ -170,7 +194,7 @@ async function submitForm() {
     } else if (formTarget.value) {
       await $fetch(`/api/users/${formTarget.value.id}`, {
         method: "PATCH",
-        body: buildPayload(),
+        body: buildPayload(avatarPath),
       });
       toast.add({
         title: "User diperbarui",
@@ -181,8 +205,16 @@ async function submitForm() {
     formOpen.value = false;
     await refresh();
   } catch (error: unknown) {
+    if (avatarUploading.value) {
+      posthog?.capture("upload.failed", {
+        endpoint: "/api/users/upload-avatar",
+        reason: errorMessage(error),
+        file_size: avatarFile.value?.size,
+      });
+    }
     formError.value = errorMessage(error);
   } finally {
+    avatarUploading.value = false;
     formSubmitting.value = false;
   }
 }
@@ -211,7 +243,7 @@ function askToggleActive(user: User) {
     ? `User ${user.fullname} akan bisa login kembali.`
     : `User ${user.fullname} tidak akan bisa login sampai diaktifkan lagi.`;
   confirm.confirmLabel = willActivate ? "Aktifkan" : "Nonaktifkan";
-  confirm.color = willActivate ? "primary" : "warning";
+  confirm.color = willActivate ? "primary" : "error";
   confirm.action = async () => {
     await $fetch(`/api/users/${user.id}`, {
       method: "PATCH",
@@ -297,7 +329,8 @@ const columns: TableColumn<User>[] = [
   {
     accessorKey: "fullname",
     header: "Nama Lengkap",
-    cell: ({ row }) => h("span", { class: "font-medium" }, row.original.fullname),
+    cell: ({ row }) =>
+      h("span", { class: "font-medium" }, row.original.fullname),
   },
   {
     accessorKey: "nickname",
@@ -442,6 +475,48 @@ const columns: TableColumn<User>[] = [
         <div class="grid gap-6 lg:grid-cols-2">
           <div class="space-y-4">
             <h3 class="font-medium">Informasi Akun</h3>
+            <UFormField label="Avatar">
+              <div class="space-y-3">
+                <div
+                  v-if="form.avatar && !avatarFile"
+                  class="flex items-center gap-3 rounded-lg border border-default p-3"
+                >
+                  <UAvatar
+                    :src="form.avatar"
+                    :alt="form.fullname || 'Avatar user'"
+                    :text="getInitials(form.fullname || form.email)"
+                    size="xl"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium">Avatar saat ini</p>
+                    <p class="text-xs text-muted">
+                      Upload file baru untuk mengganti avatar.
+                    </p>
+                  </div>
+                  <UButton
+                    type="button"
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
+                    icon="i-ph-trash"
+                    :disabled="formSubmitting || avatarUploading"
+                    @click="removeAvatar"
+                  >
+                    Hapus
+                  </UButton>
+                </div>
+
+                <UFileUpload
+                  v-model="avatarFile"
+                  accept="image/jpeg,image/png,image/webp"
+                  label="Upload avatar"
+                  description="JPG, PNG, WebP · Maks 2MB"
+                  icon="i-ph-image"
+                  :disabled="formSubmitting || avatarUploading"
+                  class="w-full min-h-40"
+                />
+              </div>
+            </UFormField>
             <UFormField label="Nama lengkap" required>
               <UInput
                 v-model="form.fullname"
@@ -481,20 +556,6 @@ const columns: TableColumn<User>[] = [
                 class="w-full"
               />
             </UFormField>
-            <UFormField label="Avatar URL">
-              <UInput
-                v-model="form.avatar"
-                :disabled="formSubmitting"
-                class="w-full"
-              />
-            </UFormField>
-            <UFormField label="Status">
-              <USwitch
-                v-model="form.isActive"
-                :disabled="formSubmitting"
-                label="Aktif"
-              />
-            </UFormField>
             <UFormField
               v-if="formMode === 'create'"
               label="Password"
@@ -520,17 +581,19 @@ const columns: TableColumn<User>[] = [
               />
             </UFormField>
             <UFormField label="Angkatan Oji">
-              <UInput
+              <USelect
                 v-model="form.yearEnrolled"
-                type="number"
+                :items="YEAR_OPTIONS"
+                placeholder="Pilih angkatan"
                 :disabled="formSubmitting"
                 class="w-full"
               />
             </UFormField>
             <UFormField label="Angkatan Kuliah">
-              <UInput
+              <USelect
                 v-model="form.yearStudy"
-                type="number"
+                :items="YEAR_OPTIONS"
+                placeholder="Pilih angkatan"
                 :disabled="formSubmitting"
                 class="w-full"
               />
