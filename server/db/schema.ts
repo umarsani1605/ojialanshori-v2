@@ -5,7 +5,7 @@ import {
   text,
   longtext,
   boolean,
-  timestamp,
+  customType,
   date,
   year,
   mysqlEnum,
@@ -14,6 +14,22 @@ import {
   type AnyMySqlColumn,
 } from 'drizzle-orm/mysql-core'
 import { relations, sql } from 'drizzle-orm'
+
+// MySQL TIMESTAMP column wrapped to handle WIB (+07:00) explicitly.
+// mysql2 binary protocol parses date components in runtime-local TZ, which
+// gives wrong Date objects on UTC runtimes (Workers/containers). With
+// dateStrings:true we get the raw "YYYY-MM-DD HH:mm:ss" string from MySQL
+// (already in session tz = +07:00) and parse it with explicit offset.
+// NOTE: this column lacks `.onUpdateNow()`. The DB-level `ON UPDATE CURRENT_TIMESTAMP`
+// still fires automatically — don't drop it if drizzle-kit emits a migration to do so.
+const timestamp = customType<{ data: Date; driverData: string }>({
+  dataType: () => 'timestamp',
+  fromDriver: (value) => new Date(`${value.replace(' ', 'T')}+07:00`),
+  toDriver: (value) => {
+    const wibMs = value.getTime() + 7 * 60 * 60 * 1000
+    return new Date(wibMs).toISOString().slice(0, 19).replace('T', ' ')
+  },
+})
 
 // ─── TypeScript types ────────────────────────────────────────────────────────
 
@@ -43,7 +59,7 @@ export const users = mysqlTable('users', {
   yearEnrolled: year('year_enrolled'),
   isActive: boolean().notNull().default(true),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const categories = mysqlTable('categories', {
@@ -68,7 +84,7 @@ export const posts = mysqlTable('posts', {
   reviewNote: longtext(),
   publishedAt: timestamp(),
   createdAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const pages = mysqlTable('pages', {
@@ -76,7 +92,7 @@ export const pages = mysqlTable('pages', {
   title: varchar({ length: 255 }).notNull(),
   template: varchar({ length: 100 }).notNull().unique(), // e.g., 'home', 'profile'
   meta: json().notNull().default('{}'), // JSON storage for page-specific content
-  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const activities = mysqlTable('activities', {
@@ -117,7 +133,7 @@ export const banners = mysqlTable('banners', {
 export const settings = mysqlTable('settings', {
   key: varchar({ length: 100 }).primaryKey(),
   value: text().notNull(),
-  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+  updatedAt: timestamp().notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const testimonials = mysqlTable('testimonials', {
@@ -136,7 +152,7 @@ export const faqs = mysqlTable('faqs', {
   answer: text().notNull(),
   order: int().notNull().default(0),
   createdAt: timestamp('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`).onUpdateNow(),
+  updatedAt: timestamp('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const tags = mysqlTable('tags', {

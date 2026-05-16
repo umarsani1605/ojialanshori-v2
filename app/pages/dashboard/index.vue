@@ -179,7 +179,7 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
 
       <div class="relative z-10 space-y-2">
         <h1 class="text-2xl font-bold">
-          {{ greeting }}, {{ auth.user.value?.fullname?.split(" ")[0] }}! 👋🏻
+          {{ greeting }}, {{ auth.user.value?.nickname || auth.user.value?.fullname?.split(" ")[0] }}! 👋🏻
         </h1>
         <p class="text-md text-white/90">
           <template v-if="auth.isReviewer.value">
@@ -260,7 +260,8 @@ function getPostStatusLabel(status: SantriMyPost["status"]) {
           <div v-else class="space-y-4">
             <DashboardFeedPostCard v-for="post in recentMyPosts" :key="post.id" :to="`/dashboard/posts/${post.id}/edit`"
               :title="post.title" :category="post.categoryName ?? 'Belum pilih kategori'"
-              :date="post.publishedAt ?? post.createdAt">
+              :date="post.publishedAt ?? post.createdAt"
+              :featured-image="post.featuredImage">
               <template #trailing>
                 <UBadge :color="getPostStatusTone(post.status)" variant="subtle">
                   {{ getPostStatusLabel(post.status) }}

@@ -56,7 +56,7 @@ const pages = computed(() => {
         class="px-3 py-2 text-sm rounded-md border min-w-[36px] text-center"
         :class="
           p === page
-            ? 'bg-emerald-600 text-white border-emerald-600 font-semibold'
+            ? 'bg-primary text-white border-primary font-semibold'
             : 'border-default hover:bg-slate-50 text-slate-700'
         "
       >

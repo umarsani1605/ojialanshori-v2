@@ -97,6 +97,7 @@ export async function verifyLogin(
     user: {
       id: user.id,
       fullname: user.fullname,
+      nickname: user.nickname ?? null,
       email: user.email,
       role: user.role,
       avatar: user.avatar ?? null,

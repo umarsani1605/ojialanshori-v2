@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
 import { h, resolveComponent } from "vue";
-import type { ApiList, DashboardPostRow as PostRow, PostStatus } from "~~/shared/types";
+import type {
+  ApiList,
+  DashboardPostRow as PostRow,
+  PostStatus,
+} from "~~/shared/types";
 
 definePageMeta({
   layout: "dashboard-santri",
@@ -215,11 +219,14 @@ const columns: TableColumn<PostRow>[] = [
 
 <template>
   <UContainer>
-    <UCard class="flex flex-col min-h-[800px]" :ui="{ body: 'pt-4! flex-1 flex flex-col' }">
+    <UCard
+      class="flex flex-col min-h-[800px]"
+      :ui="{ body: 'pt-4! flex-1 flex flex-col' }"
+    >
       <template #header>
         <div class="flex items-center justify-between gap-3">
           <h1 class="text-xl font-semibold">Artikel Saya</h1>
-          <UButton to="/dashboard/posts/create" icon="i-ph-plus" size="sm">
+          <UButton to="/dashboard/posts/create" icon="i-ph-plus">
             Tulis Artikel
           </UButton>
         </div>
@@ -227,20 +234,41 @@ const columns: TableColumn<PostRow>[] = [
 
       <UTabs v-model="activeStatus" :items="tabs" variant="link" class="w-full">
         <template v-for="tab in tabs" :key="tab.slot" #[tab.slot]>
-          <div v-if="status === 'pending'" class="flex items-center justify-center py-16">
-            <UIcon name="i-ph-spinner-gap" class="text-2xl text-dimmed animate-spin" />
+          <div
+            v-if="status === 'pending'"
+            class="flex items-center justify-center py-16"
+          >
+            <UIcon
+              name="i-ph-spinner-gap"
+              class="text-2xl text-dimmed animate-spin"
+            />
           </div>
-          <div v-else-if="postsForTab(tab.value).length === 0" class="py-32 text-center text-sm text-dimmed">
-            <UIcon name="i-ph-folder-open-duotone" class="text-primary w-12 h-12 mb-4" />
+          <div
+            v-else-if="postsForTab(tab.value).length === 0"
+            class="py-32 text-center text-sm text-dimmed"
+          >
+            <UIcon
+              name="i-ph-folder-open-duotone"
+              class="text-primary w-12 h-12 mb-4"
+            />
             <div>Tidak ada artikel.</div>
           </div>
-          <UTable v-else :data="postsForTab(tab.value)" :columns="columns"
-            :ui="{ base: 'min-w-full table-fixed overflow-clip' }" />
+          <UTable
+            v-else
+            :data="postsForTab(tab.value)"
+            :columns="columns"
+            :ui="{ base: 'min-w-full table-fixed overflow-clip' }"
+          />
         </template>
       </UTabs>
 
-      <DashboardTablePagination v-if="totalForTab(activeStatus) > 0" class="mt-auto" :page="page"
-        :total="totalForTab(activeStatus)" @update:page="page = $event" />
+      <DashboardTablePagination
+        v-if="totalForTab(activeStatus) > 0"
+        class="mt-auto"
+        :page="page"
+        :total="totalForTab(activeStatus)"
+        @update:page="page = $event"
+      />
     </UCard>
   </UContainer>
 

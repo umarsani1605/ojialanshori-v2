@@ -4,6 +4,7 @@ import type { Role } from '~~/shared/types'
 type SessionUser = {
   id: number
   fullname: string
+  nickname?: string | null
   email: string
   role: Role
   avatar?: string | null

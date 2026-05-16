@@ -54,6 +54,7 @@ export type SantriMyPost = {
   id: number
   title: string
   slug: string
+  featuredImage: string | null
   status: PostStatus
   publishedAt: string | null
   createdAt: string

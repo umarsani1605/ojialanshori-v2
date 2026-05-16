@@ -187,10 +187,6 @@ export async function updatePostForActor(
     throw createError({ statusCode: 403, message: 'Kamu tidak diizinkan mengedit post ini.' })
   }
 
-  if (actor.role === 'santri' && post.status === 'pending_review') {
-    throw createError({ statusCode: 403, message: 'Post yang sedang direview tidak bisa diedit.' })
-  }
-
   const categoryId = await resolveCategoryIdForPayload(db, actor, payload)
   const shouldResetToDraft = categoryType === 'pena_santri' && post.author.id === actor.id && actor.role !== 'admin'
   const nextStatus = shouldResetToDraft ? 'draft' : post.status
@@ -203,7 +199,7 @@ export async function updatePostForActor(
     excerpt: payload.excerpt,
     featuredImage: payload.featuredImage,
     categoryId,
-    ...(shouldResetToDraft ? { status: 'draft', reviewNote: null } : {}),
+    ...(shouldResetToDraft ? { status: 'draft' } : {}),
   })
 
   await syncPostTags(db, postId, payload.tags)
@@ -239,10 +235,6 @@ export async function submitPostForReview(
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
-  if (post.status === 'pending_review') {
-    throw createError({ statusCode: 403, message: 'Post yang sedang direview tidak bisa dikirim ulang.' })
-  }
-
   await ensureCategoryExists(db, payload.categoryId)
 
   await updatePost(db, postId, {
@@ -252,7 +244,6 @@ export async function submitPostForReview(
     featuredImage: payload.featuredImage,
     categoryId: payload.categoryId,
     status: 'pending_review',
-    reviewNote: null,
   })
 
   await syncPostTags(db, postId, payload.tags)

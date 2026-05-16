@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
       id: schema.posts.id,
       title: schema.posts.title,
       slug: schema.posts.slug,
+      featuredImage: schema.posts.featuredImage,
       status: schema.posts.status,
       publishedAt: schema.posts.publishedAt,
       createdAt: schema.posts.createdAt,
